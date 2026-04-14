@@ -14,5 +14,5 @@ class TestcontainersConfiguration {
 
     @Bean
     @ServiceConnection
-    fun redisContainer(): RedisContainer = RedisContainer("redis:8.6-alpine")
+    fun redisContainer(): RedisContainer = RedisContainer("redis:8.6.2-alpine")
 }

@@ -2889,16 +2889,22 @@ Docker используется для локальной разработки (
 # Multi-stage build — минимальный production-образ
 
 # Stage 1: Build
-FROM gradle:9.4-jdk25 AS builder
+FROM gradle:9.4.1-jdk25 AS builder
 WORKDIR /app
 COPY build.gradle.kts settings.gradle.kts ./
-COPY src ./src
-RUN gradle build -x test --no-daemon
+COPY gradle/ gradle/
+RUN gradle dependencies --no-daemon --quiet || true
+COPY src/ src/
+RUN gradle bootJar --no-daemon -x test
 
-# Stage 2: Run
-FROM eclipse-temurin:25-jre-alpine
+# Stage 2: Runtime
+FROM eclipse-temurin:25-jre-noble
+RUN groupadd --system appgroup \
+    && useradd --system --gid appgroup --no-create-home appuser
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
+RUN chown appuser:appgroup app.jar
+USER appuser
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
 ```

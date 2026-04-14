@@ -641,7 +641,7 @@ docker rmi life-goals-api:latest
 
                 <pre><code class="language-bash">
 # Stage 1: Builder (gradle контейнер)
-FROM gradle:9.4-jdk25-alpine AS builder
+FROM gradle:9.4.1-jdk25 AS builder
 
 WORKDIR /app
 
@@ -649,10 +649,10 @@ WORKDIR /app
 COPY . .
 
 # Собираем JAR
-RUN gradle build -x test --no-daemon
+RUN gradle bootJar -x test --no-daemon
 
 # Stage 2: Runtime (минимальный JRE контейнер)
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:25-jre-noble
 
 WORKDIR /app
 
@@ -688,9 +688,9 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="lang-ru"><code>FROM gradle:9.4-jdk25-alpine AS builder</code></td>
+                            <td class="lang-ru"><code>FROM gradle:9.4.1-jdk25 AS builder</code></td>
                             <td class="lang-ru">Выбирает базовый образ с Gradle и JDK 25 LTS. AS builder именует stage</td>
-                            <td class="lang-en"><code>FROM gradle:9.4-jdk25-alpine AS builder</code></td>
+                            <td class="lang-en"><code>FROM gradle:9.4.1-jdk25 AS builder</code></td>
                             <td class="lang-en">Selects base image with Gradle and JDK 25 LTS. AS builder names the stage</td>
                         </tr>
                         <tr>
@@ -1052,7 +1052,7 @@ services:
 
   api:
     # Вместо build, используем Gradle во время разработки
-    image: gradle:9.4-jdk25-alpine
+    image: gradle:9.4.1-jdk25
     working_dir: /app
     command: gradle bootRun
     volumes:
@@ -1081,7 +1081,7 @@ docker-compose -f docker-compose.dev.yml up -d
                         <h4>Задание 1: Dockerfile для Spring Boot (День 1, 1.5 часа)</h4>
                         <p>
                             Создайте Dockerfile в корне вашего Spring Boot проекта с multi-stage build.
-                            Используйте gradle:9.4-jdk25-alpine для builder и eclipse-temurin:25-jre-alpine для runtime.
+                            Используйте gradle:9.4.1-jdk25 для builder и eclipse-temurin:25-jre-noble для runtime.
                             Добавьте healthcheck для /actuator/health.
                         </p>
                         <ol style="margin-left: 2rem;">
@@ -1130,7 +1130,7 @@ docker-compose -f docker-compose.dev.yml up -d
                         <h4>Assignment 1: Dockerfile for Spring Boot (Day 1, 1.5 hours)</h4>
                         <p>
                             Create a Dockerfile in the root of your Spring Boot project with multi-stage build.
-                            Use gradle:9.4-jdk25-alpine for builder and eclipse-temurin:25-jre-alpine for runtime.
+                            Use gradle:9.4.1-jdk25 for builder and eclipse-temurin:25-jre-noble for runtime.
                             Add healthcheck for /actuator/health.
                         </p>
                         <ol style="margin-left: 2rem;">

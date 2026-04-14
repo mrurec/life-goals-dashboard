@@ -434,9 +434,16 @@ npm run relay                           # Re-run Relay compiler after schema cha
 
 ```bash
 # Start everything locally
-docker-compose up -d                    # PostgreSQL + Redis
-./gradlew bootRun                       # Backend on :8080
-cd life-goals-web && npm run dev        # Frontend on :5173
+docker-compose -f life-goals-api/docker-compose.yml up -d   # PostgreSQL + Redis
+./gradlew bootRun                                            # Backend on :8080
+cd life-goals-web && npm run dev                             # Frontend on :5173
+
+# Run the backend as a Docker container (dev — builds image from source)
+docker-compose -f deploy/docker-compose.dev.yml up -d
+
+# Run the backend as a Docker container (prod — uses pre-built image)
+export API_IMAGE=ghcr.io/mrurec/life-goals-api:0.0.1-SNAPSHOT
+docker-compose -f deploy/docker-compose.prod.yml up -d
 
 # Database
 ./gradlew flywayMigrate                 # Run migrations
@@ -457,7 +464,7 @@ cd life-goals-web && npm run typecheck  # TypeScript
 # Build
 ./gradlew build                         # Backend JAR
 cd life-goals-web && npm run build      # Frontend bundle
-docker build -t life-goals-api .        # Docker image
+cd life-goals-api && docker build -t life-goals-api .  # Backend Docker image
 ```
 
 ---
