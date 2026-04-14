@@ -1,0 +1,53 @@
+root = true
+
+# ── All files ───────────────────────────────────────────────
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# ── Kotlin ──────────────────────────────────────────────────
+[*.{kt,kts}]
+indent_style = space
+indent_size = 4
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+ij_kotlin_name_count_to_use_star_import = 999
+ij_kotlin_name_count_to_use_star_import_for_members = 999
+ktlint_standard_no-wildcard-imports = enabled
+
+# ── TypeScript / JavaScript ─────────────────────────────────
+[*.{ts,tsx,js,jsx,mjs,cjs}]
+indent_style = space
+indent_size = 2
+
+# ── CSS / SCSS ───────────────────────────────────────────────
+[*.{css,scss,module.css}]
+indent_style = space
+indent_size = 2
+
+# ── GraphQL ──────────────────────────────────────────────────
+[*.graphqls]
+indent_style = space
+indent_size = 2
+
+# ── Markup / Config ──────────────────────────────────────────
+[*.{html,xml,json,yaml,yml,toml,md}]
+indent_style = space
+indent_size = 2
+
+# ── SQL / Flyway migrations ──────────────────────────────────
+[*.sql]
+indent_style = space
+indent_size = 4
+
+# ── Gradle Kotlin DSL ────────────────────────────────────────
+[*.gradle.kts]
+indent_style = space
+indent_size = 4
+
+# ── Shell scripts ────────────────────────────────────────────
+[*.sh]
+indent_style = space
+indent_size = 2
