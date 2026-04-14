@@ -488,6 +488,7 @@
                 <li><a href="#error-handling"><span class="lang-ru">Обработка ошибок</span><span class="lang-en">Error Handling</span></a></li>
                 <li><a href="#security"><span class="lang-ru">Security & OAuth2</span><span class="lang-en">Security & OAuth2</span></a></li>
                 <li><a href="#scheduled"><span class="lang-ru">Scheduled Tasks</span><span class="lang-en">Scheduled Tasks</span></a></li>
+                <li><a href="#modulith"><span class="lang-ru">Spring Modulith</span><span class="lang-en">Spring Modulith</span></a></li>
                 <li><a href="#assignments"><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></a></li>
                 <li><a href="#backlog-tasks">🧪 <span class="lang-ru">Задания из Backlog (TDD)</span><span class="lang-en">Backlog Tasks (TDD)</span></a></li>
                 <li><a href="#resources"><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></a></li>
@@ -1245,6 +1246,198 @@ class ExchangeRateScheduler(
     }
 }
                 </code></pre>
+            </section>
+
+            <section id="modulith">
+                <h2><span class="lang-ru">Spring Modulith: энфорсмент границ модульного монолита</span><span class="lang-en">Spring Modulith: Enforcing Modular Monolith Boundaries</span></h2>
+
+                <div class="lang-ru">
+                    <p>
+                        Проект — это <strong>widget-first modular monolith</strong> (см. <code>CLAUDE.md</code> → <em>Architecture</em>).
+                        Каждый пакет верхнего уровня (<code>interviewprep</code>, <code>fitness</code>, <code>budget</code>,
+                        <code>dashboard</code>, <code>notification</code>, <code>common</code>) — модуль со строгими границами.
+                        Виджеты могут зависеть только от <code>common</code> — никогда напрямую от
+                        <code>repository/</code> или <code>model/</code> друг друга.
+                    </p>
+                    <p>
+                        <strong>Spring Modulith</strong> — инструмент, который энфорсит это правило в CI, а не в code review.
+                        Полное обоснование выбора (и почему не ArchUnit) — в
+                        <a href="../adr/ADR-004-module-boundary-enforcement.md"><code>docs/adr/ADR-004-module-boundary-enforcement.md</code></a>.
+                    </p>
+
+                    <h3>Почему нельзя просто договориться?</h3>
+                    <ul>
+                        <li><strong>Code review не масштабируется.</strong> Даже на проекте из 1 человека уставший пятничный merge рано или поздно пересечёт границу. CI ловит это в 100% случаев.</li>
+                        <li><strong>Нет drift документации.</strong> Modulith генерирует PlantUML-диаграммы из самого кода — диаграмма физически не может разойтись с реальностью.</li>
+                        <li><strong>События заменяют скрытые связи.</strong> Без формальной event-шины cross-module фичи (например, <code>notification</code> реагирует на <code>fitness.WorkoutLogged</code>) молча превращаются в прямые вызовы.</li>
+                    </ul>
+                </div>
+
+                <div class="lang-en">
+                    <p>
+                        The project is a <strong>widget-first modular monolith</strong> (see <code>CLAUDE.md</code> → <em>Architecture</em>).
+                        Every top-level package (<code>interviewprep</code>, <code>fitness</code>, <code>budget</code>,
+                        <code>dashboard</code>, <code>notification</code>, <code>common</code>) is a module with explicit boundaries.
+                        Widgets may depend only on <code>common</code> — never on each other's <code>repository/</code> or <code>model/</code>.
+                    </p>
+                    <p>
+                        <strong>Spring Modulith</strong> is the tool that enforces this in CI, not by code review.
+                        The full decision (and why not ArchUnit) is in
+                        <a href="../adr/ADR-004-module-boundary-enforcement.md"><code>docs/adr/ADR-004-module-boundary-enforcement.md</code></a>.
+                    </p>
+
+                    <h3>Why not just discipline?</h3>
+                    <ul>
+                        <li><strong>Code review doesn't scale.</strong> Even on a 1-person project, a tired Friday merge will cross a boundary. CI catches it 100% of the time.</li>
+                        <li><strong>No documentation drift.</strong> Modulith generates PlantUML diagrams from the code itself — the diagram can never diverge from reality.</li>
+                        <li><strong>Events replace hidden coupling.</strong> Without a formal event bus, cross-module features (e.g., <code>notification</code> reacting to <code>fitness.WorkoutLogged</code>) silently become direct calls.</li>
+                    </ul>
+                </div>
+
+                <h3><span class="lang-ru">Объявление модуля</span><span class="lang-en">Module Declaration</span></h3>
+<pre><code class="language-kotlin">// com/mrurec/lifegoals/fitness/package-info.kt
+@org.springframework.modulith.ApplicationModule(
+    displayName = "Fitness Widget",
+    allowedDependencies = ["common"]
+)
+package com.mrurec.lifegoals.fitness
+</code></pre>
+
+                <h3><span class="lang-ru">Один тест проверяет всё</span><span class="lang-en">One Test Enforces Everything</span></h3>
+<pre><code class="language-kotlin">class ModularityTests {
+    private val modules = ApplicationModules.of(LifeGoalsApplication::class.java)
+
+    @Test fun `verifies module boundaries`() = modules.verify()
+    // Fails the build on: illegal cross-module imports, cycles,
+    // or if a module exposes internals not declared public.
+
+    @Test fun `writes documentation`() {
+        Documenter(modules)
+            .writeModulesAsPlantUml()              // ./build/spring-modulith-docs/
+            .writeIndividualModulesAsPlantUml()
+    }
+}
+</code></pre>
+
+                <h3><span class="lang-ru">Cross-module события</span><span class="lang-en">Cross-Module Events</span></h3>
+                <div class="lang-ru">
+                    <p>Никаких прямых зависимостей между модулями — только через события:</p>
+                </div>
+                <div class="lang-en">
+                    <p>No direct dependencies between modules — only events:</p>
+                </div>
+<pre><code class="language-kotlin">// fitness публикует — ничего не знает о слушателях
+data class WorkoutLogged(val userId: UUID, val workoutId: UUID, val at: Instant)
+
+@Service
+class WorkoutService(private val events: ApplicationEventPublisher) {
+    @Transactional
+    fun logWorkout(/* ... */) {
+        // ... persist workout ...
+        events.publishEvent(WorkoutLogged(viewer.userId, workout.id, Instant.now()))
+    }
+}
+
+// notification реагирует — нулевая compile-time зависимость от fitness
+@Component
+class WorkoutAchievementListener(
+    private val notifications: NotificationService,
+    private val achievements: AchievementChecker
+) {
+    @ApplicationModuleListener    // = @TransactionalEventListener + @Async + persistence
+    fun on(event: WorkoutLogged) {
+        val earned = achievements.check(event.userId)
+        earned.forEach { notifications.publish(event.userId, it) }
+    }
+}
+</code></pre>
+
+                <div class="lang-ru">
+                    <p>
+                        <code>@ApplicationModuleListener</code> — ключевая штука: событие сохраняется в таблице
+                        <code>event_publication</code> внутри той же транзакции, что записала workout.
+                        Если слушатель упал или приложение крашнулось — Modulith ретраит при рестарте.
+                        Это <strong>transactional outbox pattern</strong> — тот же подход, что Meta/LinkedIn используют
+                        для надёжных cross-service записей, только без Kafka посередине.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        <code>@ApplicationModuleListener</code> is key: the event is persisted in the
+                        <code>event_publication</code> table inside the same transaction that wrote the workout.
+                        If the listener fails or the app crashes, Modulith retries on restart.
+                        This is the <strong>transactional outbox pattern</strong> — the same approach Meta/LinkedIn use
+                        for reliable cross-service writes, but without Kafka in the way.
+                    </p>
+                </div>
+
+                <h3><span class="lang-ru">Per-module тесты</span><span class="lang-en">Per-Module Tests</span></h3>
+<pre><code class="language-kotlin">@ApplicationModuleTest    // loads only the `fitness` module context
+class FitnessServiceTest {
+    @Autowired lateinit var workoutService: WorkoutService
+
+    @Test fun `logWorkout publishes WorkoutLogged event`(events: PublishedEvents) {
+        workoutService.logWorkout(/* ... */)
+        assertThat(events.ofType(WorkoutLogged::class.java)).hasSize(1)
+    }
+}
+</code></pre>
+                <div class="lang-ru">
+                    <p>
+                        Это в ~10× быстрее полноценного <code>@SpringBootTest</code> и доказывает, что модуль работает
+                        изолированно — контракт и события, которые он публикует, — единственное, что важно для его клиентов.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        This runs ~10× faster than full <code>@SpringBootTest</code> and proves the module works in isolation —
+                        the contract it exposes and the events it publishes are all that matter for its callers.
+                    </p>
+                </div>
+
+                <h3><span class="lang-ru">Trade-off vs ArchUnit</span><span class="lang-en">Trade-off vs ArchUnit</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        <strong>ArchUnit</strong> — library-agnostic и максимально гибкий, любое правило выразимо в DSL.
+                        <strong>Modulith</strong> приходит с готовой моделью модульного монолита: знает, что такое модуль,
+                        цикл, и public API. Для нашего набора правил Modulith покрывает всё и даёт per-module тесты,
+                        события и авто-документацию сверху. ArchUnit оставлен в резерве для редких правил,
+                        которые Modulith не выражает. Полное обоснование — в
+                        <a href="../adr/ADR-004-module-boundary-enforcement.md">ADR-004</a>.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        <strong>ArchUnit</strong> is library-agnostic and maximally flexible — any rule expressible in DSL.
+                        <strong>Modulith</strong> ships with the modular-monolith model built in: it knows what a module is,
+                        what a cycle is, and what public API means. For our rule set Modulith covers everything and adds
+                        per-module tests, events, and auto-docs on top. ArchUnit is kept in reserve for rare rules Modulith
+                        cannot express. Full decision in
+                        <a href="../adr/ADR-004-module-boundary-enforcement.md">ADR-004</a>.
+                    </p>
+                </div>
+
+                <h3><span class="lang-ru">FAANG-interview framing</span><span class="lang-en">FAANG-Interview Framing</span></h3>
+                <div class="lang-ru">
+                    <p>На вопрос «Why this architecture?» — структурированный ответ:</p>
+                    <ul>
+                        <li><strong>Enforcement поверх convention</strong> — senior-level judgment.</li>
+                        <li><strong>Transactional event publication</strong> — то же семейство, что Meta TAO write pipeline и LinkedIn outbox pattern.</li>
+                        <li><strong>Per-module тесты</strong> — аналог service-level изоляции в микросервисной организации.</li>
+                        <li><strong>Документация-как-код</strong> — никакого Confluence drift.</li>
+                        <li><strong>Явный путь извлечения</strong> — граница каждого модуля уже соответствует будущему service-контракту; локальные listener'ы становятся Kafka consumer'ами без изменения API.</li>
+                    </ul>
+                </div>
+                <div class="lang-en">
+                    <p>When asked «Why this architecture?» — a structured answer:</p>
+                    <ul>
+                        <li><strong>Enforcement over convention</strong> — senior-level judgment.</li>
+                        <li><strong>Transactional event publication</strong> — same family as Meta's TAO write pipeline and LinkedIn's outbox pattern.</li>
+                        <li><strong>Per-module tests</strong> — analogous to service-level isolation in a microservice org.</li>
+                        <li><strong>Documentation as code</strong> — no Confluence drift.</li>
+                        <li><strong>Clear extraction path</strong> — each module's boundary already matches a future service contract; local listeners become Kafka consumers with zero API change.</li>
+                    </ul>
+                </div>
             </section>
 
             <section class="assignments">

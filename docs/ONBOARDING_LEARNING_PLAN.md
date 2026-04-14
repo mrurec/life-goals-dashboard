@@ -1091,7 +1091,7 @@ class ExchangeRateCacheService(
 ---
 
 ## Модуль 6: Spring Boot 4
-**Длительность:** 4 дня | **Пререквизиты:** Модуль 3 (Kotlin)
+**Длительность:** 4.5 дня | **Пререквизиты:** Модуль 3 (Kotlin)
 
 ### Зачем это в проекте
 Spring Boot 4.0.5 — основной фреймворк backend'а. Все сервисы, репозитории, конфигурации и DI (Dependency Injection) работают через Spring. Понимание Spring — обязательное условие для написания любого backend-кода.
@@ -1416,6 +1416,100 @@ class ExchangeRateScheduler(
 }
 ```
 
+**6.7. Модульный монолит со Spring Modulith (день 4.5)**
+
+Проект — это **widget-first modular monolith** (см. `CLAUDE.md` → *Architecture*). Каждый пакет верхнего уровня (`interviewprep`, `fitness`, `budget`, `dashboard`, `notification`, `common`) — модуль со строгими границами. Виджеты могут зависеть только от `common` — никогда напрямую от `repository/` или `model/` друг друга. `Spring Modulith` — инструмент, который энфорсит это правило в CI, а не в code review.
+
+**Почему нельзя просто договориться?** Три причины:
+1. **Code review не масштабируется.** Даже на проекте из 1 человека уставший пятничный merge рано или поздно пересечёт границу. CI ловит это в 100% случаев.
+2. **Нет drift документации.** Modulith генерирует PlantUML-диаграммы из самого кода — диаграмма физически не может разойтись с реальностью.
+3. **События заменяют скрытые связи.** Без формальной event-шины cross-module фичи (например, `notification` реагирует на `fitness.WorkoutLogged`) молча превращаются в прямые вызовы. Transactional event publication registry делает асинхронную коммуникацию дефолтом.
+
+**Объявление модуля:**
+
+```kotlin
+// com/mrurec/lifegoals/fitness/package-info.kt
+@org.springframework.modulith.ApplicationModule(
+    displayName = "Fitness Widget",
+    allowedDependencies = ["common"]
+)
+package com.mrurec.lifegoals.fitness
+```
+
+**Один тест проверяет всё:**
+
+```kotlin
+class ModularityTests {
+    private val modules = ApplicationModules.of(LifeGoalsApplication::class.java)
+
+    @Test fun `verifies module boundaries`() = modules.verify()
+    // Проваливает сборку если: нелегальные cross-module импорты, циклы,
+    // или если модуль экспонирует внутренности, не заявленные как public.
+
+    @Test fun `writes documentation`() {
+        Documenter(modules)
+            .writeModulesAsPlantUml()              // ./build/spring-modulith-docs/
+            .writeIndividualModulesAsPlantUml()
+    }
+}
+```
+
+**Cross-module события — без прямых зависимостей:**
+
+```kotlin
+// fitness публикует — ничего не знает о слушателях
+data class WorkoutLogged(val userId: UUID, val workoutId: UUID, val at: Instant)
+
+@Service
+class WorkoutService(private val events: ApplicationEventPublisher) {
+    @Transactional
+    fun logWorkout(/* ... */) {
+        // ... persist workout ...
+        events.publishEvent(WorkoutLogged(viewer.userId, workout.id, Instant.now()))
+    }
+}
+
+// notification реагирует — нулевая compile-time зависимость на internals fitness'а
+@Component
+class WorkoutAchievementListener(
+    private val notifications: NotificationService,
+    private val achievements: AchievementChecker
+) {
+    @ApplicationModuleListener            // = @TransactionalEventListener + @Async + persistence
+    fun on(event: WorkoutLogged) {
+        val earned = achievements.check(event.userId)
+        earned.forEach { notifications.publish(event.userId, it) }
+    }
+}
+```
+
+`@ApplicationModuleListener` — ключевая штука: событие сохраняется в таблице `event_publication` внутри той же транзакции, что записала workout. Если слушатель упал или приложение крашнулось — Modulith ретраит при рестарте. Это **transactional outbox pattern**, тот же подход, что Meta/LinkedIn используют для надёжных cross-service записей, только без Kafka посередине.
+
+**Per-module тесты:**
+
+```kotlin
+@ApplicationModuleTest                    // поднимает контекст только `fitness`
+class FitnessServiceTest {
+    @Autowired lateinit var workoutService: WorkoutService
+
+    @Test fun `logWorkout publishes WorkoutLogged event`(events: PublishedEvents) {
+        workoutService.logWorkout(/* ... */)
+        assertThat(events.ofType(WorkoutLogged::class.java)).hasSize(1)
+    }
+}
+```
+
+Это в ~10× быстрее `@SpringBootTest` и доказывает, что модуль работает изолированно — контракт и события, которые он публикует, — единственное, что важно для его клиентов.
+
+**Trade-off vs ArchUnit.** ArchUnit — library-agnostic и максимально гибкий, любое правило выразимо в DSL. Modulith приходит с готовой моделью модульного монолита: он знает, что такое модуль, цикл, и public API. Для нашего набора правил Modulith покрывает всё и даёт per-module тесты, события и авто-документацию сверху. ArchUnit оставлен в резерве для редких правил, которые Modulith не выражает (напр. глобальный бан `java.util.logging`). Полное обоснование — `docs/adr/ADR-004-module-boundary-enforcement.md`.
+
+**FAANG-interview framing.** На вопрос «Why this architecture?» — структурированный ответ:
+- **Enforcement поверх convention** — senior-level judgment.
+- **Transactional event publication** — то же семейство, что Meta TAO write pipeline и LinkedIn outbox pattern, масштабированное до одного сервиса.
+- **Per-module тесты** — аналог service-level изоляции в микросервисной организации.
+- **Документация-как-код** — никакого Confluence drift.
+- **Явный путь извлечения** — граница каждого модуля уже соответствует будущему service-контракту; локальные listener'ы становятся Kafka consumer'ами без изменения API.
+
 ### Практические задания
 
 **Задание 6.1.** Создайте Spring Boot проект (https://start.spring.io/) с Kotlin, Web, Data JPA, PostgreSQL, Redis. Настройте `application.yml` с профилями `dev` и `prod`. Запустите и убедитесь, что сервер стартует.
@@ -1426,11 +1520,15 @@ class ExchangeRateScheduler(
 
 **Задание 6.4.** Настройте Spring Security с JWT. Создайте `ViewerContextExtractor`, который из JWT-токена извлекает `ViewerContext`. Напишите integration test с мокнутым JWT.
 
+**Задание 6.5.** *Modulith TDD.* Проаннотируйте шесть пакетов верхнего уровня `@ApplicationModule`. Напишите `ModularityTests` с `ApplicationModules.verify()` — добейтесь зелёного теста. Затем умышленно добавьте импорт из `notification` в `com.mrurec.lifegoals.fitness.repository.WorkoutRepository` — тест должен упасть. Почините это через событие `WorkoutLogged` + `@ApplicationModuleListener` в `notification`. Закоммитьте сгенерированные `Documenter`-ом PlantUML-диаграммы в репозиторий. Bonus: добавьте `@ApplicationModuleTest`, проверяющий, что событие публикуется при вызове `logWorkout`.
+
 ### Дополнительные источники
 - [Spring Boot Reference Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/) — официальная
 - [Spring Boot with Kotlin](https://spring.io/guides/tutorials/spring-boot-kotlin/) — официальный гайд
 - [Baeldung — Spring Boot](https://www.baeldung.com/spring-boot) — практические статьи
 - [Spring Security Architecture](https://spring.io/guides/topicals/spring-security-architecture/) — как работает security
+- [Spring Modulith Reference](https://docs.spring.io/spring-modulith/reference/) — границы модулей, события, тестирование
+- [`docs/adr/ADR-004-module-boundary-enforcement.md`](adr/ADR-004-module-boundary-enforcement.md) — решение Spring Modulith vs ArchUnit
 
 ---
 
@@ -3287,7 +3385,7 @@ test.describe('Meal Logging', () => {
 - **Relay vs Apollo:** Relay enforces best practices (persisted queries, fragment colocation, cursor pagination). Apollo более гибкий, но Relay — это стандарт Meta.
 - **PostgreSQL + JSONB vs MongoDB:** Реляционная модель для структурированных данных + JSONB для гибких полей (config, tags). Лучшее из двух миров.
 - **Redis dual-use:** Cache (cache-aside/write-through) + pub/sub для GraphQL Subscriptions. Один сервис — две роли.
-- **Modular Monolith vs Microservices:** На старте — монолит с чёткими границами модулей. Widget packages уже готовы к извлечению в сервисы, когда это потребуется.
+- **Modular Monolith vs Microservices:** На старте — монолит с энфорсимыми границами модулей (Spring Modulith). Мы отвергли микросервисы (команда = 1, operational overhead, distributed-tracing debt, нет давления на шардирование) **и** отвергли «просто пакеты» (дрейф границ, случайные N+1 зависимости, нет изолированного тестирования). Modulith даёт нам: CI-энфорсмент границ пакетов, **transactional event publication registry** для cross-module коммуникации (то же семейство, что Meta TAO write pipeline / LinkedIn outbox pattern), per-module тесты через `@ApplicationModuleTest`, и авто-генерируемую PlantUML документацию. Путь извлечения явный: граница каждого модуля уже соответствует будущему service-контракту; `@ApplicationModuleListener` становится Kafka consumer'ом без изменения API. Trade-off vs ArchUnit — см. `docs/adr/ADR-004-module-boundary-enforcement.md`.
 
 **17.2. End-to-End: Новый виджет за 10 шагов**
 
@@ -3316,6 +3414,17 @@ test.describe('Meal Logging', () => {
 
 Пять развёрнутых вопросов и ответов для подготовки к system design и coding round интервью. Подробности — в [HTML-версии](study-plans/17-integration.html).
 
+**Bonus Q — масштабирование команды, а не трафика:**
+
+> **Q:** Как бы вы масштабировали этот проект с 1 до N команд на одном репозитории, не замедляя их друг относительно друга?
+>
+> **A:** Три рычага, уже заложенных в архитектуре:
+> 1. **Энфорсимые границы модулей (Spring Modulith).** Команда A физически не может случайно заимпортить internals команды B — CI упадёт. Это убирает главный источник трения в multi-team monorepo: связь через «общие» внутренности, которые должны были быть приватными.
+> 2. **События как дефолтный cross-module контракт.** `@ApplicationModuleListener` + transactional event publication registry → команды коммуницируют через задокументированные типы событий, а не прямые вызовы. Temporal decoupling → независимый release cadence, тривиально мокаются в тестах.
+> 3. **Per-module тесты (`@ApplicationModuleTest`).** CI каждой команды быстрый, потому что поднимается только их модуль. Это Meta/Google monorepo-гигиена, применённая в меньшем масштабе.
+>
+> Когда один модуль становится hotspot'ом (трафик, размер команды, частота деплоя), его извлекают: граница уже является контрактом, события уже асинхронные, миграция — механическая. Именно это — явная причина выбора Modulith против ArchUnit, см. `docs/adr/ADR-004`.
+
 ### Практические задания
 
 **Задание 17.1.** Реализуйте Reading Tracker Widget (10 шагов из §17.2). Каждый шаг — отдельный коммит с правильным conventional commit message.
@@ -3343,7 +3452,7 @@ test.describe('Meal Logging', () => {
 | 3 | Kotlin | 4 | Любой ООП-язык |
 | 4 | PostgreSQL + Flyway | 3 | Базовые БД |
 | 5 | Redis | 2 | Модуль 4 |
-| 6 | Spring Boot 4 | 4 | Модуль 3 |
+| 6 | Spring Boot 4 (в т.ч. Spring Modulith) | 4.5 | Модуль 3 |
 | 7 | Spring Data JPA + Hibernate | 3 | Модули 4, 6 |
 | 8 | GraphQL (теория) | 2 | HTTP API |
 | 9 | Netflix DGS | 3 | Модули 6, 8 |
@@ -3355,7 +3464,7 @@ test.describe('Meal Logging', () => {
 | 15 | GitHub Actions | 1.5 | Модули 1, 14 |
 | 16 | Тестирование (полный стек) | 4 | Все модули |
 | 17 | Интеграция + Meta Interview Prep | 5 | Все модули |
-| | **ИТОГО** | **~49.5 дня** | |
+| | **ИТОГО** | **~50 дней** | |
 
 > При интенсивном режиме (6 часов/день) = **~9-10 недель**.
 > При умеренном (4 часа/день) = **~12-13 недель**.
