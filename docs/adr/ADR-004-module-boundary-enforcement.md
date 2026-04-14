@@ -109,7 +109,7 @@ We explicitly accept the constraints:
 ### Negative
 
 - A small runtime dependency on Spring Modulith (core + events starter). Non-critical — the stack is already Spring-heavy.
-- `package-info.kt` requires explicit module markup. That's +5 files, one-time.
+- `package-info.java` requires explicit module markup. That's +5 files, one-time. We use `.java` (not `.kt`) because Kotlin has no equivalent of Java's package-level annotations that Spring Modulith's classpath scanner can read; `package-info.java` is the supported idiom even in Kotlin-only modules. The build enables this by adding `src/main/kotlin` to the Java source set so javac picks up the `package-info.java` files colocated with Kotlin sources.
 - Published events require an `event_publication` table — adds a migration when first used.
 
 ### Neutral
@@ -140,15 +140,23 @@ testImplementation("org.springframework.modulith:spring-modulith-starter-test")
 // ArchUnit: removed. Add back only when a non-Modulith rule appears.
 ```
 
-**Module declaration** — at the root of each widget package:
+**Module declaration** — at the root of each widget package. Written in Java because Kotlin cannot host package-level annotations in a form Spring Modulith's scanner reads; the `build.gradle.kts` adds `src/main/kotlin` to the Java source set so javac picks these files up:
 
-```kotlin
-// com/mrurec/lifegoals/fitness/package-info.kt
+```java
+// com/mrurec/lifegoals/fitness/package-info.java
 @org.springframework.modulith.ApplicationModule(
     displayName = "Fitness Widget",
-    allowedDependencies = ["common"]
+    allowedDependencies = {"common"}
 )
-package com.mrurec.lifegoals.fitness
+package com.mrurec.lifegoals.fitness;
+```
+
+```kotlin
+// build.gradle.kts — let javac scan src/main/kotlin for package-info.java
+sourceSets {
+    main { java.srcDirs("src/main/kotlin") }
+    test { java.srcDirs("src/test/kotlin") }
+}
 ```
 
 **Verify test** — one test for the whole project:

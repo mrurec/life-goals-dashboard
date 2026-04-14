@@ -1425,15 +1425,15 @@ The project is a **widget-first modular monolith** (see `CLAUDE.md` → *Archite
 2. **No documentation drift.** Modulith generates PlantUML diagrams from the code itself — the diagram can never diverge from reality.
 3. **Events replace hidden coupling.** Without a formal event bus, cross-module features (e.g., `notification` reacting to `fitness.WorkoutLogged`) silently become direct calls. Modulith's transactional event publication registry makes async communication the default.
 
-**Module declaration:**
+**Module declaration** (written in Java because Kotlin has no equivalent of Java's package-level annotations that Spring Modulith's scanner can read; `build.gradle.kts` adds `src/main/kotlin` to the Java source set so javac picks these files up):
 
-```kotlin
-// com/mrurec/lifegoals/fitness/package-info.kt
+```java
+// com/mrurec/lifegoals/fitness/package-info.java
 @org.springframework.modulith.ApplicationModule(
     displayName = "Fitness Widget",
-    allowedDependencies = ["common"]
+    allowedDependencies = {"common"}
 )
-package com.mrurec.lifegoals.fitness
+package com.mrurec.lifegoals.fitness;
 ```
 
 **One test enforces everything:**

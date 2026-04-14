@@ -1295,12 +1295,13 @@ class ExchangeRateScheduler(
                 </div>
 
                 <h3><span class="lang-ru">Объявление модуля</span><span class="lang-en">Module Declaration</span></h3>
-<pre><code class="language-kotlin">// com/mrurec/lifegoals/fitness/package-info.kt
+<p><span class="lang-ru">Пишем на Java — Kotlin не поддерживает package-level аннотации в форме, которую читает сканер Spring Modulith; <code>build.gradle.kts</code> добавляет <code>src/main/kotlin</code> в Java source set, чтобы javac подхватил эти файлы.</span><span class="lang-en">Written in Java because Kotlin has no equivalent of Java's package-level annotations that Spring Modulith's scanner can read; <code>build.gradle.kts</code> adds <code>src/main/kotlin</code> to the Java source set so javac picks these files up.</span></p>
+<pre><code class="language-java">// com/mrurec/lifegoals/fitness/package-info.java
 @org.springframework.modulith.ApplicationModule(
     displayName = "Fitness Widget",
-    allowedDependencies = ["common"]
+    allowedDependencies = {"common"}
 )
-package com.mrurec.lifegoals.fitness
+package com.mrurec.lifegoals.fitness;
 </code></pre>
 
                 <h3><span class="lang-ru">Один тест проверяет всё</span><span class="lang-en">One Test Enforces Everything</span></h3>

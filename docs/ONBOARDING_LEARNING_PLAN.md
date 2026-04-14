@@ -1425,15 +1425,15 @@ class ExchangeRateScheduler(
 2. **Нет drift документации.** Modulith генерирует PlantUML-диаграммы из самого кода — диаграмма физически не может разойтись с реальностью.
 3. **События заменяют скрытые связи.** Без формальной event-шины cross-module фичи (например, `notification` реагирует на `fitness.WorkoutLogged`) молча превращаются в прямые вызовы. Transactional event publication registry делает асинхронную коммуникацию дефолтом.
 
-**Объявление модуля:**
+**Объявление модуля** (пишем на Java — Kotlin не поддерживает package-level аннотации в форме, которую читает сканер Spring Modulith; `build.gradle.kts` добавляет `src/main/kotlin` в Java source set, чтобы javac подхватил эти файлы):
 
-```kotlin
-// com/mrurec/lifegoals/fitness/package-info.kt
+```java
+// com/mrurec/lifegoals/fitness/package-info.java
 @org.springframework.modulith.ApplicationModule(
     displayName = "Fitness Widget",
-    allowedDependencies = ["common"]
+    allowedDependencies = {"common"}
 )
-package com.mrurec.lifegoals.fitness
+package com.mrurec.lifegoals.fitness;
 ```
 
 **Один тест проверяет всё:**
