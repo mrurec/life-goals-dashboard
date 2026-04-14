@@ -9,10 +9,11 @@ spring:
     active: test
   jpa:
     hibernate:
-      ddl-auto: validate
+      # TODO: switch to 'validate' and set flyway.enabled=true once the first Flyway migration is added
+      ddl-auto: create-drop
     show-sql: false
   flyway:
-    enabled: true
+    enabled: false
 
 app:
   security:
