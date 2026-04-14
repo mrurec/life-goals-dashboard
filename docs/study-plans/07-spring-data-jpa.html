@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 7: Spring Data JPA + Hibernate - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 43.75%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .language-bash::before,
+        .language-kotlin::before,
+        .language-sql::before {
+            content: attr(data-lang);
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details/Collapse */
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        /* Assignments */
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .tdd-badge {
+            display: inline-block;
+            background: #f5c2e7;
+            color: #1e1e2e;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+
+        /* Resources */
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        /* Navigation */
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Prism Customization */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+
+        /* Language switcher */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button {
+            padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px;
+            cursor: pointer; font-size: 0.85rem; background: transparent;
+            color: var(--text-secondary); transition: all 0.2s;
+        }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="module-number"><span class="lang-ru">МОДУЛЬ 7 / 16</span><span class="lang-en">MODULE 7 / 16</span></div>
+            <h1><span class="lang-ru">Spring Data JPA + Hibernate</span><span class="lang-en">Spring Data JPA + Hibernate</span></h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3><span class="lang-ru">Содержание</span><span class="lang-en">Table of Contents</span></h3>
+            <ul>
+                <li><a href="#intro"><span class="lang-ru">Введение</span><span class="lang-en">Introduction</span></a></li>
+                <li><a href="#entity-mapping"><span class="lang-ru">Entity Mapping</span><span class="lang-en">Entity Mapping</span></a></li>
+                <li><a href="#relationships"><span class="lang-ru">Relationship</span><span class="lang-en">Relationships</span></a></li>
+                <li><a href="#repository-pattern"><span class="lang-ru">Repository Pattern</span><span class="lang-en">Repository Pattern</span></a></li>
+                <li><a href="#transactions"><span class="lang-ru">Transactions</span><span class="lang-en">Transactions</span></a></li>
+                <li><a href="#jsonb"><span class="lang-ru">JSONB в JPA</span><span class="lang-en">JSONB in JPA</span></a></li>
+                <li><a href="#assignments"><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></a></li>
+                <li><a href="#backlog-tasks"><span class="lang-ru">🧪 Задания из Backlog (TDD)</span><span class="lang-en">🧪 Backlog Tasks (TDD)</span></a></li>
+                <li><a href="#resources"><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <div class="lang-ru">
+                    <h2>Введение: Spring Data JPA + Hibernate</h2>
+                    <p>
+                        <strong>JPA (Java Persistence API)</strong> — это стандарт для работы с реляционными БД через объектно-ориентированные модели.
+                        <strong>Hibernate</strong> — реализация JPA, которая автоматически преобразует объекты (entities) в таблицы и обратно.
+                        <strong>Spring Data JPA</strong> упрощает работу с Hibernate через Repository паттерн.
+                    </p>
+                    <p>
+                        За 3 дня вы освоите Entity mapping (аннотации), relationships (OneToMany, ManyToOne),
+                        Repository pattern с query методами, Transactions и JSONB колонны для config.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Совет:</strong> JPA превращает ваши Kotlin классы в таблицы БД. Но помните: Hibernate генерирует SQL,
+                        который может быть неоптимальным. Всегда проверяйте логированный SQL в dev режиме (spring.jpa.show-sql=true).
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <h2>Introduction: Spring Data JPA + Hibernate</h2>
+                    <p>
+                        <strong>JPA (Java Persistence API)</strong> is a standard for working with relational databases through object-oriented models.
+                        <strong>Hibernate</strong> is a JPA implementation that automatically converts objects (entities) into database tables and vice versa.
+                        <strong>Spring Data JPA</strong> simplifies working with Hibernate through the Repository pattern.
+                    </p>
+                    <p>
+                        In 3 days you will master Entity mapping (annotations), relationships (OneToMany, ManyToOne),
+                        Repository pattern with query methods, Transactions, and JSONB columns for config.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Tip:</strong> JPA converts your Kotlin classes into database tables. But remember: Hibernate generates SQL,
+                        which may not be optimal. Always check the logged SQL in dev mode (spring.jpa.show-sql=true).
+                    </div>
+                </div>
+            </section>
+
+            <section id="entity-mapping">
+                <div class="lang-ru">
+                    <h2>Entity Mapping</h2>
+
+                    <h3>Базовая структура Entity</h3>
+                    <p>
+                        Entity — это класс Kotlin, который представляет строку в таблице БД.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h2>Entity Mapping</h2>
+
+                    <h3>Basic Entity Structure</h3>
+                    <p>
+                        An Entity is a Kotlin class that represents a row in a database table.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+import jakarta.persistence.*
+import java.util.UUID
+import java.time.Instant
+
+@Entity
+@Table(name = "food_product")
+data class FoodProduct(
+    @Id
+    @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
+    val id: UUID = UUID.randomUUID(),
+
+    @Column(name = "user_id", nullable = false)
+    val userId: UUID,
+
+    @Column(name = "name", nullable = false, length = 255)
+    val name: String,
+
+    @Column(name = "calories_per_100g", nullable = false)
+    val caloriesPer100g: Int,
+
+    @Column(name = "protein_g")
+    val proteinG: Double? = null,
+
+    @Column(name = "carbs_g")
+    val carbsG: Double? = null,
+
+    @Column(name = "fat_g")
+    val fatG: Double? = null,
+
+    @Column(name = "is_custom", nullable = false)
+    val isCustom: Boolean = false,
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    val createdAt: Instant = Instant.now(),
+
+    @Column(name = "updated_at", nullable = false)
+    val updatedAt: Instant = Instant.now()
+)
+                </code></pre>
+
+                <div class="lang-ru">
+                    <h3>Аннотации Entity</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Entity Annotations</h3>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th><span class="lang-ru">Аннотация</span><span class="lang-en">Annotation</span></th>
+                            <th><span class="lang-ru">Назначение</span><span class="lang-en">Purpose</span></th>
+                            <th><span class="lang-ru">Пример</span><span class="lang-en">Example</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>@Entity</td>
+                            <td><span class="lang-ru">Помечает класс как Entity (таблица в БД)</span><span class="lang-en">Marks a class as an Entity (table in DB)</span></td>
+                            <td>@Entity class FoodProduct</td>
+                        </tr>
+                        <tr>
+                            <td>@Table(name="...")</td>
+                            <td><span class="lang-ru">Имя таблицы (по умолчанию = класс в snake_case)</span><span class="lang-en">Table name (default = class in snake_case)</span></td>
+                            <td>@Table(name = "food_product")</td>
+                        </tr>
+                        <tr>
+                            <td>@Id</td>
+                            <td><span class="lang-ru">Первичный ключ</span><span class="lang-en">Primary key</span></td>
+                            <td>@Id val id: UUID</td>
+                        </tr>
+                        <tr>
+                            <td>@Column(...)</td>
+                            <td><span class="lang-ru">Свойства колонки (имя, nullable, length)</span><span class="lang-en">Column properties (name, nullable, length)</span></td>
+                            <td>@Column(name="calories_per_100g")</td>
+                        </tr>
+                        <tr>
+                            <td>@Transient</td>
+                            <td><span class="lang-ru">Поле НЕ сохраняется в БД (вычисляемое поле)</span><span class="lang-en">Field NOT saved to DB (computed field)</span></td>
+                            <td>@Transient val totalCalories: Int</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="lang-ru">
+                    <h3>UUID как первичный ключ</h3>
+                    <p>
+                        В проекте ВСЕ primary keys — это UUID (не autoincrement int).
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h3>UUID as Primary Key</h3>
+                    <p>
+                        In the project, ALL primary keys are UUIDs (not autoincrement int).
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+@Entity
+@Table(name = "user_account")
+data class User(
+    @Id
+    @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
+    val id: UUID = UUID.randomUUID(),
+
+    @Column(nullable = false, unique = true)
+    val email: String,
+
+    @Column(nullable = false)
+    val createdAt: Instant = Instant.now()
+)
+                </code></pre>
+
+                <div class="lang-ru">
+                    <p><strong>SQL для создания таблицы:</strong></p>
+                </div>
+                <div class="lang-en">
+                    <p><strong>SQL to create the table:</strong></p>
+                </div>
+
+                <pre><code class="language-sql">
+CREATE TABLE "user_account" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+                </code></pre>
+            </section>
+
+            <section id="relationships">
+                <div class="lang-ru">
+                    <h2>Relationships: OneToMany и ManyToOne</h2>
+
+                    <h3>ManyToOne (Много к одному)</h3>
+                    <p>
+                        Много RecipeIngredient-ов относятся к одному FoodProduct.
+                        RecipeIngredient имеет внешний ключ foodProductId.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h2>Relationships: OneToMany and ManyToOne</h2>
+
+                    <h3>ManyToOne (Many to One)</h3>
+                    <p>
+                        Many RecipeIngredients relate to one FoodProduct.
+                        RecipeIngredient has a foreign key foodProductId.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+// FoodProduct — "родитель"
+@Entity
+@Table(name = "food_product")
+data class FoodProduct(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+    val name: String,
+    val caloriesPer100g: Int
+)
+
+// RecipeIngredient — "ребёнок"
+@Entity
+@Table(name = "recipe_ingredient")
+data class RecipeIngredient(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "food_product_id", nullable = false)
+    val foodProduct: FoodProduct,
+
+    @Column(name = "portion_grams")
+    val portionGrams: Double
+)
+                </code></pre>
+
+                <div class="lang-ru">
+                    <h3>OneToMany (Один ко многим)</h3>
+                    <p>
+                        Один Recipe содержит много RecipeIngredient-ов.
+                        Обратное направление ManyToOne.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h3>OneToMany (One to Many)</h3>
+                    <p>
+                        One Recipe contains many RecipeIngredients.
+                        The reverse direction of ManyToOne.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+@Entity
+@Table(name = "recipe")
+data class Recipe(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+
+    @Column(nullable = false)
+    val name: String,
+
+    @OneToMany(
+        mappedBy = "recipe",  // "recipe" — поле в RecipeIngredient
+        fetch = FetchType.LAZY,  // Ленивая загрузка!
+        cascade = [CascadeType.ALL],
+        orphanRemoval = true
+    )
+    val ingredients: List&lt;RecipeIngredient&gt; = emptyList()
+)
+
+// RecipeIngredient изменяется:
+@Entity
+@Table(name = "recipe_ingredient")
+data class RecipeIngredient(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipe_id", nullable = false)
+    val recipe: Recipe,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "food_product_id", nullable = false)
+    val foodProduct: FoodProduct,
+
+    val portionGrams: Double
+)
+                </code></pre>
+
+                <div class="lang-ru">
+                    <h3>FetchType.LAZY vs EAGER</h3>
+                    <div class="warning">
+                        <strong>Правило:</strong> ВСЕГДА используйте FetchType.LAZY для relationships.
+                        NEVER EAGER. Ленивая загрузка избегает N+1 проблем.
+                    </div>
+
+                    <p><strong>Объяснение:</strong></p>
+                    <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                        <li><strong>LAZY (правильно):</strong> Recipe загружается, но ingredients не загружаются. Только при обращении к recipe.ingredients Hibernate выполнит отдельный SQL запрос.</li>
+                        <li><strong>EAGER (плохо):</strong> Hibernate при загрузке Recipe сразу загружает ВСЕ ingredients через JOIN. Если у вас 100 recipes, будут 100 JOIN'ов!</li>
+                    </ul>
+
+                    <p><strong>Решение N+1 проблемы: DataLoader</strong></p>
+                    <p>
+                        Вместо EAGER, используйте Spring Data DataLoader (как Relay на backend).
+                        DataLoader батчит запросы: вместо 100 отдельных SELECT'ов, один SELECT с IN (id1, id2, ..., id100).
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h3>FetchType.LAZY vs EAGER</h3>
+                    <div class="warning">
+                        <strong>Rule:</strong> ALWAYS use FetchType.LAZY for relationships.
+                        NEVER EAGER. Lazy loading avoids N+1 problems.
+                    </div>
+
+                    <p><strong>Explanation:</strong></p>
+                    <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                        <li><strong>LAZY (correct):</strong> Recipe is loaded, but ingredients are not. Only when accessing recipe.ingredients will Hibernate execute a separate SQL query.</li>
+                        <li><strong>EAGER (bad):</strong> When loading a Recipe, Hibernate immediately loads ALL ingredients via JOIN. If you have 100 recipes, there will be 100 JOINs!</li>
+                    </ul>
+
+                    <p><strong>Solution to N+1 Problem: DataLoader</strong></p>
+                    <p>
+                        Instead of EAGER, use Spring Data DataLoader (like Relay on backend).
+                        DataLoader batches queries: instead of 100 separate SELECTs, one SELECT with IN (id1, id2, ..., id100).
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+@DgsData(parentType = "Recipe", field = "ingredients")
+fun ingredients(dfe: DgsDataFetchingEnvironment): CompletableFuture&lt;List&lt;RecipeIngredient&gt;&gt; {
+    val loader = dfe.getDataLoader&lt;UUID, List&lt;RecipeIngredient&gt;&gt;("recipeIngredientLoader")
+    val recipeId = dfe.getSource&lt;Recipe&gt;().id
+    return loader.load(recipeId)
+}
+                </code></pre>
+            </section>
+
+            <section id="repository-pattern">
+                <div class="lang-ru">
+                    <h2>Repository Pattern</h2>
+
+                    <h3>Создание Repository</h3>
+                    <p>
+                        Repository — это interface для доступа к сущностям. Spring Data автоматически генерирует реализацию.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h2>Repository Pattern</h2>
+
+                    <h3>Creating a Repository</h3>
+                    <p>
+                        A Repository is an interface for accessing entities. Spring Data automatically generates the implementation.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
+import org.springframework.stereotype.Repository
+import java.util.UUID
+
+@Repository
+interface FoodProductRepository : JpaRepository&lt;FoodProduct, UUID&gt; {
+    // Spring автоматически реализует эти методы из имён!
+
+    // Найти по userId
+    fun findByUserId(userId: UUID): List&lt;FoodProduct&gt;
+
+    // Найти по userId AND name
+    fun findByUserIdAndName(userId: UUID, name: String): List&lt;FoodProduct&gt;
+
+    // Поиск по pattern (LIKE)
+    fun findByNameContainingIgnoreCase(name: String): List&lt;FoodProduct&gt;
+
+    // Только кастомные продукты
+    fun findByIsCustomTrue(): List&lt;FoodProduct&gt;
+
+    // JPQL запрос
+    @Query("""
+        SELECT p FROM FoodProduct p
+        WHERE p.userId = :userId
+        AND LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))
+        ORDER BY p.createdAt DESC
+    """)
+    fun searchByNameForUser(userId: UUID, name: String): List&lt;FoodProduct&gt;
+
+    // Native SQL запрос
+    @Query(nativeQuery = true, value = """
+        SELECT * FROM food_product
+        WHERE user_id = :userId AND calories_per_100g &gt; :minCalories
+        LIMIT :limit
+    """)
+    fun findHighCalorieProductsForUser(
+        userId: UUID,
+        minCalories: Int,
+        limit: Int
+    ): List&lt;FoodProduct&gt;
+}
+                </code></pre>
+
+                <div class="lang-ru">
+                    <h3>Cursor-based pagination (Relay style)</h3>
+                    <p>
+                        Вместо offset-based (page, size), используйте cursor-based pagination для production-ready API.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h3>Cursor-based Pagination (Relay Style)</h3>
+                    <p>
+                        Instead of offset-based (page, size), use cursor-based pagination for production-ready API.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+interface RecipeRepository : JpaRepository&lt;Recipe, UUID&gt; {
+    @Query("""
+        SELECT r FROM Recipe r
+        WHERE r.userId = :userId
+        AND r.id &gt; :cursor
+        ORDER BY r.id ASC
+        LIMIT :first
+    """)
+    fun findByUserIdAfterCursor(
+        userId: UUID,
+        cursor: UUID,
+        first: Int
+    ): List&lt;Recipe&gt;
+}
+
+// Использование
+val pageSize = 10
+val firstPage = recipeRepository.findByUserIdAfterCursor(
+    userId = viewer.userId,
+    cursor = UUID(0, 0),  // Начало
+    first = pageSize + 1  // Запросить +1 для определения hasNextPage
+)
+
+val hasNextPage = firstPage.size &gt; pageSize
+val edges = firstPage.take(pageSize).map { recipe -&gt;
+    RecipeEdge(cursor = recipe.id.toString(), node = recipe)
+}
+                </code></pre>
+
+                <div class="lang-ru">
+                    <h3>Projections для оптимизации SELECT</h3>
+                    <p>
+                        Если нужны только некоторые поля, используйте Projections вместо загрузки полной сущности.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h3>Projections for SELECT Optimization</h3>
+                    <p>
+                        If you only need certain fields, use Projections instead of loading the full entity.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+interface RecipeNameOnly {
+    val id: UUID
+    val name: String
+    val servings: Int
+}
+
+interface RecipeRepository : JpaRepository&lt;Recipe, UUID&gt; {
+    @Query("""
+        SELECT r.id, r.name, r.servings
+        FROM Recipe r
+        WHERE r.userId = :userId
+    """)
+    fun findNameOnlyForUser(userId: UUID): List&lt;RecipeNameOnly&gt;
+}
+                </code></pre>
+            </section>
+
+            <section id="transactions">
+                <div class="lang-ru">
+                    <h2>Transactions</h2>
+
+                    <h3>@Transactional аннотация</h3>
+                    <p>
+                        @Transactional обёртывает метод в БД транзакцию. Если исключение выброшено, транзакция откатывается (rollback).
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h2>Transactions</h2>
+
+                    <h3>@Transactional Annotation</h3>
+                    <p>
+                        @Transactional wraps a method in a database transaction. If an exception is thrown, the transaction is rolled back.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+@Service
+class RecipeService(
+    private val recipeRepository: RecipeRepository,
+    private val ingredientRepository: RecipeIngredientRepository
+) {
+    // Вся транзакция откатывается, если любая операция не удалась
+    @Transactional
+    fun createRecipeWithIngredients(
+        viewer: ViewerContext,
+        input: CreateRecipeInput
+    ): Recipe {
+        // 1. Создать рецепт
+        val recipe = Recipe(
+            userId = viewer.userId,
+            name = input.name,
+            servings = input.servings
+        )
+        val savedRecipe = recipeRepository.save(recipe)
+
+        // 2. Создать ингредиенты
+        input.ingredients.forEach { ingredientInput ->
+            val ingredient = RecipeIngredient(
+                recipe = savedRecipe,
+                foodProductId = ingredientInput.productId,
+                portionGrams = ingredientInput.portionGrams
+            )
+            ingredientRepository.save(ingredient)
+        }
+
+        // Если ошибка ЗДЕСЬ — оба сохранения откатываются
+        return savedRecipe
+    }
+}
+                </code></pre>
+
+                <div class="lang-ru">
+                    <h3>readOnly optimization</h3>
+                    <p>
+                        Для методов, которые только читают — отметьте readOnly=true.
+                        Hibernate пропустит dirty checking и flush.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h3>readOnly Optimization</h3>
+                    <p>
+                        For read-only methods, mark readOnly=true.
+                        Hibernate will skip dirty checking and flush.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+@Transactional(readOnly = true)
+fun getRecipesForUser(viewer: ViewerContext): List&lt;Recipe&gt; {
+    return recipeRepository.findByUserId(viewer.userId)
+    // Hibernate не будет проверять изменения объектов
+    // Быстрее, чем обычная транзакция
+}
+                </code></pre>
+            </section>
+
+            <section id="jsonb">
+                <div class="lang-ru">
+                    <h2>JSONB в JPA</h2>
+
+                    <h3>Сохранение JSON в колонку</h3>
+                    <p>
+                        Widget config хранится как JSON в JSONB колонке PostgreSQL.
+                        JPA с Hibernate Types позволяет работать с JSON как с обычными объектами.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h2>JSONB in JPA</h2>
+
+                    <h3>Saving JSON to a Column</h3>
+                    <p>
+                        Widget config is stored as JSON in a JSONB column in PostgreSQL.
+                        JPA with Hibernate Types allows working with JSON like regular objects.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+import io.hypersistence.utils.hibernate.type.json.JsonType
+import com.fasterxml.jackson.databind.JsonNode
+
+@Entity
+@Table(name = "user_dashboard_widget")
+@TypeDefs(
+    TypeDef(
+        name = "json",
+        typeClass = JsonType::class
+    )
+)
+data class DashboardWidget(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+
+    @Column(nullable = false)
+    val userId: UUID,
+
+    @Column(nullable = false)
+    val widgetType: WidgetType,
+
+    // JSONB колонка, содержит конфиг
+    @Type(JsonType::class)
+    @Column(columnDefinition = "jsonb")
+    val config: JsonNode,
+
+    @Column(name = "created_at")
+    val createdAt: Instant = Instant.now()
+)
+                </code></pre>
+
+                <div class="lang-ru">
+                    <p><strong>Пример config JSON:</strong></p>
+                </div>
+                <div class="lang-en">
+                    <p><strong>Example config JSON:</strong></p>
+                </div>
+
+                <pre><code class="language-kotlin">
+// Budget widget config
+val budgetConfig = objectMapper.createObjectNode().apply {
+    put("goalName", "South Korea Trip")
+    put("targetAmount", 3000)
+    put("targetCurrency", "KRW")
+    put("baseCurrency", "EUR")
+    put("deadline", "2026-10")
+}
+
+val widget = DashboardWidget(
+    userId = userId,
+    widgetType = WidgetType.BUDGET,
+    config = budgetConfig
+)
+widgetRepository.save(widget)
+                </code></pre>
+
+                <div class="lang-ru">
+                    <p><strong>SQL для таблицы:</strong></p>
+                </div>
+                <div class="lang-en">
+                    <p><strong>SQL for the table:</strong></p>
+                </div>
+
+                <pre><code class="language-sql">
+CREATE TABLE user_dashboard_widget (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES "user"(id),
+    widget_type VARCHAR(50) NOT NULL,
+    config JSONB NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_user_dashboard_widget_user_id
+ON user_dashboard_widget(user_id);
+                </code></pre>
+            </section>
+
+            <section class="assignments">
+                <div class="lang-ru">
+                    <h2>Практические задания</h2>
+
+                    <div class="assignment">
+                        <h4>Задание 1: Создать Entity с UUID и аннотациями</h4>
+                        <p>
+                            Создайте Meal entity с колонками: id (UUID), userId, mealDate (LocalDate),
+                            caloriesConsumed, mealType (enum: BREAKFAST, LUNCH, DINNER, SNACK).
+                            Добавьте индекс на (userId, mealDate).
+                        </p>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Задание 2: Relationships ManyToOne и OneToMany</h4>
+                        <p>
+                            Создайте CodingProblem и ProblemAttempt entities.
+                            CodingProblem имеет UUID id, название, сложность.
+                            ProblemAttempt имеет ManyToOne к CodingProblem (LAZY), дату, статус (SOLVED/FAILED).
+                            CodingProblem имеет OneToMany к ProblemAttempt (LAZY).
+                        </p>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Задание 3: Repository с Query методами</h4>
+                        <p>
+                            Создайте WorkoutRepository с методами:
+                            - findByUserIdAndWorkoutDateBetween(userId, startDate, endDate)
+                            - countByUserIdAndWorkoutDate(userId, date)
+                            - findTopByUserIdOrderByWorkoutDateDesc(userId) — последняя тренировка
+                        </p>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Задание 4: JSONB config сохранение</h4>
+                        <p>
+                            Создайте InterviewPrepWidget entity с JSONB config.
+                            Config должна содержать: targetCompany (String), targetLevel (String), focusCategories (List).
+                            Создайте, прочитайте и обновите widget в @Transactional методе.
+                        </p>
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <h2>Practical Assignments</h2>
+
+                    <div class="assignment">
+                        <h4>Assignment 1: Create Entity with UUID and Annotations</h4>
+                        <p>
+                            Create a Meal entity with columns: id (UUID), userId, mealDate (LocalDate),
+                            caloriesConsumed, mealType (enum: BREAKFAST, LUNCH, DINNER, SNACK).
+                            Add an index on (userId, mealDate).
+                        </p>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Assignment 2: ManyToOne and OneToMany Relationships</h4>
+                        <p>
+                            Create CodingProblem and ProblemAttempt entities.
+                            CodingProblem has UUID id, name, difficulty.
+                            ProblemAttempt has ManyToOne to CodingProblem (LAZY), date, status (SOLVED/FAILED).
+                            CodingProblem has OneToMany to ProblemAttempt (LAZY).
+                        </p>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Assignment 3: Repository with Query Methods</h4>
+                        <p>
+                            Create a WorkoutRepository with methods:
+                            - findByUserIdAndWorkoutDateBetween(userId, startDate, endDate)
+                            - countByUserIdAndWorkoutDate(userId, date)
+                            - findTopByUserIdOrderByWorkoutDateDesc(userId) — last workout
+                        </p>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Assignment 4: JSONB Config Persistence</h4>
+                        <p>
+                            Create an InterviewPrepWidget entity with JSONB config.
+                            Config should contain: targetCompany (String), targetLevel (String), focusCategories (List).
+                            Create, read, and update the widget in a @Transactional method.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="backlog-tasks">
+                <div class="lang-ru">
+                    <h2>🧪 Задания из Backlog (TDD)</h2>
+                    <p>
+                        Ниже представлены реальные задачи из backlog проекта Life Goals Dashboard.
+                        Решайте их в TDD стиле: сначала напишите тест, потом реализацию.
+                    </p>
+
+                    <div class="assignment">
+                        <h4>Backlog #24: CodingProblem CRUD <span class="tdd-badge">5 SP</span></h4>
+                        <p>
+                            Реализуйте CRUD операции для CodingProblem entity с поддержкой фильтрации по категориям.
+                            Entity должна содержать: id (UUID), userId, title, description, category (enum), difficulty (1-5),
+                            isTargetCompanyTagged (была ли проблема на собеседовании в целевой компании), createdAt.
+                        </p>
+                        <p><strong>Тест:</strong></p>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Backlog #33: Workout entities с relationships <span class="tdd-badge">5 SP</span></h4>
+                        <p>
+                            Создайте Workout и ExerciseSet entities с OneToMany relationship.
+                            Workout: id, userId, workoutDate, totalDurationMinutes.
+                            ExerciseSet: id, workoutId, exerciseName, reps, sets, weightKg.
+                            Реализуйте fetch стратегию LAZY и каскадное удаление.
+                        </p>
+                        <p><strong>Тест:</strong></p>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Backlog #35: FoodProduct catalog с custom products <span class="tdd-badge">8 SP</span></h4>
+                        <p>
+                            Реализуйте FoodProduct entity с поддержкой как каталожных, так и пользовательских продуктов.
+                            Поля: id, userId (может быть null для каталога), name, caloriesPer100g, proteinG, carbsG, fatG, isCustom.
+                            Создайте FoodProductRepository с методами поиска, кэшированием и индексами на (userId, isCustom).
+                        </p>
+                        <p><strong>Тест:</strong></p>
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <h2>🧪 Backlog Tasks (TDD)</h2>
+                    <p>
+                        Below are real tasks from the Life Goals Dashboard project backlog.
+                        Solve them TDD style: write the test first, then the implementation.
+                    </p>
+
+                    <div class="assignment">
+                        <h4>Backlog #24: CodingProblem CRUD <span class="tdd-badge">5 SP</span></h4>
+                        <p>
+                            Implement CRUD operations for CodingProblem entity with category filtering support.
+                            Entity should contain: id (UUID), userId, title, description, category (enum), difficulty (1-5),
+                            isTargetCompanyTagged (was the problem in a target company interview), createdAt.
+                        </p>
+                        <p><strong>Test:</strong></p>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Backlog #33: Workout entities with relationships <span class="tdd-badge">5 SP</span></h4>
+                        <p>
+                            Create Workout and ExerciseSet entities with OneToMany relationship.
+                            Workout: id, userId, workoutDate, totalDurationMinutes.
+                            ExerciseSet: id, workoutId, exerciseName, reps, sets, weightKg.
+                            Implement LAZY fetch strategy and cascade delete.
+                        </p>
+                        <p><strong>Test:</strong></p>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Backlog #35: FoodProduct catalog with custom products <span class="tdd-badge">8 SP</span></h4>
+                        <p>
+                            Implement FoodProduct entity with support for both catalog and user-created products.
+                            Fields: id, userId (can be null for catalog), name, caloriesPer100g, proteinG, carbsG, fatG, isCustom.
+                            Create FoodProductRepository with search methods, caching, and indexes on (userId, isCustom).
+                        </p>
+                        <p><strong>Test:</strong></p>
+                    </div>
+                </div>
+
+                <pre><code class="language-kotlin">
+@DataJpaTest
+class CodingProblemRepositoryTest {
+    @Autowired
+    private lateinit var repository: CodingProblemRepository
+
+    private val userId = UUID.randomUUID()
+
+    @Test
+    fun `saveProblem should persist entity with correct fields`() {
+        val problem = CodingProblem(
+            userId = userId,
+            title = "Two Sum",
+            description = "Find two numbers that add up to target",
+            category = ProblemCategory.ARRAY,
+            difficulty = 2,
+            isTargetCompanyTagged = true
+        )
+
+        val saved = repository.save(problem)
+
+        assertThat(saved.id).isNotNull()
+        assertThat(saved.title).isEqualTo("Two Sum")
+        assertThat(saved.category).isEqualTo(ProblemCategory.ARRAY)
+        assertThat(saved.isTargetCompanyTagged).isTrue()
+    }
+
+    @Test
+    fun `findByUserIdAndCategory should return filtered problems`() {
+        val problem1 = repository.save(CodingProblem(
+            userId = userId, title = "Array 1", category = ProblemCategory.ARRAY, difficulty = 1
+        ))
+        val problem2 = repository.save(CodingProblem(
+            userId = userId, title = "Graph 1", category = ProblemCategory.GRAPH, difficulty = 2
+        ))
+
+        val arrayProblems = repository.findByUserIdAndCategory(userId, ProblemCategory.ARRAY)
+
+        assertThat(arrayProblems).hasSize(1)
+        assertThat(arrayProblems[0].title).isEqualTo("Array 1")
+    }
+
+    @Test
+    fun `countByUserIdAndIsTargetCompanyTagged should count meta problems`() {
+        repository.save(CodingProblem(
+            userId = userId, title = "Meta 1", category = ProblemCategory.SYSTEM_DESIGN,
+            isTargetCompanyTagged = true
+        ))
+        repository.save(CodingProblem(
+            userId = userId, title = "Other 1", category = ProblemCategory.ARRAY,
+            isTargetCompanyTagged = false
+        ))
+
+        val metaCount = repository.countByUserIdAndIsTargetCompanyTagged(userId, true)
+
+        assertThat(metaCount).isEqualTo(1)
+    }
+}
+                </code></pre>
+
+                <pre><code class="language-kotlin">
+@DataJpaTest
+class WorkoutRepositoryTest {
+    @Autowired
+    private lateinit var workoutRepository: WorkoutRepository
+
+    @Autowired
+    private lateinit var exerciseSetRepository: ExerciseSetRepository
+
+    private val userId = UUID.randomUUID()
+
+    @Test
+    fun `saveWorkout with exercises should persist all entities`() {
+        val workout = Workout(
+            userId = userId,
+            workoutDate = LocalDate.now(),
+            totalDurationMinutes = 60
+        )
+        val savedWorkout = workoutRepository.save(workout)
+
+        val set1 = ExerciseSet(
+            workoutId = savedWorkout.id,
+            exerciseName = "Bench Press",
+            reps = 10,
+            sets = 3,
+            weightKg = 80.0
+        )
+        exerciseSetRepository.save(set1)
+
+        val retrieved = workoutRepository.findByIdOrNull(savedWorkout.id)
+
+        assertThat(retrieved).isNotNull()
+        assertThat(retrieved!!.totalDurationMinutes).isEqualTo(60)
+    }
+
+    @Test
+    fun `deleteWorkout should cascade delete exercise sets`() {
+        val workout = workoutRepository.save(Workout(
+            userId = userId,
+            workoutDate = LocalDate.now(),
+            totalDurationMinutes = 45
+        ))
+        exerciseSetRepository.save(ExerciseSet(
+            workoutId = workout.id,
+            exerciseName = "Squat",
+            reps = 8,
+            sets = 4,
+            weightKg = 120.0
+        ))
+
+        workoutRepository.delete(workout)
+
+        val sets = exerciseSetRepository.findByWorkoutId(workout.id)
+        assertThat(sets).isEmpty()
+    }
+
+    @Test
+    fun `findByUserIdAndWorkoutDateBetween should filter by date range`() {
+        val today = LocalDate.now()
+        workoutRepository.save(Workout(userId = userId, workoutDate = today, totalDurationMinutes = 60))
+        workoutRepository.save(Workout(userId = userId, workoutDate = today.minusDays(5), totalDurationMinutes = 45))
+        workoutRepository.save(Workout(userId = userId, workoutDate = today.minusDays(10), totalDurationMinutes = 50))
+
+        val weekWorkouts = workoutRepository.findByUserIdAndWorkoutDateBetween(
+            userId, today.minusDays(7), today
+        )
+
+        assertThat(weekWorkouts).hasSize(2)
+    }
+}
+                </code></pre>
+
+                <pre><code class="language-kotlin">
+@DataJpaTest
+class FoodProductRepositoryTest {
+    @Autowired
+    private lateinit var repository: FoodProductRepository
+
+    private val userId = UUID.randomUUID()
+
+    @Test
+    fun `saveCatalogProduct should allow null userId`() {
+        val catalogProduct = FoodProduct(
+            userId = null,
+            name = "Chicken Breast",
+            caloriesPer100g = 165,
+            proteinG = 31.0,
+            carbsG = 0.0,
+            fatG = 3.6,
+            isCustom = false
+        )
+
+        val saved = repository.save(catalogProduct)
+
+        assertThat(saved.id).isNotNull()
+        assertThat(saved.userId).isNull()
+        assertThat(saved.isCustom).isFalse()
+    }
+
+    @Test
+    fun `saveCustomProduct should require userId`() {
+        val customProduct = FoodProduct(
+            userId = userId,
+            name = "My Protein Shake",
+            caloriesPer100g = 120,
+            proteinG = 25.0,
+            carbsG = 5.0,
+            fatG = 1.5,
+            isCustom = true
+        )
+
+        val saved = repository.save(customProduct)
+
+        assertThat(saved.userId).isEqualTo(userId)
+        assertThat(saved.isCustom).isTrue()
+    }
+
+    @Test
+    fun `findByNameContainingIgnoreCaseAndIsCustom should search catalog and user products`() {
+        repository.save(FoodProduct(userId = null, name = "Banana", caloriesPer100g = 89, isCustom = false))
+        repository.save(FoodProduct(userId = userId, name = "Banana Protein Mix", caloriesPer100g = 150, isCustom = true))
+        repository.save(FoodProduct(userId = userId, name = "Apple", caloriesPer100g = 52, isCustom = false))
+
+        val userBananaProducts = repository.findByNameContainingIgnoreCaseAndUserIdAndIsCustom("banana", userId, true)
+        val catalogProducts = repository.findByNameContainingIgnoreCaseAndUserIdIsNullAndIsCustom("banana", false)
+
+        assertThat(userBananaProducts).hasSize(1)
+        assertThat(userBananaProducts[0].name).isEqualTo("Banana Protein Mix")
+        assertThat(catalogProducts).hasSize(1)
+    }
+
+    @Test
+    fun `countByUserIdAndIsCustom should count user products separately`() {
+        repository.save(FoodProduct(userId = userId, name = "Custom 1", caloriesPer100g = 100, isCustom = true))
+        repository.save(FoodProduct(userId = userId, name = "Custom 2", caloriesPer100g = 150, isCustom = true))
+        repository.save(FoodProduct(userId = null, name = "Catalog 1", caloriesPer100g = 80, isCustom = false))
+
+        val customCount = repository.countByUserIdAndIsCustom(userId, true)
+        val catalogCount = repository.countByUserIdIsNullAndIsCustom(false)
+
+        assertThat(customCount).isEqualTo(2)
+        assertThat(catalogCount).isEqualTo(1)
+    }
+}
+                </code></pre>
+            </section>
+
+            <section class="resources">
+                <div class="lang-ru">
+                    <h2>Ресурсы</h2>
+                </div>
+                <div class="lang-en">
+                    <h2>Resources</h2>
+                </div>
+
+                <a href="https://spring.io/projects/spring-data-jpa" class="resource-link">Spring Data JPA Official</a>
+                <a href="https://hibernate.org/orm/documentation/" class="resource-link">Hibernate ORM Documentation</a>
+                <a href="https://www.baeldung.com/spring-data-jpa-tutorial" class="resource-link">Baeldung Spring Data JPA</a>
+                <a href="https://vladmihalcea.com/hibernate-tips/" class="resource-link">Vlad Mihalcea - Hibernate Tips</a>
+                <a href="https://github.com/vladmihalcea/hibernate-types" class="resource-link">Hibernate Types (JSONB support)</a>
+                <a href="https://spring.io/guides/gs/accessing-data-jpa/" class="resource-link">Accessing Data with JPA</a>
+            </section>
+
+            <div class="nav-footer">
+                <a href="06-spring-boot.html" class="nav-link prev"><span class="lang-ru">← Предыдущий модуль</span><span class="lang-en">← Previous Module</span></a>
+                <a href="08-graphql.html" class="nav-link next"><span class="lang-ru">Следующий модуль →</span><span class="lang-en">Next Module →</span></a>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+
+    <script>
+        function setLang(lang) {
+            document.body.classList.toggle('show-en', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('study-lang', lang); } catch(e) {}
+        }
+        try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+    </script>
+</body>
+</html>

@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 2: TypeScript - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 12.50%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .assignment .tdd-badge {
+            display: inline-block;
+            background: #f5c2e7;
+            color: #1e1e2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Language switcher */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            margin-left: 1rem;
+        }
+        .lang-switcher button {
+            padding: 4px 12px;
+            border: 1px solid var(--header);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        .lang-switcher button.active {
+            background: var(--header);
+            color: var(--bg);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="module-number"><span class="lang-ru">МОДУЛЬ 2 / 4</span><span class="lang-en">MODULE 2 / 4</span></div>
+            <h1><span class="lang-ru">TypeScript</span><span class="lang-en">TypeScript</span></h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3><span class="lang-ru">Содержание</span><span class="lang-en">Contents</span></h3>
+            <ul>
+                <li><a href="#intro"><span class="lang-ru">Введение</span><span class="lang-en">Introduction</span></a></li>
+                <li><a href="#types"><span class="lang-ru">Типы данных</span><span class="lang-en">Data Types</span></a></li>
+                <li><a href="#interfaces"><span class="lang-ru">Interfaces & Types</span><span class="lang-en">Interfaces & Types</span></a></li>
+                <li><a href="#generics"><span class="lang-ru">Generics</span><span class="lang-en">Generics</span></a></li>
+                <li><a href="#utilities"><span class="lang-ru">Utility Types</span><span class="lang-en">Utility Types</span></a></li>
+                <li><a href="#react"><span class="lang-ru">React & TypeScript</span><span class="lang-en">React & TypeScript</span></a></li>
+                <li><a href="#assignments"><span class="lang-ru">Практические задания</span><span class="lang-en">Assignments</span></a></li>
+                <li><a href="#backlog-tasks">🧪 <span class="lang-ru">Задания из Backlog (TDD)</span><span class="lang-en">Backlog Tasks (TDD)</span></a></li>
+                <li><a href="#resources"><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <h2><span class="lang-ru">Введение: TypeScript для фронтенда LGD</span><span class="lang-en">Introduction: TypeScript for LGD Frontend</span></h2>
+                <div class="lang-ru">
+                    <p>
+                        TypeScript — это надмножество JavaScript, которое добавляет статическую типизацию. В Life Goals Dashboard
+                        весь фронтенд написан на TypeScript + React + Relay, с использованием Jotai для глобального состояния.
+                    </p>
+                    <p>
+                        За 3 дня вы освоите типы, интерфейсы, generics, и специфику работы с React компонентами. Это будет служить
+                        основой для понимания архитектуры фронтенда.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Совет:</strong> Установите TypeScript локально (`npm install -g typescript`) и практикуйте примеры в файле `.ts`.
+                        Используйте `tsc` для проверки типов.
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        TypeScript is a superset of JavaScript that adds static typing. In Life Goals Dashboard,
+                        the entire frontend is written in TypeScript + React + Relay, using Jotai for global state.
+                    </p>
+                    <p>
+                        Over 3 days, you'll master types, interfaces, generics, and React component specifics. This will be
+                        the foundation for understanding the frontend architecture.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Tip:</strong> Install TypeScript locally (`npm install -g typescript`) and practice examples in `.ts` files.
+                        Use `tsc` for type checking.
+                    </div>
+                </div>
+            </section>
+
+            <section id="types">
+                <h2><span class="lang-ru">Основные типы данных (Day 1)</span><span class="lang-en">Basic Data Types (Day 1)</span></h2>
+
+                <h3><span class="lang-ru">Примитивные типы</span><span class="lang-en">Primitive Types</span></h3>
+
+                <pre><code class="language-typescript">
+// Строки
+const targetCompany: string = "Meta";
+const message: string = `Welcome, ${targetCompany}!`;
+
+// Числа (всё число: int, float)
+const weeklyGoal: number = 15;
+const caloriesPerGram: number = 4.0;
+
+// Булевы
+const isLoggedIn: boolean = true;
+const hasConflict: boolean = false;
+
+// null и undefined
+const nothing: null = null;
+const voidValue: undefined = undefined;
+
+// Массивы
+const problems: string[] = ["Array", "LinkedList", "Graph"];
+const numbers: Array&lt;number&gt; = [1, 2, 3];
+
+// Кортежи (массив с известной длиной и типом каждого элемента)
+const tuple: [string, number, boolean] = ["Meta", 5, true];
+
+// any (избегайте!)
+const anything: any = "could be anything";  // Потеря типизации!
+                </code></pre>
+
+                <h3><span class="lang-ru">Объединения и литералы</span><span class="lang-en">Unions and Literals</span></h3>
+
+                <div class="lang-ru">
+                    <p>
+                        В LGD широко используются объединения (unions) для перечисления возможных значений:
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        LGD widely uses unions to enumerate possible values:
+                    </p>
+                </div>
+
+                <pre><code class="language-typescript">
+// Union типы — значение может быть одним из нескольких типов
+type WidgetType = "INTERVIEW_PREP" | "FITNESS" | "BUDGET";
+
+const myWidget: WidgetType = "INTERVIEW_PREP";  // OK
+// const invalid: WidgetType = "UNKNOWN";  // Ошибка типа!
+
+// Enum (альтернатива union)
+enum ProblemCategory {
+    ARRAY = "ARRAY",
+    LINKED_LIST = "LINKED_LIST",
+    GRAPH = "GRAPH",
+    DYNAMIC_PROGRAMMING = "DYNAMIC_PROGRAMMING"
+}
+
+const category: ProblemCategory = ProblemCategory.GRAPH;
+
+// Literal types — конкретные значения как типы
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+type StatusCode = 200 | 201 | 400 | 404 | 500;
+
+const method: HttpMethod = "POST";  // OK
+// const invalid: HttpMethod = "PATCH";  // Ошибка!
+                </code></pre>
+
+                <h3><span class="lang-ru">Типы функций</span><span class="lang-en">Function Types</span></h3>
+
+                <pre><code class="language-typescript">
+// Функция с типами параметров и возвращаемого значения
+function calculateNutrition(portionG: number, caloriesPer100g: number): number {
+    return (portionG / 100) * caloriesPer100g;
+}
+
+// Стрелочная функция с типами
+const filterProblems = (problems: string[], category: string): string[] => {
+    return problems.filter(p =&gt; p === category);
+};
+
+// Функция с опциональными параметрами
+function createRecipe(name: string, servings?: number): void {
+    console.log(`Recipe: ${name}, servings: ${servings || 1}`);
+}
+
+// Функция с параметрами по умолчанию
+function setCalorieTarget(target: number = 2000): void {
+    console.log(`Calorie target: ${target}`);
+}
+
+// Функции с несколькими возможными типами параметров (overloading)
+function formatValue(value: string | number): string {
+    if (typeof value === "number") {
+        return `Number: ${value}`;
+    }
+    return `String: ${value}`;
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Type vs Interface (День 1-2)</span><span class="lang-en">Type vs Interface (Day 1-2)</span></h3>
+
+                <div class="lang-ru">
+                    <p>
+                        <strong>Type</strong> используется для скалярных значений, объединений и интерсекций.
+                        <strong>Interface</strong> используется для структур объектов и расширяемости.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        <strong>Type</strong> is used for scalar values, unions, and intersections.
+                        <strong>Interface</strong> is used for object structures and extensibility.
+                    </p>
+                </div>
+
+                <pre><code class="language-typescript">
+// Type для скалярного значения
+type WidgetType = "INTERVIEW_PREP" | "FITNESS" | "BUDGET";
+
+// Type для объекта
+type FoodProductType = {
+    id: string;
+    name: string;
+    caloriesPer100g: number;
+    isCustom?: boolean;  // опциональное поле
+};
+
+// Interface для объекта (более традиционный для структур)
+interface FoodProduct {
+    id: string;
+    name: string;
+    caloriesPer100g: number;
+    isCustom?: boolean;
+}
+
+// Interface может быть расширен (extends)
+interface CustomFoodProduct extends FoodProduct {
+    userId: string;
+    createdAt: Date;
+}
+
+// Type может использовать интерсекцию (&)
+type FullFoodProduct = FoodProduct & {
+    userId: string;
+    createdAt: Date;
+};
+
+// Interface может быть объявлена несколько раз (merging)
+interface Window {
+    myCustomProperty: string;
+}
+
+interface Window {
+    anotherProperty: number;
+}
+// Обе декларации объединены в одну
+
+// Type алиас для функции
+type ValidationFn = (value: unknown) =&gt; boolean;
+
+const isValidEmail: ValidationFn = (value) =&gt; {
+    return typeof value === "string" && value.includes("@");
+};
+                </code></pre>
+
+                <div class="tip">
+                    <div class="lang-ru">
+                        <strong>Best Practice для LGD:</strong> Используйте `interface` для структур объектов (FoodProduct, Recipe, Workout),
+                        а `type` для union типов (WidgetType, HttpMethod). Это облегчает расширяемость.
+                    </div>
+                    <div class="lang-en">
+                        <strong>Best Practice for LGD:</strong> Use `interface` for object structures (FoodProduct, Recipe, Workout),
+                        and `type` for union types (WidgetType, HttpMethod). This improves extensibility.
+                    </div>
+                </div>
+            </section>
+
+            <section id="generics">
+                <h2><span class="lang-ru">Generics (День 2-3)</span><span class="lang-en">Generics (Day 2-3)</span></h2>
+
+                <h3><span class="lang-ru">Основные концепции</span><span class="lang-en">Basic Concepts</span></h3>
+
+                <div class="lang-ru">
+                    <p>
+                        Generics позволяют писать код, который работает с любыми типами, но сохраняет типизацию.
+                        В LGD они используются в Relay Connection паттерне и кастомных хуках.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Generics allow you to write code that works with any type while maintaining type safety.
+                        In LGD they are used in Relay Connection pattern and custom hooks.
+                    </p>
+                </div>
+
+                <pre><code class="language-typescript">
+// Generic функция
+function getFirstItem&lt;T&gt;(array: T[]): T | undefined {
+    return array[0];
+}
+
+const first = getFirstItem&lt;string&gt;(["a", "b"]);  // string
+const num = getFirstItem&lt;number&gt;([1, 2]);        // number
+
+// Generic interface
+interface Container&lt;T&gt; {
+    value: T;
+    getValue(): T;
+}
+
+interface StringContainer extends Container&lt;string&gt; {
+    toUpperCase(): string;
+}
+
+// Generic type для Relay Connection pattern
+interface Connection&lt;T&gt; {
+    edges: Array&lt;{
+        node: T;
+        cursor: string;
+    }&gt;;
+    pageInfo: {
+        hasNextPage: boolean;
+        endCursor: string | null;
+    };
+    totalCount: number;
+}
+
+// Использование
+interface CodingProblem {
+    id: string;
+    title: string;
+    difficulty: "EASY" | "MEDIUM" | "HARD";
+}
+
+const problemConnection: Connection&lt;CodingProblem&gt; = {
+    edges: [
+        {
+            node: { id: "1", title: "Array Sum", difficulty: "EASY" },
+            cursor: "cursor1"
+        }
+    ],
+    pageInfo: {
+        hasNextPage: true,
+        endCursor: "cursor1"
+    },
+    totalCount: 100
+};
+                </code></pre>
+
+                <h3><span class="lang-ru">Constraints (ограничения)</span><span class="lang-en">Constraints</span></h3>
+
+                <pre><code class="language-typescript">
+// Generic с constraint: T должно иметь свойство 'id'
+interface HasId {
+    id: string;
+}
+
+function getId&lt;T extends HasId&gt;(obj: T): string {
+    return obj.id;
+}
+
+getId({ id: "123", name: "John" });  // OK
+// getId({ name: "John" });  // Ошибка: нет 'id'
+
+// Constraint с keyof
+function getProperty&lt;T, K extends keyof T&gt;(obj: T, key: K): T[K] {
+    return obj[key];
+}
+
+const person = { name: "Alice", age: 30 };
+const name = getProperty(person, "name");  // OK, тип string
+// const invalid = getProperty(person, "email");  // Ошибка: 'email' не существует
+
+// Constraint с множественным наследованием
+function merge&lt;T extends object, U extends object&gt;(obj1: T, obj2: U): T & U {
+    return { ...obj1, ...obj2 };
+}
+
+const merged = merge({ a: 1 }, { b: 2 });
+// merged.a и merged.b доступны, типизировано
+                </code></pre>
+
+                <h3><span class="lang-ru">Conditional Types (продвинутый уровень)</span><span class="lang-en">Conditional Types (Advanced)</span></h3>
+
+                <pre><code class="language-typescript">
+// Conditional type: если T является строкой, вернуть number, иначе string
+type StringToNumber&lt;T&gt; = T extends string ? number : string;
+
+type A = StringToNumber&lt;string&gt;;  // number
+type B = StringToNumber&lt;boolean&gt;;  // string
+
+// Используется для типобезопасных утилит
+type Flatten&lt;T&gt; = T extends Array&lt;infer U&gt; ? U : T;
+
+type Str = Flatten&lt;string[]&gt;;      // string
+type Num = Flatten&lt;number&gt;;        // number
+                </code></pre>
+            </section>
+
+            <section id="utilities">
+                <h2><span class="lang-ru">Utility Types (День 3)</span><span class="lang-en">Utility Types (Day 3)</span></h2>
+
+                <div class="lang-ru">
+                    <p>
+                        TypeScript поставляется с встроенными utility типами, которые облегчают манипуляцию типами:
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        TypeScript comes with built-in utility types that make type manipulation easier:
+                    </p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th><span class="lang-ru">Utility</span><span class="lang-en">Utility</span></th>
+                            <th><span class="lang-ru">Описание</span><span class="lang-en">Description</span></th>
+                            <th><span class="lang-ru">Пример</span><span class="lang-en">Example</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Partial&lt;T&gt;</code></td>
+                            <td><span class="lang-ru">Делает все поля опциональными</span><span class="lang-en">Makes all fields optional</span></td>
+                            <td><code>Partial&lt;FoodProduct&gt;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>Required&lt;T&gt;</code></td>
+                            <td><span class="lang-ru">Делает все поля обязательными</span><span class="lang-en">Makes all fields required</span></td>
+                            <td><code>Required&lt;FoodProduct&gt;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>Pick&lt;T, K&gt;</code></td>
+                            <td><span class="lang-ru">Выбирает определённые поля из T</span><span class="lang-en">Selects specific fields from T</span></td>
+                            <td><code>Pick&lt;FoodProduct, "name" | "id"&gt;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>Omit&lt;T, K&gt;</code></td>
+                            <td><span class="lang-ru">Исключает определённые поля из T</span><span class="lang-en">Excludes specific fields from T</span></td>
+                            <td><code>Omit&lt;FoodProduct, "isCustom"&gt;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>Record&lt;K, T&gt;</code></td>
+                            <td><span class="lang-ru">Объект с ключами K и значениями T</span><span class="lang-en">Object with keys K and values T</span></td>
+                            <td><code>Record&lt;"morning" | "evening", number&gt;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>Readonly&lt;T&gt;</code></td>
+                            <td><span class="lang-ru">Делает все поля read-only</span><span class="lang-en">Makes all fields read-only</span></td>
+                            <td><code>Readonly&lt;FoodProduct&gt;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ReturnType&lt;T&gt;</code></td>
+                            <td><span class="lang-ru">Извлекает тип возвращаемого значения функции</span><span class="lang-en">Extracts function return type</span></td>
+                            <td><code>ReturnType&lt;typeof fetchProducts&gt;</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3><span class="lang-ru">Примеры использования</span><span class="lang-en">Usage Examples</span></h3>
+
+                <pre><code class="language-typescript">
+interface FoodProduct {
+    id: string;
+    name: string;
+    caloriesPer100g: number;
+    isCustom?: boolean;
+}
+
+// Partial: для patch-запроса (обновление некоторых полей)
+function updateProduct(id: string, changes: Partial&lt;FoodProduct&gt;): void {
+    // changes может содержать только некоторые поля
+}
+
+// Pick: для DTO (Data Transfer Object) — отправляем только нужные данные
+type ProductPreview = Pick&lt;FoodProduct, "id" | "name"&gt;;
+const preview: ProductPreview = { id: "1", name: "Apple" };
+
+// Omit: исключаем чувствительные поля
+type PublicProduct = Omit&lt;FoodProduct, "isCustom"&gt;;
+
+// Record: словарь макро по типам
+type MacroSplit = Record&lt;"protein" | "carbs" | "fat", number&gt;;
+const macros: MacroSplit = {
+    protein: 30,
+    carbs: 40,
+    fat: 30
+};
+
+// Readonly: неизменяемые константы
+const DIFFICULTY_LEVELS: Readonly&lt;string[]&gt; = ["EASY", "MEDIUM", "HARD"];
+// DIFFICULTY_LEVELS[0] = "INSANE";  // Ошибка!
+
+// ReturnType: автоматический тип результата функции
+function fetchProblems(): Promise&lt;FoodProduct[]&gt; {
+    return Promise.resolve([]);
+}
+
+type ProblemsResult = ReturnType&lt;typeof fetchProblems&gt;;  // Promise&lt;FoodProduct[]&gt;
+                </code></pre>
+            </section>
+
+            <section id="react">
+                <h2><span class="lang-ru">React & TypeScript (День 3)</span><span class="lang-en">React & TypeScript (Day 3)</span></h2>
+
+                <h3><span class="lang-ru">React компоненты с типизацией</span><span class="lang-en">Typed React Components</span></h3>
+
+                <pre><code class="language-typescript">
+import React, { FC, ReactNode } from 'react';
+
+// Props interface
+interface FoodProductCardProps {
+    product: FoodProduct;
+    onSelect: (id: string) =&gt; void;
+    isSelected?: boolean;
+}
+
+// Функциональный компонент с FC (React.FunctionComponent)
+const FoodProductCard: FC&lt;FoodProductCardProps&gt; = ({
+    product,
+    onSelect,
+    isSelected = false
+}) =&gt; {
+    return (
+        &lt;div className={`card ${isSelected ? 'selected' : ''}`}&gt;
+            &lt;h3&gt;{product.name}&lt;/h3&gt;
+            &lt;p&gt;{product.caloriesPer100g} cal/100g&lt;/p&gt;
+            &lt;button onClick={() =&gt; onSelect(product.id)}&gt;
+                Select
+            &lt;/button&gt;
+        &lt;/div&gt;
+    );
+};
+
+// Или без FC (более минималистично)
+const FoodProductCard = ({ product, onSelect }: FoodProductCardProps) =&gt; {
+    // компонент
+};
+                </code></pre>
+
+                <h3><span class="lang-ru">Хуки с типизацией</span><span class="lang-en">Typed Hooks</span></h3>
+
+                <pre><code class="language-typescript">
+import { useState, useCallback, useRef } from 'react';
+
+// useState с типом
+const [count, setCount] = useState&lt;number&gt;(0);
+const [widget, setWidget] = useState&lt;WidgetType | null&gt;(null);
+
+// useCallback с типизацией
+const handleSelect = useCallback&lt;(id: string) =&gt; void&gt;((id) =&gt; {
+    console.log(`Selected: ${id}`);
+}, []);
+
+// useRef с типом
+const inputRef = useRef&lt;HTMLInputElement&gt;(null);
+
+const focusInput = () =&gt; {
+    inputRef.current?.focus();
+};
+
+// Кастомный хук с типами
+interface UseFetchOptions {
+    url: string;
+    method?: 'GET' | 'POST';
+    headers?: Record&lt;string, string&gt;;
+}
+
+interface UseFetchResult&lt;T&gt; {
+    data: T | null;
+    loading: boolean;
+    error: Error | null;
+}
+
+function useFetch&lt;T&gt;(options: UseFetchOptions): UseFetchResult&lt;T&gt; {
+    const [data, setData] = useState&lt;T | null&gt;(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState&lt;Error | null&gt;(null);
+
+    // useEffect логика...
+
+    return { data, loading, error };
+}
+
+// Использование
+const { data: products, loading } = useFetch&lt;FoodProduct[]&gt;({
+    url: '/api/products'
+});
+                </code></pre>
+
+                <h3><span class="lang-ru">Event handlers</span><span class="lang-en">Event Handlers</span></h3>
+
+                <pre><code class="language-typescript">
+// React event types из 'react' пакета
+import { ChangeEvent, FormEvent, MouseEvent } from 'react';
+
+interface FormProps {}
+
+const MyForm: FC&lt;FormProps&gt; = () =&gt; {
+    const [value, setValue] = useState&lt;string&gt;('');
+
+    // ChangeEvent для input
+    const handleInputChange = (e: ChangeEvent&lt;HTMLInputElement&gt;) =&gt; {
+        setValue(e.target.value);
+    };
+
+    // MouseEvent для button
+    const handleClick = (e: MouseEvent&lt;HTMLButtonElement&gt;) =&gt; {
+        e.preventDefault();
+        console.log('Clicked!');
+    };
+
+    // FormEvent для form
+    const handleSubmit = (e: FormEvent&lt;HTMLFormElement&gt;) =&gt; {
+        e.preventDefault();
+        // отправить форму
+    };
+
+    return (
+        &lt;form onSubmit={handleSubmit}&gt;
+            &lt;input
+                type="text"
+                value={value}
+                onChange={handleInputChange}
+            /&gt;
+            &lt;button type="submit" onClick={handleClick}&gt;
+                Submit
+            &lt;/button&gt;
+        &lt;/form&gt;
+    );
+};
+                </code></pre>
+
+                <h3><span class="lang-ru">Relay Fragment Colocation</span><span class="lang-en">Relay Fragment Colocation</span></h3>
+
+                <pre><code class="language-typescript">
+import { graphql, useFragment } from 'react-relay';
+import { FoodProductCard_product$key } from './__generated__/FoodProductCard_product.graphql';
+
+// Fragment в том же файле что и компонент
+const fragment = graphql`
+    fragment FoodProductCard_product on FoodProduct {
+        id
+        name
+        caloriesPer100g
+    }
+`;
+
+interface FoodProductCardProps {
+    product: FoodProductCard_product$key;
+    onSelect: (id: string) =&gt; void;
+}
+
+const FoodProductCard: FC&lt;FoodProductCardProps&gt; = ({ product, onSelect }) =&gt; {
+    const data = useFragment(fragment, product);
+
+    return (
+        &lt;div&gt;
+            &lt;h3&gt;{data.name}&lt;/h3&gt;
+            &lt;p&gt;{data.caloriesPer100g} cal/100g&lt;/p&gt;
+            &lt;button onClick={() =&gt; onSelect(data.id)}&gt;Select&lt;/button&gt;
+        &lt;/div&gt;
+    );
+};
+                </code></pre>
+            </section>
+
+            <section id="ts6-features">
+                <h2><span class="lang-ru">TypeScript 6.0.2 — Что нового / What's New in TypeScript 6.0.2</span><span class="lang-en">TypeScript 6.0.2 — What's New</span></h2>
+
+                <div class="lang-ru">
+                    <p>
+                        Life Goals Dashboard использует <strong>TypeScript 6.0.2</strong> — последнюю версию с улучшениями производительности и удобства разработки.
+                    </p>
+
+                    <h3>Stricter checkJS (JavaScript файлы с контролем типов)</h3>
+                    <p>
+                        TypeScript 6 по умолчанию더 строго проверяет JavaScript файлы с JSDoc комментариями.
+                        Это помогает постепенно мигрировать JS проекты на TypeScript без переписывания всего кода.
+                    </p>
+
+                    <h3>ESM-First (модули первым приоритетом)</h3>
+                    <p>
+                        TypeScript 6 теперь ESM-first, что означает лучшую совместимость с modern bundler'ами (Vite, Rolldown).
+                        Все импорты по умолчанию рассматриваются как ES modules, повышая производительность сборки.
+                    </p>
+
+                    <h3>Улучшенная производительность</h3>
+                    <p>
+                        Компилятор переписан для скорости. Проверка типов на больших проектах (<strong>10K+ файлов</strong>) теперь быстрее на 20-30%.
+                        Это заметно при разработке Life Goals Dashboard с 200+ компонентами.
+                    </p>
+
+                    <h3>Улучшенный `satisfies` оператор</h3>
+                    <p>
+                        <code>satisfies</code> оператор теперь работает более предсказуемо с union типами и object shorthand.
+                        Это полезно для конфигурации виджетов, где нужна гибкость типа и проверка структуры одновременно.
+                    </p>
+                    <pre><code class="language-typescript">
+// Пример: конфиг виджета с проверкой структуры
+type WidgetConfig = {
+  name: string;
+  deadline?: string;
+  targetAmount?: number;
+};
+
+const budgetConfig = {
+  name: "South Korea Trip",
+  deadline: "2026-10",
+  targetAmount: 3000
+} satisfies WidgetConfig;  // TS 6: проверяет структуру, но сохраняет literal типы
+                    </code></pre>
+                </div>
+
+                <div class="lang-en">
+                    <p>
+                        Life Goals Dashboard uses <strong>TypeScript 6.0.2</strong> — the latest version with performance and developer experience improvements.
+                    </p>
+
+                    <h3>Stricter checkJS (Type-checking JavaScript files)</h3>
+                    <p>
+                        TypeScript 6 is stricter by default when checking JavaScript files with JSDoc comments.
+                        This helps gradually migrate JS projects to TypeScript without rewriting everything.
+                    </p>
+
+                    <h3>ESM-First (Modules as first priority)</h3>
+                    <p>
+                        TypeScript 6 is now ESM-first, meaning better compatibility with modern bundlers (Vite, Rolldown).
+                        All imports default to ES modules, improving build performance.
+                    </p>
+
+                    <h3>Improved Performance</h3>
+                    <p>
+                        The compiler is rewritten for speed. Type checking on large projects (<strong>10K+ files</strong>) is now 20-30% faster.
+                        This is noticeable when developing Life Goals Dashboard with 200+ components.
+                    </p>
+
+                    <h3>Enhanced `satisfies` Operator</h3>
+                    <p>
+                        The <code>satisfies</code> operator now works more predictably with union types and object shorthand.
+                        Useful for widget config where you need type flexibility and structure validation simultaneously.
+                    </p>
+                    <pre><code class="language-typescript">
+// Example: widget config with structure checking
+type WidgetConfig = {
+  name: string;
+  deadline?: string;
+  targetAmount?: number;
+};
+
+const budgetConfig = {
+  name: "South Korea Trip",
+  deadline: "2026-10",
+  targetAmount: 3000
+} satisfies WidgetConfig;  // TS 6: validates structure, preserves literal types
+                    </code></pre>
+                </div>
+            </section>
+
+            <section class="assignments">
+                <h2><span class="lang-ru">Практические задания</span><span class="lang-en">Assignments</span></h2>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 1: Основные типы и функции (День 1, 45 минут)</span><span class="lang-en">Assignment 1: Basic Types & Functions (Day 1, 45 min)</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте файл `nutrition.ts` и реализуйте следующее:
+                        </p>
+                        <ol>
+                            <li>Определите interface <code>FoodProduct</code> с полями: id, name, caloriesPer100g, protein, carbs, fat</li>
+                            <li>Создайте функцию <code>calculatePortionCalories</code>, которая принимает продукт и вес в граммах, возвращает калории</li>
+                            <li>Создайте union type <code>MealType = "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK"</code></li>
+                            <li>Напишите функцию <code>validateNutrition</code>, которая проверяет, что сумма макро равна 100%</li>
+                            <li>Протестируйте типизацию: создайте объект product и вызовите функции</li>
+                        </ol>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create a file `nutrition.ts` and implement the following:
+                        </p>
+                        <ol>
+                            <li>Define interface <code>FoodProduct</code> with fields: id, name, caloriesPer100g, protein, carbs, fat</li>
+                            <li>Create function <code>calculatePortionCalories</code> that takes product and weight in grams, returns calories</li>
+                            <li>Create union type <code>MealType = "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK"</code></li>
+                            <li>Write function <code>validateNutrition</code> that checks if macro sum equals 100%</li>
+                            <li>Test typing: create product object and call functions</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 2: Interfaces, Types и Generics (День 2, 1 час)</span><span class="lang-en">Assignment 2: Interfaces, Types & Generics (Day 2, 1 hour)</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте файл `relay-connection.ts` с типом Connection:
+                        </p>
+                        <ol>
+                            <li>Определите generic interface <code>Connection&lt;T&gt;</code> с полями: edges, pageInfo, totalCount</li>
+                            <li>Определите тип <code>Edge&lt;T&gt;</code> с полями: node (тип T), cursor (строка)</li>
+                            <li>Используйте constraint <code>&lt;T extends { id: string }&gt;</code></li>
+                            <li>Создайте функцию <code>mapConnection&lt;T, U&gt;</code>, которая трансформирует Connection&lt;T&gt; в Connection&lt;U&gt;</li>
+                            <li>Протестируйте с FoodProduct и CodingProblem</li>
+                        </ol>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create a file `relay-connection.ts` with Connection type:
+                        </p>
+                        <ol>
+                            <li>Define generic interface <code>Connection&lt;T&gt;</code> with fields: edges, pageInfo, totalCount</li>
+                            <li>Define type <code>Edge&lt;T&gt;</code> with fields: node (type T), cursor (string)</li>
+                            <li>Use constraint <code>&lt;T extends { id: string }&gt;</code></li>
+                            <li>Create function <code>mapConnection&lt;T, U&gt;</code> that transforms Connection&lt;T&gt; to Connection&lt;U&gt;</li>
+                            <li>Test with FoodProduct and CodingProblem</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 3: Utility Types (День 2-3, 1 час)</span><span class="lang-en">Assignment 3: Utility Types (Day 2-3, 1 hour)</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте файл `product-utilities.ts`:
+                        </p>
+                        <ol>
+                            <li>Используйте <code>Partial&lt;FoodProduct&gt;</code> для типа updateFoodProduct</li>
+                            <li>Используйте <code>Pick&lt;FoodProduct, "id" | "name"&gt;</code> для типа ProductPreview</li>
+                            <li>Используйте <code>Omit&lt;FoodProduct, "isCustom"&gt;</code> для типа PublicProduct</li>
+                            <li>Создайте <code>Record&lt;"macro" | "micro", string[]&gt;</code> для типа NutrientCategories</li>
+                            <li>Напишите функции, которые используют эти типы корректно</li>
+                        </ol>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create a file `product-utilities.ts`:
+                        </p>
+                        <ol>
+                            <li>Use <code>Partial&lt;FoodProduct&gt;</code> for updateFoodProduct type</li>
+                            <li>Use <code>Pick&lt;FoodProduct, "id" | "name"&gt;</code> for ProductPreview type</li>
+                            <li>Use <code>Omit&lt;FoodProduct, "isCustom"&gt;</code> for PublicProduct type</li>
+                            <li>Create <code>Record&lt;"macro" | "micro", string[]&gt;</code> for NutrientCategories type</li>
+                            <li>Write functions that use these types correctly</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 4: React компоненты с типизацией (День 3, 1 час 30 минут)</span><span class="lang-en">Assignment 4: Typed React Components (Day 3, 1.5 hours)</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте React компонент `FoodProductForm.tsx`:
+                        </p>
+                        <ol>
+                            <li>Определите props interface с полями: onSubmit (функция), initialValues (опциональный FoodProduct)</li>
+                            <li>Используйте <code>useState&lt;string&gt;</code> для name, <code>useState&lt;number&gt;</code> для калорий</li>
+                            <li>Создайте event handlers для input (ChangeEvent) и submit (FormEvent)</li>
+                            <li>Добавьте кастомный хук <code>useFormValidation&lt;T&gt;</code> с типизацией</li>
+                            <li>Используйте Relay Fragment (можно без реального запроса, только типы)</li>
+                            <li>Убедитесь, что ошибок типизации нет</li>
+                        </ol>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create React component `FoodProductForm.tsx`:
+                        </p>
+                        <ol>
+                            <li>Define props interface with fields: onSubmit (function), initialValues (optional FoodProduct)</li>
+                            <li>Use <code>useState&lt;string&gt;</code> for name, <code>useState&lt;number&gt;</code> for calories</li>
+                            <li>Create event handlers for input (ChangeEvent) and submit (FormEvent)</li>
+                            <li>Add custom hook <code>useFormValidation&lt;T&gt;</code> with typing</li>
+                            <li>Use Relay Fragment (can be without real request, just types)</li>
+                            <li>Ensure there are no type errors</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <section class="assignments" id="backlog-tasks" style="border-top-color: #f5c2e7;">
+                <h2>🧪 <span class="lang-ru">Задания из Backlog проекта (TDD)</span><span class="lang-en">Backlog Project Tasks (TDD)</span></h2>
+                <div class="lang-ru">
+                    <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                        Эти задания — реальные задачи из бэклога проекта Life Goals Dashboard.
+                        Для каждого задания предоставлены тесты, которые нужно сделать зелёными, написав реализацию.
+                        <strong>Подход TDD:</strong> сначала изучи тесты → пойми что от тебя ожидается → напиши код → запусти тесты.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                        These tasks are real issues from the Life Goals Dashboard project backlog.
+                        For each task, tests are provided that you need to make pass by implementing the solution.
+                        <strong>TDD approach:</strong> first study tests → understand what's expected → write code → run tests.
+                    </p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4><span class="lang-ru">Backlog #2: Инициализация React/TypeScript проекта (часть 8 SP) <span class="tdd-badge">TypeScript конфиг</span></span><span class="lang-en">Backlog #2: React/TypeScript Project Setup (8 SP partial) <span class="tdd-badge">TypeScript config</span></span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Настрой структуру TypeScript проекта с правильным `tsconfig.json`, создав все необходимые директории
+                            для компонентов, хуков, atoms (Jotai), Relay окружения, стилей. Убедись, что TypeScript в strict режиме,
+                            правильно настроен JSX для React, и имеются определения типов для CSS Modules.
+                        </p>
+                        <p><strong>Тесты (TypeScript compilation checks):</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Set up TypeScript project structure with correct `tsconfig.json`, creating all necessary directories
+                            for components, hooks, atoms (Jotai), Relay environment, styles. Ensure TypeScript is in strict mode,
+                            JSX is properly configured for React, and CSS Modules type definitions exist.
+                        </p>
+                        <p><strong>Tests (TypeScript compilation checks):</strong></p>
+                    </div>
+
+                    <pre><code class="language-typescript">// __tests__/project-structure.test.ts
+import { describe, it, expect } from '@jest/globals';
+import * as fs from 'fs';
+import * as path from 'path';
+
+describe('Backlog #2: Frontend Project Structure', () =&gt; {
+  const rootDir = path.resolve(__dirname, '..');
+
+  it('should have tsconfig.json with strict mode enabled', () =&gt; {
+    const tsconfig = JSON.parse(
+      fs.readFileSync(path.join(rootDir, 'tsconfig.json'), 'utf-8')
+    );
+    expect(tsconfig.compilerOptions.strict).toBe(true);
+  });
+
+  it('should target ESNext for modern React', () =&gt; {
+    const tsconfig = JSON.parse(
+      fs.readFileSync(path.join(rootDir, 'tsconfig.json'), 'utf-8')
+    );
+    expect(tsconfig.compilerOptions.target).toMatch(/ESNext|ES2022/i);
+  });
+
+  it('should have jsx set to react-jsx', () =&gt; {
+    const tsconfig = JSON.parse(
+      fs.readFileSync(path.join(rootDir, 'tsconfig.json'), 'utf-8')
+    );
+    expect(tsconfig.compilerOptions.jsx).toBe('react-jsx');
+  });
+
+  it('should have required source directories', () =&gt; {
+    const requiredDirs = [
+      'src/components',
+      'src/features',
+      'src/hooks',
+      'src/atoms',
+      'src/relay',
+      'src/styles',
+    ];
+    for (const dir of requiredDirs) {
+      expect(
+        fs.existsSync(path.join(rootDir, dir))
+      ).toBe(true);
+    }
+  });
+
+  it('should have proper type definitions', () =&gt; {
+    // vite-env.d.ts should declare CSS Modules
+    const envDts = fs.readFileSync(
+      path.join(rootDir, 'src', 'vite-env.d.ts'), 'utf-8'
+    );
+    expect(envDts).toContain('.module.css');
+  });
+});</code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em><span class="lang-ru">Файл:</span><span class="lang-en">File:</span> life-goals-web/__tests__/project-structure.test.ts</em></p>
+                </div>
+            </section>
+
+            <section class="resources">
+                <h2><span class="lang-ru">Дополнительные ресурсы</span><span class="lang-en">Additional Resources</span></h2>
+
+                <a href="https://www.typescriptlang.org/docs/" class="resource-link">
+                    <span class="lang-ru">TypeScript Handbook (официальная документация)</span><span class="lang-en">TypeScript Handbook (official documentation)</span>
+                </a>
+
+                <a href="https://www.typescriptlang.org/play" class="resource-link">
+                    <span class="lang-ru">TypeScript Playground (интерактивный компилятор)</span><span class="lang-en">TypeScript Playground (interactive compiler)</span>
+                </a>
+
+                <a href="https://basarat.gitbook.io/typescript/" class="resource-link">
+                    <span class="lang-ru">TypeScript Deep Dive (подробное руководство)</span><span class="lang-en">TypeScript Deep Dive (comprehensive guide)</span>
+                </a>
+
+                <a href="https://www.typescriptlang.org/docs/handbook/utility-types.html" class="resource-link">
+                    <span class="lang-ru">Utility Types (встроенные утилиты)</span><span class="lang-en">Utility Types (built-in utilities)</span>
+                </a>
+
+                <a href="https://type-challenges.com/" class="resource-link">
+                    <span class="lang-ru">Type Challenges (интерактивные задачи)</span><span class="lang-en">Type Challenges (interactive exercises)</span>
+                </a>
+
+                <a href="https://www.react-typescript-cheatsheet.dev/" class="resource-link">
+                    <span class="lang-ru">React TypeScript Cheatsheet</span><span class="lang-en">React TypeScript Cheatsheet</span>
+                </a>
+            </section>
+
+            <footer class="nav-footer">
+                <a href="01-git.html" class="nav-link prev">← <span class="lang-ru">Модуль 1: Git</span><span class="lang-en">Module 1: Git</span></a>
+                <a href="03-kotlin.html" class="nav-link next"><span class="lang-ru">Модуль 3: Kotlin</span><span class="lang-en">Module 3: Kotlin</span> →</a>
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-graphql.min.js"></script>
+    <script>
+        function setLang(lang) {
+            document.body.classList.toggle('show-en', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('study-lang', lang); } catch(e) {}
+        }
+        try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+    </script>
+</body>
+</html>

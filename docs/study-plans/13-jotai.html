@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 13: Jotai - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; }
+        header { position: sticky; top: 0; background: var(--bg-secondary); border-bottom: 2px solid var(--header); padding: 1.5rem 2rem; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .header-left h1 { color: var(--header); font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .progress-bar { width: 100%; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-top: 0.5rem; }
+        .progress-fill { width: 76.5%; height: 100%; background: linear-gradient(90deg, var(--accent), var(--warning)); transition: width 0.3s ease; }
+        .module-number { color: var(--accent); font-size: 0.9rem; font-weight: bold; }
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button { padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px; cursor: pointer; font-size: 0.85rem; background: transparent; color: var(--text-secondary); transition: all 0.2s; }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+        .container { display: flex; max-width: 1400px; margin: 0 auto; }
+        .sidebar { width: 280px; background: var(--bg-secondary); padding: 2rem 1.5rem; border-right: 1px solid var(--text-secondary); max-height: calc(100vh - 100px); overflow-y: auto; position: sticky; top: 100px; }
+        .sidebar h3 { color: var(--header); font-size: 1rem; margin-bottom: 1rem; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin-bottom: 0.5rem; }
+        .sidebar a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; display: block; padding: 0.5rem 0.75rem; border-radius: 4px; transition: all 0.2s; }
+        .sidebar a:hover { background: var(--bg); color: var(--header); border-left: 3px solid var(--accent); }
+        .main-content { flex: 1; padding: 2rem; overflow-x: hidden; }
+        h2 { color: var(--header); font-size: 1.8rem; margin-top: 2.5rem; margin-bottom: 1rem; border-left: 4px solid var(--accent); padding-left: 1rem; }
+        h3 { color: var(--header); font-size: 1.3rem; margin-top: 1.8rem; margin-bottom: 0.8rem; }
+        p { margin-bottom: 1rem; color: var(--text); line-height: 1.7; }
+        strong { color: var(--accent); }
+        pre { background: var(--code-bg); border-left: 4px solid var(--accent); border-radius: 4px; padding: 1rem; margin: 1.5rem 0; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Fira Code', 'Courier New', monospace; }
+        .language-bash::before, .language-typescript::before { content: attr(data-lang); display: block; text-align: right; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        details { background: var(--code-bg); border: 1px solid var(--text-secondary); border-radius: 4px; padding: 1rem; margin: 1.5rem 0; cursor: pointer; }
+        details[open] { background: var(--bg-secondary); }
+        summary { color: var(--header); font-weight: bold; user-select: none; padding: 0.5rem; margin: -0.5rem; }
+        summary:hover { color: var(--accent); }
+        details > *:not(summary) { margin-top: 1rem; }
+        .tip { background: rgba(166, 227, 161, 0.1); border-left: 4px solid var(--success); padding: 1rem; border-radius: 4px; margin: 1.5rem 0; }
+        .tip strong { color: var(--success); }
+        .warning { background: rgba(250, 179, 135, 0.1); border-left: 4px solid var(--warning); padding: 1rem; border-radius: 4px; margin: 1.5rem 0; }
+        .warning strong { color: var(--warning); }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        thead { background: var(--code-bg); }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--text-secondary); }
+        th { color: var(--header); font-weight: bold; }
+        tbody tr:hover { background: rgba(243, 139, 168, 0.05); }
+        .assignments { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--accent); }
+        .assignment { background: var(--code-bg); padding: 1.5rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid var(--warning); }
+        .assignment h4 { color: var(--header); margin-bottom: 0.5rem; }
+        .tdd-badge { display: inline-block; background: #f5c2e7; color: #1e1e2e; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem; vertical-align: middle; }
+        .resources { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--accent); }
+        .resource-link { display: block; color: var(--header); text-decoration: none; margin-bottom: 0.5rem; padding: 0.75rem; background: var(--code-bg); border-radius: 4px; border-left: 3px solid var(--accent); transition: all 0.2s; }
+        .resource-link:hover { background: var(--bg-secondary); transform: translateX(4px); }
+        .nav-footer { display: flex; justify-content: space-between; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--text-secondary); }
+        .nav-link { color: var(--header); text-decoration: none; transition: all 0.2s; }
+        .nav-link:hover { color: var(--accent); }
+        .nav-link.next { text-align: right; }
+        @media (max-width: 900px) { .container { flex-direction: column; } .sidebar { width: 100%; max-height: none; position: relative; top: 0; border-right: none; border-bottom: 1px solid var(--text-secondary); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1><span class="lang-ru">Модуль 13: Jotai</span><span class="lang-en">Module 13: Jotai</span></h1>
+        <p class="module-number"><span class="lang-ru">1.5 дня • React 19.2 • Jotai 2.x</span><span class="lang-en">1.5 days • React 19.2 • Jotai 2.x</span></p>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+    <div class="lang-switcher">
+        <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+        <button id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+</header>
+
+<div class="container">
+    <aside class="sidebar">
+        <h3><span class="lang-ru">Разделы</span><span class="lang-en">Sections</span></h3>
+        <ul>
+            <li><a href="#intro" class="lang-ru">Введение: Почему Jotai?</a><a href="#intro" class="lang-en">Introduction: Why Jotai?</a></li>
+            <li><a href="#atoms" class="lang-ru">Core API: Atoms</a><a href="#atoms" class="lang-en">Core API: Atoms</a></li>
+            <li><a href="#derived" class="lang-ru">Производные атомы</a><a href="#derived" class="lang-en">Derived Atoms</a></li>
+            <li><a href="#atomfamily" class="lang-ru">atomFamily</a><a href="#atomfamily" class="lang-en">atomFamily</a></li>
+            <li><a href="#storage" class="lang-ru">atomWithStorage</a><a href="#storage" class="lang-en">atomWithStorage</a></li>
+            <li><a href="#async" class="lang-ru">Асинхронные атомы</a><a href="#async" class="lang-en">Async Atoms</a></li>
+            <li><a href="#provider" class="lang-ru">Provider & Тестирование</a><a href="#provider" class="lang-en">Provider & Testing</a></li>
+            <li><a href="#migration" class="lang-ru">Таблица миграции</a><a href="#migration" class="lang-en">Migration Table</a></li>
+            <li><a href="#assignments" class="lang-ru">Практические задания</a><a href="#assignments" class="lang-en">Practical Assignments</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <h1><span class="lang-ru">Jotai: Управление состоянием для React 19</span><span class="lang-en">Jotai: State Management for React 19</span></h1>
+
+        <section id="intro">
+            <div class="lang-ru">
+                <h2>Введение: Почему Jotai?</h2>
+                <p><strong>Recoil</strong> был отличной библиотекой, но её разработка замедлилась. Facebook не обновляет его активно, и он <strong>не поддерживает React 19 concurrent rendering</strong>. Поэтому Life Goals Dashboard мигрировал на <strong>Jotai 2.x</strong>.</p>
+                <p><strong>Jotai</strong> — это минималистичная библиотека управления состоянием React, созданная для работы с React 19 concurrent rendering. Она использует <strong>bottom-up модель атомов</strong> (как Recoil), но с чистым API и полной поддержкой Suspense + Server Components.</p>
+                <p>В <strong>Life Goals Dashboard</strong> мы используем Jotai для UI-состояния: активная тема, видимость сайдбара, уведомления, параметры виджета. Серверное состояние (проблемы, рецепты, транзакции) управляется <strong>Relay</strong>, а локальное UI-состояние — <strong>Jotai</strong>.</p>
+                <p><strong>Совет:</strong> За 1.5 дня вы освоите основные концепции Jotai и научитесь создавать atoms для реальных сценариев.</p>
+            </div>
+            <div class="lang-en">
+                <h2>Introduction: Why Jotai?</h2>
+                <p><strong>Recoil</strong> was a great library, but its development slowed down. Meta is not actively updating it, and it <strong>does not support React 19 concurrent rendering</strong>. That's why Life Goals Dashboard migrated to <strong>Jotai 2.x</strong>.</p>
+                <p><strong>Jotai</strong> is a minimalist state management library for React, designed for React 19 concurrent rendering. It uses a <strong>bottom-up atom model</strong> (like Recoil) but with a clean API and full support for Suspense + Server Components.</p>
+                <p>In <strong>Life Goals Dashboard</strong>, we use Jotai for UI state: active theme, sidebar visibility, notifications, widget parameters. Server state (problems, recipes, transactions) is managed by <strong>Relay</strong>, while local UI state is managed by <strong>Jotai</strong>.</p>
+                <p><strong>Tip:</strong> In 1.5 days, you will master the core concepts of Jotai and learn to create atoms for real-world scenarios.</p>
+            </div>
+        </section>
+
+        <section id="atoms">
+            <div class="lang-ru">
+                <h2>Core API: Atoms</h2>
+                <p><strong>Atom</strong> — это единица состояния в Jotai. Каждый atom имеет <strong>значение по умолчанию</strong> и необязательный <strong>initializer</strong>. В отличие от Recoil, атомы в Jotai <strong>не требуют уникального key</strong> — они идентифицируются объектом.</p>
+                <p>Три основных хука для работы с атомами:</p>
+                <ul style="margin: 1rem 0 1rem 2rem;">
+                    <li><code>useAtom(atom)</code> — читает И пишет (как useState)</li>
+                    <li><code>useAtomValue(atom)</code> — только читает</li>
+                    <li><code>useSetAtom(atom)</code> — только пишет</li>
+                </ul>
+            </div>
+            <div class="lang-en">
+                <h2>Core API: Atoms</h2>
+                <p><strong>Atom</strong> is a unit of state in Jotai. Each atom has a <strong>default value</strong> and an optional <strong>initializer</strong>. Unlike Recoil, atoms in Jotai <strong>do not require a unique key</strong> — they are identified by the object itself.</p>
+                <p>Three main hooks for working with atoms:</p>
+                <ul style="margin: 1rem 0 1rem 2rem;">
+                    <li><code>useAtom(atom)</code> — reads AND writes (like useState)</li>
+                    <li><code>useAtomValue(atom)</code> — read only</li>
+                    <li><code>useSetAtom(atom)</code> — write only</li>
+                </ul>
+            </div>
+
+            <h3><span class="lang-ru">Создание и использование атомов</span><span class="lang-en">Creating and Using Atoms</span></h3>
+            <pre><code class="language-typescript">import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
+
+// 1. Создаём атом с дефолтным значением
+const themeAtom = atom&lt;'light' | 'dark'&gt;('dark');
+const notificationsAtom = atom&lt;Notification[]&gt;([]);
+
+// 2. useAtom — читает и пишет (как useState)
+function ThemeSwitcher() {
+  const [theme, setTheme] = useAtom(themeAtom);
+
+  return (
+    &lt;button onClick={() =&gt; setTheme(theme === 'dark' ? 'light' : 'dark')}&gt;
+      Current: {theme}
+    &lt;/button&gt;
+  );
+}
+
+// 3. useAtomValue — только читает (оптимизация)
+function ThemeDisplay() {
+  const theme = useAtomValue(themeAtom);
+  return &lt;div className={theme}&gt;Theme: {theme}&lt;/div&gt;;
+}
+
+// 4. useSetAtom — только пишет (оптимизация)
+function NotificationLogger() {
+  const setNotifications = useSetAtom(notificationsAtom);
+
+  const logNotification = (msg: string) =&gt; {
+    setNotifications(prev =&gt; [...prev, { id: Date.now(), message: msg }]);
+  };
+
+  return &lt;button onClick={() =&gt; logNotification('Hello!')}&gt;Log&lt;/button&gt;;
+}</code></pre>
+
+            <div class="tip">
+                <strong><span class="lang-ru">Совет:</span><span class="lang-en">Tip:</span></strong> <span class="lang-ru">Используйте useAtomValue для компонентов, которые только читают состояние. Это позволит Jotai оптимизировать re-renders и избежать ненужных обновлений.</span><span class="lang-en">Use useAtomValue for components that only read state. This allows Jotai to optimize re-renders and avoid unnecessary updates.</span>
+            </div>
+        </section>
+
+        <section id="derived">
+            <div class="lang-ru">
+                <h2>Производные атомы (Derived Atoms)</h2>
+                <p><strong>Производный атом</strong> — это атом, значение которого зависит от других атомов. Есть два вида:</p>
+                <ol style="margin: 1rem 0 1rem 2rem;">
+                    <li><strong>Только для чтения (read-only):</strong> вычисляет значение на основе других атомов</li>
+                    <li><strong>С возможностью записи (writable):</strong> может быть обновлён и также обновить зависимые атомы</li>
+                </ol>
+            </div>
+            <div class="lang-en">
+                <h2>Derived Atoms</h2>
+                <p><strong>Derived atom</strong> is an atom whose value depends on other atoms. There are two types:</p>
+                <ol style="margin: 1rem 0 1rem 2rem;">
+                    <li><strong>Read-only:</strong> computes value based on other atoms</li>
+                    <li><strong>Writable:</strong> can be updated and also update dependent atoms</li>
+                </ol>
+            </div>
+
+            <h3><span class="lang-ru">Пример: Read-only atom</span><span class="lang-en">Example: Read-only atom</span></h3>
+            <pre><code class="language-typescript">import { atom } from 'jotai';
+
+const notificationsAtom = atom&lt;Notification[]&gt;([]);
+
+// Производный атом — только для чтения
+// Вычисляет количество непрочитанных уведомлений
+const unreadCountAtom = atom((get) =&gt; {
+  const notifications = get(notificationsAtom);
+  return notifications.filter(n =&gt; !n.read).length;
+});
+
+function NotificationBell() {
+  const unreadCount = useAtomValue(unreadCountAtom);
+  return (
+    &lt;button&gt;
+      🔔 {unreadCount > 0 && &lt;span className="badge"&gt;{unreadCount}&lt;/span&gt;}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+            <h3><span class="lang-ru">Пример: Writable atom</span><span class="lang-en">Example: Writable atom</span></h3>
+            <pre><code class="language-typescript">// Производный атом с возможностью записи
+// Может как читать, так и обновлять другие атомы
+const userDisplayNameAtom = atom(
+  (get) =&gt; {
+    const user = get(currentUserAtom);
+    return user?.name || 'Anonymous';
+  },
+  (get, set, newName: string) =&gt; {
+    const user = get(currentUserAtom);
+    if (user) {
+      set(currentUserAtom, { ...user, name: newName });
+    }
+  }
+);
+
+function UserGreeting() {
+  const [displayName, setDisplayName] = useAtom(userDisplayNameAtom);
+
+  return (
+    &lt;&gt;
+      &lt;p&gt;Welcome, {displayName}!&lt;/p&gt;
+      &lt;input
+        value={displayName}
+        onChange={(e) =&gt; setDisplayName(e.target.value)}
+      /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+        </section>
+
+        <section id="atomfamily">
+            <div class="lang-ru">
+                <h2>atomFamily: Параметризованные атомы</h2>
+                <p><strong>atomFamily</strong> позволяет создавать семейства атомов, параметризованные по ID или ключу. Это идеально для списков, где каждый элемент имеет свой独立 state (например, открытость каждого widget на dashboard).</p>
+            </div>
+            <div class="lang-en">
+                <h2>atomFamily: Parameterized Atoms</h2>
+                <p><strong>atomFamily</strong> allows you to create families of atoms, parameterized by ID or key. This is perfect for lists where each item has independent state (e.g., the open/closed state of each widget on the dashboard).</p>
+            </div>
+
+            <pre><code class="language-typescript">import { atomFamily } from 'jotai/utils';
+
+// Семейство атомов для видимости каждого widget
+// Каждый widget имеет свой atom на основе его ID
+const widgetVisibilityAtom = atomFamily((widgetId: string) =&gt;
+  atom(true) // дефолтно видим
+);
+
+function Dashboard() {
+  const widgets = [
+    { id: 'fitness', title: 'Fitness Tracker' },
+    { id: 'budget', title: 'Budget Planner' },
+    { id: 'interview', title: 'Interview Prep' },
+  ];
+
+  return (
+    &lt;div&gt;
+      {widgets.map(widget =&gt; (
+        &lt;WidgetCard
+          key={widget.id}
+          id={widget.id}
+          title={widget.title}
+        /&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}
+
+function WidgetCard({ id, title }: { id: string; title: string }) {
+  const [isVisible, setIsVisible] = useAtom(widgetVisibilityAtom(id));
+
+  if (!isVisible) return null;
+
+  return (
+    &lt;div className="widget"&gt;
+      &lt;h3&gt;{title}&lt;/h3&gt;
+      &lt;button onClick={() =&gt; setIsVisible(false)}&gt;Hide&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </section>
+
+        <section id="storage">
+            <div class="lang-ru">
+                <h2>atomWithStorage: Persistence</h2>
+                <p><strong>atomWithStorage</strong> автоматически сохраняет значение atom в localStorage (или sessionStorage). Идеально для пользовательских предпочтений, которые должны сохраняться между сессиями.</p>
+            </div>
+            <div class="lang-en">
+                <h2>atomWithStorage: Persistence</h2>
+                <p><strong>atomWithStorage</strong> automatically saves the atom value to localStorage (or sessionStorage). Perfect for user preferences that should persist between sessions.</p>
+            </div>
+
+            <pre><code class="language-typescript">import { atomWithStorage } from 'jotai/utils';
+
+// Атом с автоматической persistence в localStorage
+const themeAtom = atomWithStorage&lt;'light' | 'dark'&gt;('lifegoals:theme', 'dark');
+const sidebarCollapsedAtom = atomWithStorage('lifegoals:sidebarCollapsed', false);
+
+function ThemeSwitcher() {
+  const [theme, setTheme] = useAtom(themeAtom);
+
+  // При первом рендере загружается из localStorage
+  // При изменении автоматически сохраняется
+  return (
+    &lt;button onClick={() =&gt; setTheme(theme === 'dark' ? 'light' : 'dark')}&gt;
+      Toggle {theme}
+    &lt;/button&gt;
+  );
+}
+
+function Layout() {
+  const [collapsed, setCollapsed] = useAtom(sidebarCollapsedAtom);
+
+  return (
+    &lt;div className={collapsed ? 'layout-collapsed' : 'layout-expanded'}&gt;
+      {/* Sidebar, content... */}
+    &lt;/div&gt;
+  );
+}</code></pre>
+        </section>
+
+        <section id="async">
+            <div class="lang-ru">
+                <h2>Асинхронные атомы & Suspense</h2>
+                <p>Jotai отлично интегрируется с Suspense. Атомы, возвращающие Promise, автоматически работают с &lt;Suspense&gt;.</p>
+            </div>
+            <div class="lang-en">
+                <h2>Async Atoms & Suspense</h2>
+                <p>Jotai integrates perfectly with Suspense. Atoms that return a Promise automatically work with &lt;Suspense&gt;.</p>
+            </div>
+
+            <pre><code class="language-typescript">import { atom } from 'jotai';
+import { Suspense } from 'react';
+
+// Асинхронный атом — возвращает Promise
+const currentUserAtom = atom(async () =&gt; {
+  const res = await fetch('/api/me');
+  return res.json();
+});
+
+function UserProfile() {
+  const user = useAtomValue(currentUserAtom);
+
+  // useAtomValue автоматически ждет Promise
+  // Suspense показывает fallback пока загружается
+  return &lt;div&gt;User: {user.name}&lt;/div&gt;;
+}
+
+// Компонент с Suspense
+export function UserProfilePage() {
+  return (
+    &lt;Suspense fallback={&lt;div&gt;Loading user...&lt;/div&gt;}&gt;
+      &lt;UserProfile /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+        </section>
+
+        <section id="provider">
+            <div class="lang-ru">
+                <h2>Provider & Тестирование</h2>
+                <p>Jotai использует <strong>&lt;Provider&gt;</strong> для подключения атомов к приложению. Для тестирования можно создавать отдельные Provider экземпляры с инициальным состоянием.</p>
+            </div>
+            <div class="lang-en">
+                <h2>Provider & Testing</h2>
+                <p>Jotai uses <strong>&lt;Provider&gt;</strong> to connect atoms to your app. For testing, you can create separate Provider instances with initial state.</p>
+            </div>
+
+            <pre><code class="language-typescript">import { Provider } from 'jotai';
+import { render, screen } from '@testing-library/react';
+
+// В App.tsx
+export function App() {
+  return (
+    &lt;Provider&gt;
+      &lt;Dashboard /&gt;
+    &lt;/Provider&gt;
+  );
+}
+
+// В тесте
+describe('Theme Switcher', () => {
+  it('should toggle theme', () =&gt; {
+    const { rerender } = render(
+      &lt;Provider&gt;
+        &lt;ThemeSwitcher /&gt;
+      &lt;/Provider&gt;
+    );
+
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+
+    expect(button).toHaveTextContent('light');
+  });
+
+  it('should initialize with stored value', () =&gt; {
+    localStorage.setItem('lifegoals:theme', 'light');
+
+    render(
+      &lt;Provider&gt;
+        &lt;ThemeSwitcher /&gt;
+      &lt;/Provider&gt;
+    );
+
+    expect(screen.getByRole('button')).toHaveTextContent('light');
+  });
+});</code></pre>
+        </section>
+
+        <section id="migration">
+            <div class="lang-ru">
+                <h2>Миграция с Recoil на Jotai</h2>
+                <p>Таблица соответствия между Recoil и Jotai API:</p>
+            </div>
+            <div class="lang-en">
+                <h2>Migrating from Recoil to Jotai</h2>
+                <p>Mapping between Recoil and Jotai API:</p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th><span class="lang-ru">Recoil</span><span class="lang-en">Recoil</span></th>
+                        <th><span class="lang-ru">Jotai</span><span class="lang-en">Jotai</span></th>
+                        <th><span class="lang-ru">Примечание</span><span class="lang-en">Note</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>atom({ key: 'x', default: val })</code></td>
+                        <td><code>atom(val)</code></td>
+                        <td><span class="lang-ru">Jotai не требует key</span><span class="lang-en">Jotai doesn't need key</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>useRecoilValue(atom)</code></td>
+                        <td><code>useAtomValue(atom)</code></td>
+                        <td><span class="lang-ru">Прямое соответствие</span><span class="lang-en">Direct mapping</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>useSetRecoilState(atom)</code></td>
+                        <td><code>useSetAtom(atom)</code></td>
+                        <td><span class="lang-ru">Прямое соответствие</span><span class="lang-en">Direct mapping</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>useRecoilState(atom)</code></td>
+                        <td><code>useAtom(atom)</code></td>
+                        <td><span class="lang-ru">Прямое соответствие</span><span class="lang-en">Direct mapping</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>selector({ key: 'x', get: (opts) =&gt; ... })</code></td>
+                        <td><code>atom((get) =&gt; ...)</code></td>
+                        <td><span class="lang-ru">Производный атом (read-only)</span><span class="lang-en">Derived atom (read-only)</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>selectorFamily({ key: 'x', get: (id) =&gt; (opts) =&gt; ... })</code></td>
+                        <td><code>atomFamily((id) =&gt; atom(...))</code></td>
+                        <td><span class="lang-ru">Параметризованные атомы</span><span class="lang-en">Parameterized atoms</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>&lt;RecoilRoot&gt;</code></td>
+                        <td><code>&lt;Provider&gt;</code></td>
+                        <td><span class="lang-ru">Scope atoms в приложении</span><span class="lang-en">Scope atoms in app</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>useRecoilCallback</code></td>
+                        <td><code>useAtomCallback</code></td>
+                        <td><span class="lang-ru">Для сложных операций</span><span class="lang-en">For complex operations</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>localStorage вручную</code></td>
+                        <td><code>atomWithStorage</code></td>
+                        <td><span class="lang-ru">Встроенная persistence</span><span class="lang-en">Built-in persistence</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="assignments" class="assignments">
+            <div class="lang-ru">
+                <h2>Практические задания (TDD)</h2>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 1: Theme Atom с atomWithStorage</span><span class="lang-en">Assignment 1: Theme Atom with atomWithStorage</span> <span class="tdd-badge">3 SP</span></h4>
+                    <p><strong><span class="lang-ru">Описание:</span><span class="lang-en">Description:</span></strong> <span class="lang-ru">Создайте atom для управления темой (светлая/тёмная) с автоматическим сохранением в localStorage. При первом рендере загружается из localStorage, при изменении автоматически сохраняется.</span><span class="lang-en">Create an atom for managing theme (light/dark) with automatic persistence to localStorage. On first render, load from localStorage; on change, auto-save.</span></p>
+                    <p><strong><span class="lang-ru">Тест TDD:</span><span class="lang-en">TDD test:</span></strong></p>
+                    <pre><code class="language-typescript">import { render, screen, fireEvent } from '@testing-library/react';
+import { Provider } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
+import { useAtom } from 'jotai';
+
+const themeAtom = atomWithStorage&lt;'light' | 'dark'&gt;('lifegoals:theme', 'dark');
+
+describe('Theme Atom', () =&gt; {
+  beforeEach(() =&gt; {
+    localStorage.clear();
+  });
+
+  it('should initialize with default value', () =&gt; {
+    let themeValue: string | null = null;
+
+    const TestComponent = () =&gt; {
+      [themeValue] = useAtom(themeAtom);
+      return &lt;div&gt;{themeValue}&lt;/div&gt;;
+    };
+
+    render(
+      &lt;Provider&gt;
+        &lt;TestComponent /&gt;
+      &lt;/Provider&gt;
+    );
+
+    expect(themeValue).toBe('dark');
+  });
+
+  it('should persist theme to localStorage', () =&gt; {
+    const TestComponent = () =&gt; {
+      const [theme, setTheme] = useAtom(themeAtom);
+      return (
+        &lt;button onClick={() =&gt; setTheme('light')}&gt;
+          {theme}
+        &lt;/button&gt;
+      );
+    };
+
+    render(
+      &lt;Provider&gt;
+        &lt;TestComponent /&gt;
+      &lt;/Provider&gt;
+    );
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(localStorage.getItem('lifegoals:theme')).toBe('light');
+  });
+
+  it('should load theme from localStorage on init', () =&gt; {
+    localStorage.setItem('lifegoals:theme', 'light');
+
+    let themeValue: string | null = null;
+
+    const TestComponent = () =&gt; {
+      [themeValue] = useAtom(themeAtom);
+      return null;
+    };
+
+    render(
+      &lt;Provider&gt;
+        &lt;TestComponent /&gt;
+      &lt;/Provider&gt;
+    );
+
+    expect(themeValue).toBe('light');
+  });
+});</code></pre>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 2: Производный атом для количества непрочитанных уведомлений</span><span class="lang-en">Assignment 2: Derived Atom for Unread Notifications Count</span> <span class="tdd-badge">5 SP</span></h4>
+                    <p><strong><span class="lang-ru">Описание:</span><span class="lang-en">Description:</span></strong> <span class="lang-ru">Создайте atom для списка уведомлений и производный атом, который вычисляет количество непрочитанных. Компонент NotificationBell должен использовать только производный атом.</span><span class="lang-en">Create an atom for notifications list and a derived atom that computes unread count. NotificationBell component should use only the derived atom.</span></p>
+                    <p><strong><span class="lang-ru">Тест TDD:</span><span class="lang-en">TDD test:</span></strong></p>
+                    <pre><code class="language-typescript">import { render, screen, fireEvent } from '@testing-library/react';
+import { Provider } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
+import { atom } from 'jotai';
+
+const notificationsAtom = atom&lt;Array&lt;{ id: string; message: string; read: boolean }&gt;&gt;([]);
+
+const unreadCountAtom = atom((get) =&gt; {
+  const notifications = get(notificationsAtom);
+  return notifications.filter(n =&gt; !n.read).length;
+});
+
+describe('Unread Notifications Count', () =&gt; {
+  it('should calculate correct unread count', () =&gt; {
+    let countValue = 0;
+
+    const TestComponent = () =&gt; {
+      const [notifications, setNotifications] = useAtom(notificationsAtom);
+      countValue = useAtomValue(unreadCountAtom);
+
+      return (
+        &lt;button
+          onClick={() =&gt;
+            setNotifications([
+              ...notifications,
+              { id: '1', message: 'Test', read: false },
+            ])
+          }
+        &gt;
+          Add unread
+        &lt;/button&gt;
+      );
+    };
+
+    render(
+      &lt;Provider&gt;
+        &lt;TestComponent /&gt;
+      &lt;/Provider&gt;
+    );
+
+    expect(countValue).toBe(0);
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(countValue).toBe(1);
+  });
+
+  it('should update count when marking read', () =&gt; {
+    const TestComponent = () =&gt; {
+      const [notifications, setNotifications] = useAtom(notificationsAtom);
+      const unreadCount = useAtomValue(unreadCountAtom);
+
+      return (
+        &lt;&gt;
+          &lt;div&gt;Unread: {unreadCount}&lt;/div&gt;
+          &lt;button
+            onClick={() =&gt;
+              setNotifications(notifications.map(n =&gt; ({ ...n, read: true })))
+            }
+          &gt;
+            Mark all read
+          &lt;/button&gt;
+        &lt;/&gt;
+      );
+    };
+
+    const { rerender } = render(
+      &lt;Provider
+        initialValues={[
+          [
+            notificationsAtom,
+            [
+              { id: '1', message: 'Test1', read: false },
+              { id: '2', message: 'Test2', read: false },
+            ],
+          ],
+        ]}
+      &gt;
+        &lt;TestComponent /&gt;
+      &lt;/Provider&gt;
+    );
+
+    expect(screen.getByText('Unread: 2')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(screen.getByText('Unread: 0')).toBeInTheDocument();
+  });
+});</code></pre>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 3: atomFamily для видимости виджетов</span><span class="lang-en">Assignment 3: atomFamily for Widget Visibility</span> <span class="tdd-badge">5 SP</span></h4>
+                    <p><strong><span class="lang-ru">Описание:</span><span class="lang-en">Description:</span></strong> <span class="lang-ru">Используя atomFamily, создайте независимый atom для каждого widget на dashboard. Каждый widget может быть скрыт/показан независимо от других.</span><span class="lang-en">Using atomFamily, create an independent atom for each widget on the dashboard. Each widget can be hidden/shown independently.</span></p>
+                    <pre><code class="language-typescript">import { render, screen, fireEvent } from '@testing-library/react';
+import { Provider } from 'jotai';
+import { atomFamily } from 'jotai/utils';
+import { useAtom } from 'jotai';
+import { atom } from 'jotai';
+
+const widgetVisibilityAtom = atomFamily((widgetId: string) =&gt; atom(true));
+
+describe('Widget Visibility Family', () =&gt; {
+  it('should manage independent visibility per widget', () =&gt; {
+    const widgets = ['fitness', 'budget', 'interview'];
+
+    const Dashboard = () =&gt; (
+      &lt;&gt;
+        {widgets.map(id =&gt; (
+          &lt;WidgetCard key={id} id={id} /&gt;
+        ))}
+      &lt;/&gt;
+    );
+
+    const WidgetCard = ({ id }: { id: string }) =&gt; {
+      const [visible, setVisible] = useAtom(widgetVisibilityAtom(id));
+
+      if (!visible) return null;
+
+      return (
+        &lt;div data-testid={`widget-${id}`}&gt;
+          &lt;h3&gt;{id}&lt;/h3&gt;
+          &lt;button onClick={() =&gt; setVisible(false)}&gt;Hide&lt;/button&gt;
+        &lt;/div&gt;
+      );
+    };
+
+    render(
+      &lt;Provider&gt;
+        &lt;Dashboard /&gt;
+      &lt;/Provider&gt;
+    );
+
+    expect(screen.getByTestId('widget-fitness')).toBeInTheDocument();
+    expect(screen.getByTestId('widget-budget')).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByText('Hide')[0]);
+
+    expect(screen.queryByTestId('widget-fitness')).not.toBeInTheDocument();
+    expect(screen.getByTestId('widget-budget')).toBeInTheDocument();
+  });
+});</code></pre>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 4: Асинхронный атом для текущего пользователя</span><span class="lang-en">Assignment 4: Async Atom for Current User</span> <span class="tdd-badge">8 SP partial</span></h4>
+                    <p><strong><span class="lang-ru">Описание:</span><span class="lang-en">Description:</span></strong> <span class="lang-ru">Создайте асинхронный atom, который загружает текущего пользователя с сервера. Используйте Suspense для обработки загрузки.</span><span class="lang-en">Create an async atom that loads the current user from the server. Use Suspense to handle loading.</span></p>
+                    <pre><code class="language-typescript">import { render, screen } from '@testing-library/react';
+import { Provider } from 'jotai';
+import { useAtomValue } from 'jotai';
+import { atom } from 'jotai';
+import { Suspense } from 'react';
+
+const currentUserAtom = atom(async () =&gt; {
+  const res = await fetch('/api/me');
+  if (!res.ok) throw new Error('Failed to load user');
+  return res.json();
+});
+
+describe('Current User Async Atom', () =&gt; {
+  beforeEach(() =&gt; {
+    global.fetch = jest.fn();
+  });
+
+  it('should load user data', async () =&gt; {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () =&gt; ({ id: '1', name: 'Test User' }),
+    });
+
+    const UserProfile = () =&gt; {
+      const user = useAtomValue(currentUserAtom);
+      return &lt;div&gt;User: {user.name}&lt;/div&gt;;
+    };
+
+    render(
+      &lt;Provider&gt;
+        &lt;Suspense fallback={&lt;div&gt;Loading...&lt;/div&gt;}&gt;
+          &lt;UserProfile /&gt;
+        &lt;/Suspense&gt;
+      &lt;/Provider&gt;
+    );
+
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    await screen.findByText('User: Test User');
+  });
+
+  it('should handle fetch errors', async () =&gt; {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+    });
+
+    const UserProfile = () =&gt; {
+      try {
+        const user = useAtomValue(currentUserAtom);
+        return &lt;div&gt;User: {user.name}&lt;/div&gt;;
+      } catch (e) {
+        return &lt;div&gt;Error: {(e as Error).message}&lt;/div&gt;;
+      }
+    };
+
+    render(
+      &lt;Provider&gt;
+        &lt;Suspense fallback={&lt;div&gt;Loading...&lt;/div&gt;}&gt;
+          &lt;UserProfile /&gt;
+        &lt;/Suspense&gt;
+      &lt;/Provider&gt;
+    );
+
+    await screen.findByText(/Error/);
+  });
+});</code></pre>
+                </div>
+            </div>
+
+            <div class="lang-en">
+                <h2>Practical Assignments (TDD)</h2>
+
+                <div class="assignment">
+                    <h4>Assignment 1: Theme Atom with atomWithStorage <span class="tdd-badge">3 SP</span></h4>
+                    <p><strong>Description:</strong> Create an atom for managing theme (light/dark) with automatic persistence to localStorage. On first render, load from localStorage; on change, auto-save.</p>
+                    <p><strong>Implementation Hint:</strong> Use atomWithStorage from 'jotai/utils'. The third parameter is the initial value.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Assignment 2: Derived Atom for Unread Count <span class="tdd-badge">5 SP</span></h4>
+                    <p><strong>Description:</strong> Create an atom for notifications and a derived atom that computes unread count. The NotificationBell should use only the derived atom.</p>
+                    <p><strong>Implementation Hint:</strong> Use the read-only atom syntax: atom((get) =&gt; { return get(otherAtom).filter(...).length; })</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Assignment 3: atomFamily for Widget Visibility <span class="tdd-badge">5 SP</span></h4>
+                    <p><strong>Description:</strong> Using atomFamily, create independent atoms for each dashboard widget. Each widget controls its own visibility independently.</p>
+                    <p><strong>Implementation Hint:</strong> atomFamily(widgetId =&gt; atom(initialVisible))</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Assignment 4: Async Atom for Current User <span class="tdd-badge">8 SP partial</span></h4>
+                    <p><strong>Description:</strong> Create an async atom that fetches the current user. Wrap it in Suspense for loading state.</p>
+                    <p><strong>Implementation Hint:</strong> atom(async () =&gt; { const res = await fetch(...); return res.json(); })</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="resources">
+            <div class="lang-ru">
+                <h2>Дополнительные ресурсы</h2>
+            </div>
+            <div class="lang-en">
+                <h2>Additional Resources</h2>
+            </div>
+
+            <a href="https://jotai.org/" class="resource-link lang-ru">
+                Официальная документация Jotai
+            </a>
+            <a href="https://jotai.org/" class="resource-link lang-en">
+                Jotai Official Documentation
+            </a>
+
+            <a href="https://jotai.org/docs/api/core" class="resource-link lang-ru">
+                Core API: atom, useAtom, useAtomValue
+            </a>
+            <a href="https://jotai.org/docs/api/core" class="resource-link lang-en">
+                Core API: atom, useAtom, useAtomValue
+            </a>
+
+            <a href="https://jotai.org/docs/utilities/atomWithStorage" class="resource-link lang-ru">
+                atomWithStorage для persistence
+            </a>
+            <a href="https://jotai.org/docs/utilities/atomWithStorage" class="resource-link lang-en">
+                atomWithStorage for persistence
+            </a>
+
+            <a href="https://jotai.org/docs/utilities/atomFamily" class="resource-link lang-ru">
+                atomFamily: параметризованные атомы
+            </a>
+            <a href="https://jotai.org/docs/utilities/atomFamily" class="resource-link lang-en">
+                atomFamily: Parameterized atoms
+            </a>
+
+            <a href="https://jotai.org/docs/guides/async" class="resource-link lang-ru">
+                Асинхронные атомы и Suspense
+            </a>
+            <a href="https://jotai.org/docs/guides/async" class="resource-link lang-en">
+                Async Atoms and Suspense
+            </a>
+
+            <a href="https://jotai.org/docs/api/provider" class="resource-link lang-ru">
+                Provider для scope и тестирования
+            </a>
+            <a href="https://jotai.org/docs/api/provider" class="resource-link lang-en">
+                Provider for scoping and testing
+            </a>
+
+            <a href="https://jotai.org/docs/guides/comparison" class="resource-link lang-ru">
+                Сравнение с другими библиотеками
+            </a>
+            <a href="https://jotai.org/docs/guides/comparison" class="resource-link lang-en">
+                Comparison with other libraries
+            </a>
+        </section>
+
+        <footer class="nav-footer">
+            <a href="12-relay-mutations.html" class="nav-link prev lang-ru">← Модуль 12: Relay Mutations</a>
+            <a href="12-relay-mutations.html" class="nav-link prev lang-en">← Module 12: Relay Mutations</a>
+            <a href="14-docker.html" class="nav-link next lang-ru">Модуль 14: Docker →</a>
+            <a href="14-docker.html" class="nav-link next lang-en">Module 14: Docker →</a>
+        </footer>
+    </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script>
+    function setLang(lang) {
+        document.body.classList.toggle('show-en', lang === 'en');
+        document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+        document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+        try { localStorage.setItem('study-lang', lang); } catch(e) {}
+    }
+    try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+</script>
+</body>
+</html>

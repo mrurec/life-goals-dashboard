@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 4: PostgreSQL + Flyway - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 25%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 25%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .lang-switcher {
+            display: flex;
+            gap: 8px;
+        }
+
+        .lang-switcher button {
+            padding: 6px 12px;
+            border: 2px solid var(--header);
+            background: transparent;
+            color: var(--header);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .lang-switcher button:hover {
+            background: var(--header);
+            color: var(--bg);
+        }
+
+        .lang-switcher button.active {
+            background: var(--header);
+            color: var(--bg);
+        }
+
+        body.show-en .lang-ru {
+            display: none;
+        }
+
+        body.show-en .lang-en {
+            display: block;
+        }
+
+        body:not(.show-en) .lang-ru {
+            display: block;
+        }
+
+        body:not(.show-en) .lang-en {
+            display: none;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .assignment .tdd-badge {
+            display: inline-block;
+            background: #f5c2e7;
+            color: #1e1e2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="lang-ru">
+                <div class="module-number">МОДУЛЬ 4 / 4</div>
+                <h1>PostgreSQL + Flyway</h1>
+            </div>
+            <div class="lang-en">
+                <div class="module-number">MODULE 4 / 4</div>
+                <h1>PostgreSQL + Flyway</h1>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button id="btn-ru" class="active">РУ</button>
+            <button id="btn-en">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="lang-ru">
+                <h3>Содержание</h3>
+                <ul>
+                    <li><a href="#intro">Введение</a></li>
+                    <li><a href="#sql">SQL для LGD</a></li>
+                    <li><a href="#jsonb">JSONB</a></li>
+                    <li><a href="#pagination">Pagination</a></li>
+                    <li><a href="#flyway">Flyway</a></li>
+                    <li><a href="#indexes">Indexes</a></li>
+                    <li><a href="#assignments">Практические задания</a></li>
+                    <li><a href="#backlog-tasks">🧪 Задания из Backlog (TDD)</a></li>
+                    <li><a href="#resources">Ресурсы</a></li>
+                </ul>
+            </div>
+            <div class="lang-en">
+                <h3>Contents</h3>
+                <ul>
+                    <li><a href="#intro">Introduction</a></li>
+                    <li><a href="#sql">SQL for LGD</a></li>
+                    <li><a href="#jsonb">JSONB</a></li>
+                    <li><a href="#pagination">Pagination</a></li>
+                    <li><a href="#flyway">Flyway</a></li>
+                    <li><a href="#indexes">Indexes</a></li>
+                    <li><a href="#assignments">Practical Assignments</a></li>
+                    <li><a href="#backlog-tasks">🧪 Backlog Tasks (TDD)</a></li>
+                    <li><a href="#resources">Resources</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <div class="lang-ru">
+                    <h2>Введение: PostgreSQL для Life Goals Dashboard</h2>
+                    <p>
+                        PostgreSQL — это мощная, надёжная СУБД, используемая в бэкенде Life Goals Dashboard.
+                        Проект использует Spring Data JPA + Hibernate для ORM и Flyway для версионирования схемы.
+                    </p>
+                    <p>
+                        За 3 дня вы изучите SQL, JSONB для конфига виджетов, cursor-based pagination, Flyway миграции
+                        и оптимизацию с индексами. Это всё необходимо для работы с данными в LGD.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Совет:</strong> Установите PostgreSQL локально или используйте Docker.
+                        Практикуйте примеры в psql (командная строка) или pgAdmin (графический интерфейс).
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <h2>Introduction: PostgreSQL for Life Goals Dashboard</h2>
+                    <p>
+                        PostgreSQL is a powerful, reliable DBMS used in the Life Goals Dashboard backend.
+                        The project uses Spring Data JPA + Hibernate for ORM and Flyway for schema versioning.
+                    </p>
+                    <p>
+                        Over 3 days you will learn SQL, JSONB for widget configuration, cursor-based pagination, Flyway migrations
+                        and optimization with indexes. All of this is necessary for working with data in LGD.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Tip:</strong> Install PostgreSQL locally or use Docker.
+                        Practice the examples in psql (command line) or pgAdmin (graphical interface).
+                    </div>
+                </div>
+            </section>
+
+            <section id="sql">
+                <div class="lang-ru">
+                    <h2>SQL для Life Goals Dashboard (День 1)</h2>
+                    <h3>Таблицы и первичные ключи</h3>
+                    <p>
+                        Все таблицы в LGD используют UUID для первичных ключей и имеют поля user_id и created_at.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h2>SQL for Life Goals Dashboard (Day 1)</h2>
+                    <h3>Tables and Primary Keys</h3>
+                    <p>
+                        All tables in LGD use UUID for primary keys and have user_id and created_at fields.
+                    </p>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- Таблица пользователей / User table
+CREATE TABLE "user" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Таблица пищевых продуктов / Food products table
+CREATE TABLE food_product (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    calories_per_100g INT NOT NULL,
+    protein_per_100g DECIMAL(5, 2),
+    carbs_per_100g DECIMAL(5, 2),
+    fat_per_100g DECIMAL(5, 2),
+    is_custom BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Таблица виджетов пользователя / User dashboard widgets
+CREATE TABLE user_dashboard_widget (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    widget_type VARCHAR(50) NOT NULL,  -- INTERVIEW_PREP, FITNESS, BUDGET
+    position INT NOT NULL,
+    config JSONB NOT NULL,  -- Пользовательская конфигурация / User configuration
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(user_id, position)
+);
+            </code></pre>
+
+            <section id="sql-queries">
+                <div class="lang-ru">
+                    <h3>SELECT, WHERE, JOIN, GROUP BY</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>SELECT, WHERE, JOIN, GROUP BY</h3>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- Простой SELECT / Simple SELECT
+SELECT id, name, calories_per_100g
+FROM food_product
+WHERE user_id = '123e4567-e89b-12d3-a456-426614174000';
+
+-- WHERE с условиями / WHERE with conditions
+SELECT *
+FROM food_product
+WHERE user_id = '123e4567-e89b-12d3-a456-426614174000'
+  AND calories_per_100g > 100
+  AND is_custom = false
+ORDER BY calories_per_100g DESC;
+
+-- JOIN между таблицами / JOIN between tables
+SELECT f.name, f.calories_per_100g, u.email
+FROM food_product f
+JOIN "user" u ON f.user_id = u.id
+WHERE u.email = 'alice@example.com';
+
+-- GROUP BY для агрегации / GROUP BY for aggregation
+SELECT
+    user_id,
+    COUNT(*) as total_products,
+    AVG(calories_per_100g) as avg_calories
+FROM food_product
+WHERE is_custom = false
+GROUP BY user_id
+HAVING COUNT(*) > 5
+ORDER BY avg_calories DESC;
+
+-- LEFT JOIN для опциональных связей / LEFT JOIN for optional relationships
+SELECT
+    u.email,
+    COUNT(fp.id) as product_count
+FROM "user" u
+LEFT JOIN food_product fp ON u.id = fp.user_id
+GROUP BY u.id
+ORDER BY product_count DESC;
+            </code></pre>
+
+            <section id="sql-crud">
+                <div class="lang-ru">
+                    <h3>INSERT, UPDATE, DELETE</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>INSERT, UPDATE, DELETE</h3>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- INSERT один продукт / INSERT single product
+INSERT INTO food_product (user_id, name, calories_per_100g, is_custom)
+VALUES ('123e4567-e89b-12d3-a456-426614174000', 'Apple', 52, false)
+RETURNING id, created_at;
+
+-- INSERT несколько продуктов / INSERT multiple products
+INSERT INTO food_product (user_id, name, calories_per_100g, is_custom)
+VALUES
+    ('123e4567-e89b-12d3-a456-426614174000', 'Banana', 89, false),
+    ('123e4567-e89b-12d3-a456-426614174000', 'Orange', 47, false);
+
+-- UPDATE с WHERE
+UPDATE food_product
+SET calories_per_100g = 100, updated_at = NOW()
+WHERE id = '223e4567-e89b-12d3-a456-426614174000'
+  AND user_id = '123e4567-e89b-12d3-a456-426614174000'
+RETURNING *;
+
+-- DELETE (будьте осторожны!) / DELETE (be careful!)
+DELETE FROM food_product
+WHERE user_id = '123e4567-e89b-12d3-a456-426614174000'
+  AND is_custom = true
+  AND created_at < NOW() - INTERVAL '30 days';
+            </code></pre>
+
+            <div class="warning">
+                <div class="lang-ru">
+                    <strong>Безопасность:</strong> Всегда фильтруйте по user_id, чтобы пользователь видел только свои данные.
+                    Никогда не удаляйте данные без WHERE условия!
+                </div>
+                <div class="lang-en">
+                    <strong>Security:</strong> Always filter by user_id so users see only their data.
+                    Never delete data without a WHERE clause!
+                </div>
+            </div>
+
+            <section id="jsonb">
+                <div class="lang-ru">
+                    <h2>JSONB: Конфигурация виджета (День 1-2)</h2>
+                    <h3>Зачем JSONB?</h3>
+                    <p>
+                        Каждый виджет имеет config JSONB, который содержит параметры пользователя.
+                        Например, Budget Плаинер получает `baseCurrency`, `targetCurrency` и `deadline` в config,
+                        а не в отдельных столбцах.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h2>JSONB: Widget Configuration (Day 1-2)</h2>
+                    <h3>Why JSONB?</h3>
+                    <p>
+                        Each widget has a config JSONB that contains user parameters.
+                        For example, Budget Planner gets `baseCurrency`, `targetCurrency` and `deadline` in config,
+                        not in separate columns.
+                    </p>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- Пример конфигурации бюджет-виджета / Budget widget config example
+INSERT INTO user_dashboard_widget (user_id, widget_type, position, config)
+VALUES (
+    '123e4567-e89b-12d3-a456-426614174000',
+    'BUDGET',
+    1,
+    '{
+        "goalName": "South Korea Trip",
+        "targetAmount": 3000,
+        "baseCurrency": "EUR",
+        "targetCurrency": "KRW",
+        "deadline": "2026-10",
+        "budgetCategories": [
+            {"name": "Flights", "estimatedAmount": 800},
+            {"name": "Accommodation", "estimatedAmount": 900}
+        ]
+    }'::JSONB
+);
+
+-- Пример конфигурации интервью-виджета / Interview widget config example
+INSERT INTO user_dashboard_widget (user_id, widget_type, position, config)
+VALUES (
+    '123e4567-e89b-12d3-a456-426614174000',
+    'INTERVIEW_PREP',
+    2,
+    '{
+        "targetCompany": "Meta",
+        "targetLevel": "E5",
+        "weeklyProblemGoal": 15,
+        "focusCategories": ["GRAPH", "DYNAMIC_PROGRAMMING"],
+        "reviewIntervalDays": 3
+    }'::JSONB
+);
+            </code></pre>
+
+            <section id="jsonb-queries">
+                <div class="lang-ru">
+                    <h3>Запросы к JSONB</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>JSONB Queries</h3>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- Получить значение из JSONB (оператор ->) / Get value from JSONB
+SELECT
+    id,
+    config->>'targetCompany' as company,  -- -> returns JSON, ->> returns TEXT
+    (config->'weeklyProblemGoal')::INT as weekly_goal
+FROM user_dashboard_widget
+WHERE widget_type = 'INTERVIEW_PREP';
+
+-- Получить вложенное значение / Get nested value
+SELECT config#>'{budgetCategories,0,name}' as first_category
+FROM user_dashboard_widget
+WHERE widget_type = 'BUDGET';
+
+-- Проверить существование ключа / Check key existence
+SELECT id
+FROM user_dashboard_widget
+WHERE config ? 'targetCompany';  -- Does key 'targetCompany' exist?
+
+-- Проверить содержание JSON / Check JSON contains
+SELECT id
+FROM user_dashboard_widget
+WHERE config @> '{"targetCompany": "Meta"}'::JSONB;  -- Does it contain this value?
+
+-- Обновить значение в JSONB / Update value in JSONB
+UPDATE user_dashboard_widget
+SET config = jsonb_set(config, '{targetLevel}', '"E6"')
+WHERE widget_type = 'INTERVIEW_PREP'
+  AND user_id = '123e4567-e89b-12d3-a456-426614174000';
+
+-- Удалить ключ из JSONB / Delete key from JSONB
+UPDATE user_dashboard_widget
+SET config = config - 'focusCategories'
+WHERE widget_type = 'INTERVIEW_PREP';
+            </code></pre>
+
+            <section id="jsonb-index">
+                <div class="lang-ru">
+                    <h3>Индекс на JSONB</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Index on JSONB</h3>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- GIN индекс для быстрого поиска в JSONB / GIN index for fast JSONB search
+CREATE INDEX idx_widget_config_gin
+ON user_dashboard_widget
+USING GIN (config);
+
+-- Более специализированный индекс / More specialized index
+CREATE INDEX idx_widget_target_company
+ON user_dashboard_widget
+USING GIN (config->>'targetCompany');
+            </code></pre>
+
+            <div class="tip">
+                <div class="lang-ru">
+                    <strong>Best Practice для LGD:</strong> Все параметры виджета хранятся в config JSONB.
+                    Это позволяет легко добавлять новые параметры без изменения схемы БД.
+                </div>
+                <div class="lang-en">
+                    <strong>Best Practice for LGD:</strong> All widget parameters are stored in config JSONB.
+                    This allows you to easily add new parameters without changing the database schema.
+                </div>
+            </div>
+
+            <section id="pagination">
+                <div class="lang-ru">
+                    <h2>Cursor-Based Pagination (День 2)</h2>
+                    <h3>Почему не OFFSET?</h3>
+                    <p>
+                        OFFSET медленен на больших наборах данных. Проблема: при добавлении/удалении строк между запросами,
+                        позиции сдвигаются. Relay Connection pattern используют cursor-based pagination.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h2>Cursor-Based Pagination (Day 2)</h2>
+                    <h3>Why Not OFFSET?</h3>
+                    <p>
+                        OFFSET is slow on large datasets. Problem: when rows are added/deleted between requests,
+                        positions shift. Relay Connection pattern uses cursor-based pagination.
+                    </p>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- Плохо (OFFSET) / Bad (OFFSET)
+SELECT * FROM food_product
+WHERE user_id = '123e4567-e89b-12d3-a456-426614174000'
+ORDER BY created_at DESC
+LIMIT 20 OFFSET 40;  -- Must read first 40, then next 20
+
+-- Хорошо (Keyset/Cursor-based) / Good (Keyset/Cursor-based)
+SELECT * FROM food_product
+WHERE user_id = '123e4567-e89b-12d3-a456-426614174000'
+  AND (created_at, id) < ('2025-01-15 10:30:00', 'last-id-from-previous-page')
+ORDER BY created_at DESC, id DESC
+LIMIT 21;  -- 20 + 1 to determine hasNextPage
+
+-- Cursor = BASE64(created_at || ',' || id)
+-- Decode on client and use in next request
+            </code></pre>
+
+            <section id="pagination-relay">
+                <div class="lang-ru">
+                    <h3>Реализация Relay Connection</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Relay Connection Implementation</h3>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- Таблица для примера / Example table
+CREATE TABLE workout (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES "user"(id),
+    exercise VARCHAR(255) NOT NULL,
+    duration_minutes INT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Запрос для первой страницы / Query for first page
+SELECT
+    id,
+    exercise,
+    duration_minutes,
+    created_at,
+    -- Генерируем cursor / Generate cursor
+    encode(
+        (created_at::TEXT || ',' || id::TEXT)::BYTEA,
+        'base64'
+    ) as cursor
+FROM workout
+WHERE user_id = '123e4567-e89b-12d3-a456-426614174000'
+ORDER BY created_at DESC, id DESC
+LIMIT 21;  -- 20 + 1
+
+-- Запрос со следующей страницы / Query for next page
+SELECT
+    id,
+    exercise,
+    duration_minutes,
+    created_at,
+    encode(
+        (created_at::TEXT || ',' || id::TEXT)::BYTEA,
+        'base64'
+    ) as cursor
+FROM workout
+WHERE user_id = '123e4567-e89b-12d3-a456-426614174000'
+  AND (created_at, id) < ('2025-01-15 10:30:00'::TIMESTAMP, 'abc-123'::UUID)
+ORDER BY created_at DESC, id DESC
+LIMIT 21;
+            </code></pre>
+
+            <div class="tip">
+                <div class="lang-ru">
+                    <strong>Почему это работает лучше:</strong> Cursor-based пагинация не зависит от количества пропущенных строк.
+                    Даже если у пользователя 1 миллион тренировок, запрос выполняется за одно время.
+                </div>
+                <div class="lang-en">
+                    <strong>Why this works better:</strong> Cursor-based pagination doesn't depend on the number of skipped rows.
+                    Even if a user has 1 million workouts, the query executes in the same time.
+                </div>
+            </div>
+
+            <section id="flyway">
+                <div class="lang-ru">
+                    <h2>Flyway: Версионирование схемы (День 2-3)</h2>
+                    <h3>Что такое Flyway?</h3>
+                    <p>
+                        Flyway — это инструмент миграции БД, который версионирует схему.
+                        Каждая миграция — это файл SQL с именем вида V{N}__{description}.sql.
+                    </p>
+                    <h3>Создание миграций</h3>
+                </div>
+                <div class="lang-en">
+                    <h2>Flyway: Schema Versioning (Day 2-3)</h2>
+                    <h3>What is Flyway?</h3>
+                    <p>
+                        Flyway is a database migration tool that versions the schema.
+                        Each migration is a SQL file named V{N}__{description}.sql.
+                    </p>
+                    <h3>Creating Migrations</h3>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- Файл / File: src/main/resources/db/migration/V1__initial_schema.sql
+-- Первая миграция / First migration
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE "user" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE food_product (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    calories_per_100g INT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Файл / File: src/main/resources/db/migration/V2__add_food_nutrition.sql
+ALTER TABLE food_product
+ADD COLUMN protein_per_100g DECIMAL(5, 2),
+ADD COLUMN carbs_per_100g DECIMAL(5, 2),
+ADD COLUMN fat_per_100g DECIMAL(5, 2);
+
+-- Файл / File: src/main/resources/db/migration/V3__add_widget_table.sql
+CREATE TABLE user_dashboard_widget (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    widget_type VARCHAR(50) NOT NULL,
+    position INT NOT NULL,
+    config JSONB NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(user_id, position)
+);
+
+CREATE INDEX idx_widget_user ON user_dashboard_widget(user_id);
+CREATE INDEX idx_widget_config_gin ON user_dashboard_widget USING GIN (config);
+            </code></pre>
+
+            <section id="flyway-rules">
+                <div class="lang-ru">
+                    <h3>Правила Flyway</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Flyway Rules</h3>
+                </div>
+            </section>
+
+            <table>
+                <thead>
+                    <tr>
+                        <div class="lang-ru">
+                            <th>Правило</th>
+                            <th>Описание</th>
+                            <th>Пример</th>
+                        </div>
+                        <div class="lang-en">
+                            <th>Rule</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </div>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <div class="lang-ru">
+                            <td>Имена файлов</td>
+                            <td>V{N}__{description}.sql (N = число)</td>
+                            <td>V1__create_user.sql</td>
+                        </div>
+                        <div class="lang-en">
+                            <td>File names</td>
+                            <td>V{N}__{description}.sql (N = number)</td>
+                            <td>V1__create_user.sql</td>
+                        </div>
+                    </tr>
+                    <tr>
+                        <div class="lang-ru">
+                            <td>Последовательность</td>
+                            <td>Миграции выполняются по порядку (V1, V2, ...)</td>
+                            <td>V1, V2, V3, V4...</td>
+                        </div>
+                        <div class="lang-en">
+                            <td>Sequence</td>
+                            <td>Migrations run in order (V1, V2, ...)</td>
+                            <td>V1, V2, V3, V4...</td>
+                        </div>
+                    </tr>
+                    <tr>
+                        <div class="lang-ru">
+                            <td>Идемпотентность</td>
+                            <td>Миграция должна быть безопасной для повтора</td>
+                            <td>CREATE TABLE IF NOT EXISTS</td>
+                        </div>
+                        <div class="lang-en">
+                            <td>Idempotency</td>
+                            <td>Migration must be safe to repeat</td>
+                            <td>CREATE TABLE IF NOT EXISTS</td>
+                        </div>
+                    </tr>
+                    <tr>
+                        <div class="lang-ru">
+                            <td>Никогда не редактируйте</td>
+                            <td>Никогда не меняйте уже выполненную миграцию</td>
+                            <td>Нужна исправить V2? Создайте V5 с исправлением.</td>
+                        </div>
+                        <div class="lang-en">
+                            <td>Never edit</td>
+                            <td>Never change already executed migrations</td>
+                            <td>Need to fix V2? Create V5 with the fix.</td>
+                        </div>
+                    </tr>
+                </tbody>
+            </table>
+
+            <section id="flyway-run">
+                <div class="lang-ru">
+                    <h3>Запуск миграций</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Running Migrations</h3>
+                </div>
+            </section>
+
+            <pre><code class="language-bash">
+# Автоматически при запуске Spring Boot / Automatically on Spring Boot startup
+./gradlew bootRun  # Flyway runs before app startup
+
+# Вручную через Gradle / Manually via Gradle
+./gradlew flywayMigrate  # Execute all pending migrations
+
+# Проверить статус / Check status
+./gradlew flywayInfo
+
+# Очистить и пересоздать БД (только для dev!) / Clean and recreate DB (dev only!)
+./gradlew flywayClean flywayMigrate
+            </code></pre>
+
+            <div class="warning">
+                <div class="lang-ru">
+                    <strong>Важно:</strong> Никогда не используйте `flywayClean` в production!
+                    Это удалит ВСЕ данные. Для исправления ошибок в продакшене создавайте новые миграции.
+                </div>
+                <div class="lang-en">
+                    <strong>Important:</strong> Never use `flywayClean` in production!
+                    This will delete ALL data. To fix errors in production, create new migrations.
+                </div>
+            </div>
+
+            <section id="indexes">
+                <div class="lang-ru">
+                    <h2>Индексы и производительность (День 3)</h2>
+                    <h3>Типы индексов</h3>
+                </div>
+                <div class="lang-en">
+                    <h2>Indexes and Performance (Day 3)</h2>
+                    <h3>Types of Indexes</h3>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- B-Tree (по умолчанию / by default)
+CREATE INDEX idx_user_email ON "user"(email);
+CREATE INDEX idx_food_user_name ON food_product(user_id, name);
+
+-- GIN (для JSONB и arrays / for JSONB and arrays)
+CREATE INDEX idx_widget_config ON user_dashboard_widget USING GIN (config);
+
+-- Partial индекс / Partial index
+CREATE INDEX idx_custom_products ON food_product(user_id)
+WHERE is_custom = true;
+
+-- Индекс на выражении / Index on expression
+CREATE INDEX idx_product_name_lower ON food_product(LOWER(name));
+            </code></pre>
+
+            <section id="explain">
+                <div class="lang-ru">
+                    <h3>EXPLAIN ANALYZE: профилирование запросов</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>EXPLAIN ANALYZE: Query Profiling</h3>
+                </div>
+            </section>
+
+            <pre><code class="language-sql">
+-- Медленный запрос без индекса / Slow query without index
+EXPLAIN ANALYZE
+SELECT * FROM food_product
+WHERE name = 'Apple';
+
+-- After adding index / После добавления индекса
+CREATE INDEX idx_product_name ON food_product(name);
+
+EXPLAIN ANALYZE
+SELECT * FROM food_product
+WHERE name = 'Apple';
+            </code></pre>
+
+            <section id="index-best">
+                <div class="lang-ru">
+                    <h3>Лучшие практики индексирования</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Indexing Best Practices</h3>
+                </div>
+            </section>
+
+            <ul>
+                <div class="lang-ru">
+                    <li><strong>Индексируйте foreign keys:</strong> `user_id` часто используется в WHERE</li>
+                    <li><strong>Индексируйте уникальные поля:</strong> `email` для быстрого поиска пользователя</li>
+                    <li><strong>Composite индексы:</strong> `(user_id, created_at)` для cursor-based pagination</li>
+                    <li><strong>Избегайте лишних индексов:</strong> Каждый индекс замедляет INSERT/UPDATE/DELETE</li>
+                    <li><strong>JSONB индексы:</strong> Используйте GIN для часто ищущихся полей в config</li>
+                </div>
+                <div class="lang-en">
+                    <li><strong>Index foreign keys:</strong> `user_id` is often used in WHERE</li>
+                    <li><strong>Index unique fields:</strong> `email` for fast user lookup</li>
+                    <li><strong>Composite indexes:</strong> `(user_id, created_at)` for cursor-based pagination</li>
+                    <li><strong>Avoid unnecessary indexes:</strong> Each index slows INSERT/UPDATE/DELETE</li>
+                    <li><strong>JSONB indexes:</strong> Use GIN for frequently searched fields in config</li>
+                </div>
+            </ul>
+
+            <section id="pg18-features">
+                <div class="lang-ru">
+                    <h2>Что нового в PostgreSQL 18 / What's New in PostgreSQL 18</h2>
+                    <p>
+                        Life Goals Dashboard использует <strong>PostgreSQL 18.3</strong> — последнюю версию с критическими улучшениями производительности и функциональности.
+                    </p>
+
+                    <h3>Async I/O Subsystem (новый в PG 18)</h3>
+                    <p>
+                        PostgreSQL 18 вводит встроенную асинхронную I/O подсистему с поддержкой <code>io_method: worker</code> и <code>io_uring</code> (Linux).
+                        Это может улучшить производительность до <strong>3× быстрее на NVMe дисках</strong> за счёт параллельного чтения блоков вместо синхронного I/O.
+                    </p>
+                    <pre><code class="language-bash">
+# Configure async I/O in postgresql.conf
+backend_io_method = worker     # or io_uring on Linux 6.0+
+backend_io_worker_threads = 4  # Adjust based on CPU cores
+                    </code></pre>
+
+                    <h3>Встроенная функция uuidv7() — Время-упорядоченные UUID</h3>
+                    <p>
+                        В PostgreSQL 18 добавлена встроенная функция <code>uuidv7()</code>, которая генерирует <strong>время-упорядоченные UUID</strong> (RFC 4122 v7).
+                        В отличие от <code>gen_random_uuid()</code>, которые случайны, <code>uuidv7()</code> гарантирует монотонный порядок по времени вставки.
+                        Это <strong>существенно улучшает производительность B-tree индексов</strong> для первичных ключей.
+                    </p>
+                    <p>
+                        <strong>Ключевое отличие:</strong> B-tree вставки со случайными UUID требуют перебалансировки, но с <code>uuidv7()</code> новые элементы добавляются всегда в конец листа.
+                    </p>
+                    <pre><code class="language-sql">
+-- Старый подход (случайный UUID, плохо для B-tree):
+CREATE TABLE food_product (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    ...
+);
+
+-- Новый подход (время-упорядоченный UUID, отличная локальность):
+CREATE TABLE food_product (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    ...
+);
+
+-- uuidv7() гарантирует, что новые строки вставляются
+-- в растущий конец B-tree листа (sequential I/O)
+                    </code></pre>
+
+                    <h3>Virtual Generated Columns (GENERATED ALWAYS AS ... VIRTUAL)</h3>
+                    <p>
+                        PostgreSQL 18 вводит <strong>virtual (not materialized) generated columns</strong>.
+                        Это автоматически вычисляемые столбцы, которые <strong>не занимают место на диске</strong> — значение вычисляется при каждом чтении.
+                    </p>
+                    <pre><code class="language-sql">
+-- Пример: вычисляемая общая калорийность вещества
+CREATE TABLE meal_entry (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    user_id UUID NOT NULL,
+    product_id UUID,
+    calories_per_100g NUMERIC NOT NULL,
+    portion_g NUMERIC NOT NULL,
+
+    -- Virtual column: вычисляется при чтении, не хранится
+    total_calories NUMERIC GENERATED ALWAYS AS
+        (calories_per_100g * portion_g / 100)
+    VIRTUAL,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- При запросе total_calories автоматически пересчитывается:
+SELECT id, portion_g, calories_per_100g, total_calories
+FROM meal_entry WHERE user_id = $1;
+-- total_calories = calories_per_100g * portion_g / 100 (on-the-fly)
+                    </code></pre>
+
+                    <h3>Skip Scan на Multi-Column B-tree Индексах</h3>
+                    <p>
+                        PostgreSQL 18 добавляет оптимизацию <strong>skip scan</strong> для составных индексов.
+                        Если индекс <code>(user_id, created_at)</code> и запрос ищет <code>created_at = X</code> без указания <code>user_id</code>,
+                        планировщик может "пропустить" первый столбец и перейти напрямую ко второму.
+                    </p>
+                    <pre><code class="language-sql">
+-- Составной индекс
+CREATE INDEX idx_user_created ON meal_entry(user_id, created_at);
+
+-- Запрос без user_id теперь может использовать skip scan:
+SELECT * FROM meal_entry WHERE created_at > '2026-01-01';
+-- PostgreSQL 18 может использовать индекс вместо seq scan
+                    </code></pre>
+
+                    <h3>OAuth 2.0 Authentication in Core</h3>
+                    <p>
+                        PostgreSQL 18 добавляет встроенную поддержку OAuth 2.0 для аутентификации пользователей,
+                        снимая необходимость в отдельных расширениях.
+                    </p>
+
+                    <h3>Improved Parallel Queries и Partitioning</h3>
+                    <p>
+                        Параллельные запросы и динамическое партиционирование стали ещё более эффективны.
+                        Для больших наборов данных (например, истории приёма пищи за многие месяцы) это даёт значительный прирост производительности.
+                    </p>
+                </div>
+
+                <div class="lang-en">
+                    <h2>What's New in PostgreSQL 18</h2>
+                    <p>
+                        Life Goals Dashboard uses <strong>PostgreSQL 18.3</strong> — the latest version with critical performance and feature improvements.
+                    </p>
+
+                    <h3>Async I/O Subsystem (new in PG 18)</h3>
+                    <p>
+                        PostgreSQL 18 introduces built-in asynchronous I/O support with <code>io_method: worker</code> and <code>io_uring</code> (Linux).
+                        This can improve performance up to <strong>3× faster on NVMe drives</strong> via parallel block reads instead of synchronous I/O.
+                    </p>
+                    <pre><code class="language-bash">
+# Configure async I/O in postgresql.conf
+backend_io_method = worker     # or io_uring on Linux 6.0+
+backend_io_worker_threads = 4  # Adjust based on CPU cores
+                    </code></pre>
+
+                    <h3>Built-in uuidv7() Function — Time-Ordered UUIDs</h3>
+                    <p>
+                        PostgreSQL 18 adds the <code>uuidv7()</code> function, generating <strong>time-ordered UUIDs</strong> (RFC 4122 v7).
+                        Unlike <code>gen_random_uuid()</code>, which are random, <code>uuidv7()</code> guarantees monotonic order by insertion time.
+                        This <strong>dramatically improves B-tree index performance</strong> for primary keys.
+                    </p>
+                    <p>
+                        <strong>Key difference:</strong> B-tree inserts with random UUIDs require rebalancing, but with <code>uuidv7()</code> new entries always append to the leaf end.
+                    </p>
+                    <pre><code class="language-sql">
+-- Old approach (random UUID, bad for B-tree):
+CREATE TABLE food_product (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    ...
+);
+
+-- New approach (time-ordered UUID, excellent locality):
+CREATE TABLE food_product (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    ...
+);
+
+-- uuidv7() guarantees new rows insert
+-- at the growing B-tree leaf end (sequential I/O)
+                    </code></pre>
+
+                    <h3>Virtual Generated Columns (GENERATED ALWAYS AS ... VIRTUAL)</h3>
+                    <p>
+                        PostgreSQL 18 introduces <strong>virtual (not materialized) generated columns</strong>.
+                        These are automatically computed columns that <strong>take no storage</strong> — the value is computed at read time.
+                    </p>
+                    <pre><code class="language-sql">
+-- Example: computed total calorie count
+CREATE TABLE meal_entry (
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    user_id UUID NOT NULL,
+    product_id UUID,
+    calories_per_100g NUMERIC NOT NULL,
+    portion_g NUMERIC NOT NULL,
+
+    -- Virtual column: computed at read time, not stored
+    total_calories NUMERIC GENERATED ALWAYS AS
+        (calories_per_100g * portion_g / 100)
+    VIRTUAL,
+
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Querying total_calories auto-recomputes:
+SELECT id, portion_g, calories_per_100g, total_calories
+FROM meal_entry WHERE user_id = $1;
+-- total_calories = calories_per_100g * portion_g / 100 (on-the-fly)
+                    </code></pre>
+
+                    <h3>Skip Scan on Multi-Column B-tree Indexes</h3>
+                    <p>
+                        PostgreSQL 18 adds <strong>skip scan</strong> optimization for composite indexes.
+                        If an index is <code>(user_id, created_at)</code> and a query searches <code>created_at = X</code> without specifying <code>user_id</code>,
+                        the planner can "skip" the first column and jump directly to the second.
+                    </p>
+                    <pre><code class="language-sql">
+-- Composite index
+CREATE INDEX idx_user_created ON meal_entry(user_id, created_at);
+
+-- Query without user_id can now use skip scan:
+SELECT * FROM meal_entry WHERE created_at > '2026-01-01';
+-- PostgreSQL 18 may use index instead of seq scan
+                    </code></pre>
+
+                    <h3>OAuth 2.0 Authentication in Core</h3>
+                    <p>
+                        PostgreSQL 18 adds built-in OAuth 2.0 support for user authentication,
+                        removing the need for separate extensions.
+                    </p>
+
+                    <h3>Improved Parallel Queries and Partitioning</h3>
+                    <p>
+                        Parallel queries and dynamic partitioning are now even more efficient.
+                        For large datasets (e.g., meal history over many months), this provides significant performance gains.
+                    </p>
+                </div>
+            </section>
+
+            <section class="assignments">
+                <div class="lang-ru">
+                    <h2>Практические задания</h2>
+                    <div class="assignment">
+                        <h4>Задание 1: Создание схемы и базовые запросы (День 1, 1 час)</h4>
+                        <p>Создайте файл `V1__initial.sql` и реализуйте:</p>
+                        <ol>
+                            <li>Таблица `user` с id, email, name, created_at</li>
+                            <li>Таблица `food_product` с id, user_id, name, calories, created_at</li>
+                            <li>Вставьте 5 пользователей и 10 продуктов</li>
+                            <li>SELECT с JOIN между таблицами</li>
+                            <li>GROUP BY для подсчёта продуктов по пользователю</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Задание 2: JSONB и динамические конфигурации (День 2, 1 час)</h4>
+                        <p>Создайте файл `V2__add_widgets.sql` и реализуйте:</p>
+                        <ol>
+                            <li>Таблица `user_dashboard_widget` с config JSONB</li>
+                            <li>Вставьте 3 виджета разных типов с разными конфигами</li>
+                            <li>Запрос с ->> оператором для извлечения значений</li>
+                            <li>Запрос с @> оператором для поиска по содержанию</li>
+                            <li>Обновите конфиг JSONB виджета</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Задание 3: Cursor-based pagination (День 2, 1 час 30 минут)</h4>
+                        <p>Создайте запросы для пагинации:</p>
+                        <ol>
+                            <li>Вставьте 50 продуктов для одного пользователя</li>
+                            <li>Напишите запрос для первой страницы (20 элементов)</li>
+                            <li>Напишите запрос для второй страницы со следующим cursor'ом</li>
+                            <li>Используйте (created_at, id) для определения позиции</li>
+                            <li>Проверьте, что порядок элементов не изменяется при добавлении новых</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Задание 4: Flyway миграции и индексы (День 3, 1 час 30 минут)</h4>
+                        <p>Создайте миграции Flyway и оптимизируйте запросы:</p>
+                        <ol>
+                            <li>Создайте V1__schema.sql с таблицами</li>
+                            <li>Создайте V2__add_is_custom.sql с новым полем</li>
+                            <li>Создайте V3__add_indexes.sql с индексами</li>
+                            <li>Используйте EXPLAIN ANALYZE на медленном запросе</li>
+                            <li>Добавьте индекс и проверьте улучшение производительности</li>
+                            <li>Создайте GIN индекс на config JSONB</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <h2>Practical Assignments</h2>
+                    <div class="assignment">
+                        <h4>Assignment 1: Creating schema and basic queries (Day 1, 1 hour)</h4>
+                        <p>Create a `V1__initial.sql` file and implement:</p>
+                        <ol>
+                            <li>`user` table with id, email, name, created_at</li>
+                            <li>`food_product` table with id, user_id, name, calories, created_at</li>
+                            <li>Insert 5 users and 10 products</li>
+                            <li>SELECT with JOIN between tables</li>
+                            <li>GROUP BY to count products by user</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Assignment 2: JSONB and dynamic configurations (Day 2, 1 hour)</h4>
+                        <p>Create a `V2__add_widgets.sql` file and implement:</p>
+                        <ol>
+                            <li>`user_dashboard_widget` table with config JSONB</li>
+                            <li>Insert 3 widgets of different types with different configs</li>
+                            <li>Query with ->> operator to extract values</li>
+                            <li>Query with @> operator to search by content</li>
+                            <li>Update widget JSONB config</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Assignment 3: Cursor-based pagination (Day 2, 1.5 hours)</h4>
+                        <p>Create pagination queries:</p>
+                        <ol>
+                            <li>Insert 50 products for one user</li>
+                            <li>Write query for first page (20 items)</li>
+                            <li>Write query for second page with next cursor</li>
+                            <li>Use (created_at, id) to determine position</li>
+                            <li>Verify order doesn't change when new items are added</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Assignment 4: Flyway migrations and indexes (Day 3, 1.5 hours)</h4>
+                        <p>Create Flyway migrations and optimize queries:</p>
+                        <ol>
+                            <li>Create V1__schema.sql with tables</li>
+                            <li>Create V2__add_is_custom.sql with new field</li>
+                            <li>Create V3__add_indexes.sql with indexes</li>
+                            <li>Use EXPLAIN ANALYZE on slow query</li>
+                            <li>Add index and verify performance improvement</li>
+                            <li>Create GIN index on config JSONB</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <section class="assignments" id="backlog-tasks" style="border-top-color: #f5c2e7;">
+                <div class="lang-ru">
+                    <h2>🧪 Задания из Backlog проекта (TDD)</h2>
+                    <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                        Эти задания — реальные задачи из бэклога проекта Life Goals Dashboard.
+                        Для каждого задания предоставлены тесты, которые нужно сделать зелёными, написав реализацию.
+                        <strong>Подход TDD:</strong> сначала изучи тесты → пойми что от тебя ожидается → напиши код → запусти тесты.
+                    </p>
+
+                    <div class="assignment" style="border-left-color: #f5c2e7;">
+                        <h4>Backlog #6-#10: Все 17 Flyway миграций (БД структура) <span class="tdd-badge">17 миграций</span></h4>
+                        <p>
+                            Напиши все 17 Flyway миграций для Life Goals Dashboard, включая таблицы для:
+                            core (user, user_dashboard_widget), interview prep, fitness (с рецептами и едой), бюджет, и notifications.
+                            Каждая миграция должна быть безопасной и неразрушающей. Используй UUID для PK, JSONB для flexible полей,
+                            индексы на user_id и часто используемых столбцах. Запусти миграции против Testcontainers PostgreSQL 18.3.
+                        </p>
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <h2>🧪 Backlog Tasks (TDD)</h2>
+                    <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                        These tasks are real tasks from the Life Goals Dashboard project backlog.
+                        For each task, tests are provided that you need to make green by writing the implementation.
+                        <strong>TDD approach:</strong> first study the tests → understand what is expected → write code → run tests.
+                    </p>
+
+                    <div class="assignment" style="border-left-color: #f5c2e7;">
+                        <h4>Backlog #6-#10: All 17 Flyway migrations (DB structure) <span class="tdd-badge">17 migrations</span></h4>
+                        <p>
+                            Write all 17 Flyway migrations for Life Goals Dashboard, including tables for:
+                            core (user, user_dashboard_widget), interview prep, fitness (with recipes and food), budget, and notifications.
+                            Each migration must be safe and non-destructive. Use UUID for PK, JSONB for flexible fields,
+                            indexes on user_id and frequently used columns. Run migrations against Testcontainers PostgreSQL 18.3.
+                        </p>
+                    </div>
+
+                    <div class="assignment" style="border-left-color: #a6e3a1;">
+                        <h4>Backlog #11: PostgreSQL 18 uuidv7() — Time-Ordered PKs <span class="tdd-badge">uuidv7() integration</span></h4>
+                        <p>
+                            Migrate the `food_product` table from <code>gen_random_uuid()</code> to PostgreSQL 18's built-in <code>uuidv7()</code> function.
+                            Create a Flyway migration that:
+                        </p>
+                        <ol>
+                            <li>Create a new temp table with <code>id UUID PRIMARY KEY DEFAULT uuidv7()</code></li>
+                            <li>Copy data from old table to temp table (UUID values preserved)</li>
+                            <li>Drop the old table and rename temp to `food_product`</li>
+                            <li>Write a Testcontainers test that inserts 100 products and verifies IDs are strictly increasing (time-ordered)</li>
+                            <li>Assert that UUID ordering matches insertion time, enabling sequential B-tree inserts</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment" style="border-left-color: #a6e3a1;">
+                        <h4>Backlog #12: Virtual Generated Columns — Auto-Computed Fields <span class="tdd-badge">VIRTUAL columns</span></h4>
+                        <p>
+                            Add a virtual generated column to the `meal_entry` table using PostgreSQL 18's <code>GENERATED ALWAYS AS ... VIRTUAL</code>.
+                            Create a Flyway migration that:
+                        </p>
+                        <ol>
+                            <li>Add a `portion_g NUMERIC` column to track meal portion size</li>
+                            <li>Add a virtual column: <code>total_calories NUMERIC GENERATED ALWAYS AS (calories_per_100g * portion_g / 100) VIRTUAL</code></li>
+                            <li>Verify that `total_calories` is never stored on disk (VIRTUAL, not materialized)</li>
+                            <li>Write a Testcontainers test that inserts meal entries and queries `total_calories` (auto-computed)</li>
+                            <li>Update a source column and verify `total_calories` recalculates without migration</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <section class="resources">
+                <div class="lang-ru">
+                    <h2>Дополнительные ресурсы</h2>
+                </div>
+                <div class="lang-en">
+                    <h2>Additional Resources</h2>
+                </div>
+
+                <a href="https://www.postgresql.org/docs/" class="resource-link">
+                    PostgreSQL Official Documentation
+                </a>
+
+                <a href="https://pgexercises.com/" class="resource-link">
+                    <div class="lang-ru">PG Exercises (интерактивные задачи)</div>
+                    <div class="lang-en">PG Exercises (interactive tasks)</div>
+                </a>
+
+                <a href="https://flywaydb.org/documentation/getstarted/why" class="resource-link">
+                    <div class="lang-ru">Flyway Documentation (гайды)</div>
+                    <div class="lang-en">Flyway Documentation (guides)</div>
+                </a>
+
+                <a href="https://use-the-index-luke.com/" class="resource-link">
+                    <div class="lang-ru">Use The Index, Luke! (индексирование)</div>
+                    <div class="lang-en">Use The Index, Luke! (indexing)</div>
+                </a>
+
+                <a href="https://www.postgresql.org/docs/current/functions-json.html" class="resource-link">
+                    PostgreSQL JSONB Functions
+                </a>
+
+                <a href="https://www.postgresql.org/docs/current/sql-explain.html" class="resource-link">
+                    <div class="lang-ru">EXPLAIN и производительность</div>
+                    <div class="lang-en">EXPLAIN and performance</div>
+                </a>
+            </section>
+
+            <footer class="nav-footer">
+                <a href="03-kotlin.html" class="nav-link prev">
+                    <div class="lang-ru">← Модуль 3: Kotlin</div>
+                    <div class="lang-en">← Module 3: Kotlin</div>
+                </a>
+                <a href="#" class="nav-link next" style="opacity: 0.5; cursor: not-allowed;">
+                    <div class="lang-ru">Готово! →</div>
+                    <div class="lang-en">Done! →</div>
+                </a>
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+    <script>
+        function setLang(lang) {
+            if (lang === 'en') {
+                document.body.classList.add('show-en');
+                localStorage.setItem('preferred-lang', 'en');
+                document.getElementById('btn-en').classList.add('active');
+                document.getElementById('btn-ru').classList.remove('active');
+            } else {
+                document.body.classList.remove('show-en');
+                localStorage.setItem('preferred-lang', 'ru');
+                document.getElementById('btn-ru').classList.add('active');
+                document.getElementById('btn-en').classList.remove('active');
+            }
+        }
+
+        document.getElementById('btn-en').addEventListener('click', () => setLang('en'));
+        document.getElementById('btn-ru').addEventListener('click', () => setLang('ru'));
+
+        // Load saved preference
+        const savedLang = localStorage.getItem('preferred-lang') || 'ru';
+        setLang(savedLang);
+
+        Prism.highlightAll();
+    </script>
+</body>
+</html>

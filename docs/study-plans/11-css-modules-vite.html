@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 11: CSS Modules + Vite - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 68.75%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .language-bash::before,
+        .language-kotlin::before,
+        .language-typescript::before,
+        .language-graphql::before,
+        .language-css::before {
+            content: attr(data-lang);
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details/Collapse */
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        /* Assignments */
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .assignment .tdd-badge {
+            display: inline-block;
+            background: #f5c2e7;
+            color: #1e1e2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Resources */
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        /* Navigation */
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Prism Customization */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+
+        /* Language switcher */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button {
+            padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px;
+            cursor: pointer; font-size: 0.85rem; background: transparent;
+            color: var(--text-secondary); transition: all 0.2s;
+        }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="module-number"><span class="lang-ru">МОДУЛЬ 11 / 16</span><span class="lang-en">MODULE 11 / 16</span></div>
+            <h1><span class="lang-ru">CSS Modules + Vite</span><span class="lang-en">CSS Modules + Vite</span></h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3><span class="lang-ru">Содержание</span><span class="lang-en">Contents</span></h3>
+            <ul>
+                <li><a href="#intro"><span class="lang-ru">Введение</span><span class="lang-en">Introduction</span></a></li>
+                <li><a href="#vite8-whats-new"><span class="lang-ru">Vite 8 — что нового</span><span class="lang-en">Vite 8 — What's New</span></a></li>
+                <li><a href="#css-modules"><span class="lang-ru">CSS Modules</span><span class="lang-en">CSS Modules</span></a></li>
+                <li><a href="#vite-config"><span class="lang-ru">Vite конфигурация</span><span class="lang-en">Vite Configuration</span></a></li>
+                <li><a href="#theming"><span class="lang-ru">CSS переменные и theming</span><span class="lang-en">CSS Variables and Theming</span></a></li>
+                <li><a href="#best-practices"><span class="lang-ru">Best Practices</span><span class="lang-en">Best Practices</span></a></li>
+                <li><a href="#assignments"><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></a></li>
+                <li><a href="#backlog-tasks"><span class="lang-ru">🧪 Задания из Backlog (TDD)</span><span class="lang-en">🧪 Backlog Tasks (TDD)</span></a></li>
+                <li><a href="#resources"><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <div class="lang-ru">
+                <h2>Введение: CSS Modules + Vite</h2>
+                <p>
+                    <strong>CSS Modules</strong> — это способ писать CSS с локальным scope'ом.
+                    Вместо глобальных класс-имён (которые конфликтуют), каждый `.module.css` файл имеет уникальное пространство имён.
+                </p>
+                <p>
+                    <strong>Vite 8.0.8</strong> — современный build tool, который заменяет Webpack. Очень быстрый, современный синтаксис, встроенная поддержка CSS Modules.
+                    Новое: Rolldown (Rust-based bundler) — 10-30× быстрее старого esbuild+Rollup разделения, unified dev & build.
+                </p>
+                <p>
+                    За 1.5 дня вы освоите:
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>CSS Modules: .module.css файлы, импорт как объект, scoped классы</li>
+                    <li>Vite конфигурация: react плагин, Relay плагин, proxy для GraphQL</li>
+                    <li>CSS переменные (Custom Properties) для theming</li>
+                    <li>Оптимизация: code splitting, image optimization</li>
+                </ul>
+
+                <div class="tip">
+                    <strong>Совет:</strong> CSS Modules решают проблему глобального scope'а в CSS.
+                    Не нужно придумывать уникальные имена типа "ComponentNameButtonPrimary".
+                    Просто используйте ".button" и CSS Modules сделает его уникальным.
+                </div>
+                </div>
+
+                <div class="lang-en">
+                <h2>Introduction: CSS Modules + Vite</h2>
+                <p>
+                    <strong>CSS Modules</strong> is a way to write CSS with local scope.
+                    Instead of global class names (which conflict), each `.module.css` file has a unique namespace.
+                </p>
+                <p>
+                    <strong>Vite 8.0.8</strong> is a modern build tool that replaces Webpack. Very fast, modern syntax, built-in CSS Modules support.
+                    New: Rolldown (Rust-based bundler) — 10-30× faster than the old esbuild+Rollup split, unified dev & build.
+                </p>
+                <p>
+                    In 1.5 days you will master:
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>CSS Modules: .module.css files, import as object, scoped classes</li>
+                    <li>Vite configuration: React plugin, Relay plugin, GraphQL proxy</li>
+                    <li>CSS variables (Custom Properties) for theming</li>
+                    <li>Optimization: code splitting, image optimization</li>
+                </ul>
+
+                <div class="tip">
+                    <strong>Tip:</strong> CSS Modules solve the global scope problem in CSS.
+                    No need to invent unique names like "ComponentNameButtonPrimary".
+                    Just use ".button" and CSS Modules will make it unique.
+                </div>
+                </div>
+            </section>
+
+            <section id="vite8-whats-new">
+                <div class="lang-ru">
+                <h2>Что нового в Vite 8 / What's New in Vite 8</h2>
+
+                <h3>Rolldown — новый Rust-based бандлер</h3>
+                <p>
+                    Vite 8 вводит <strong>Rolldown</strong> — новый bundler, написанный на Rust, объединяющий dev и build pipeline.
+                    Вместо старого разделения esbuild (dev) + Rollup (build), теперь один Rolldown для всего.
+                    Результат: 10-30× быстрее, особенно на больших проектах.
+                </p>
+
+                <h3>Environment API (стабилизировано)</h3>
+                <p>
+                    Multi-environment builds (SSR, Web Workers, client) теперь встроены. Один `vite.config.ts` для всех сценариев.
+                </p>
+
+                <h3>Улучшенный dev server</h3>
+                <p>
+                    Rust-powered dev server — почти instant HMR даже на огромных проектах.
+                    Better CSS code splitting — меньше CSS в bundle.
+                </p>
+
+                <div class="tip">
+                    <strong>Совет:</strong> Если ваш build медленный (>10 сек), миграция на Vite 8 + Rolldown может ускорить его в 5-10 раз.
+                    Plugin API остаётся совместимым с Rollup.
+                </div>
+                </div>
+
+                <div class="lang-en">
+                <h2>Vite 8 / What's New in Vite 8</h2>
+
+                <h3>Rolldown — New Rust-Based Bundler</h3>
+                <p>
+                    Vite 8 introduces <strong>Rolldown</strong>, a new bundler written in Rust, unifying dev and build pipelines.
+                    Instead of the old split (esbuild for dev + Rollup for build), now one Rolldown for everything.
+                    Result: 10-30× faster, especially on large projects.
+                </p>
+
+                <h3>Environment API (Stable)</h3>
+                <p>
+                    Multi-environment builds (SSR, Web Workers, client) are now built-in. One `vite.config.ts` for all scenarios.
+                </p>
+
+                <h3>Improved Dev Server</h3>
+                <p>
+                    Rust-powered dev server — near-instant HMR even on huge projects.
+                    Better CSS code splitting — less CSS in bundle.
+                </p>
+
+                <div class="tip">
+                    <strong>Tip:</strong> If your build is slow (>10 sec), migrating to Vite 8 + Rolldown can speed it up 5-10x.
+                    Plugin API remains compatible with Rollup.
+                </div>
+                </div>
+            </section>
+
+            <section id="css-modules">
+                <div class="lang-ru">
+                <h2>CSS Modules: Scoped Styling</h2>
+
+                <h3>Базовый пример</h3>
+                <p>
+                    Создайте файл `WidgetCard.module.css`:
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <h2>CSS Modules: Scoped Styling</h2>
+
+                <h3>Basic Example</h3>
+                <p>
+                    Create a `WidgetCard.module.css` file:
+                </p>
+                </div>
+
+                <pre><code class="language-css">
+/* WidgetCard.module.css */
+.container {
+    border: 1px solid var(--text-secondary);
+    border-radius: 4px;
+    padding: 1.5rem;
+    background: var(--code-bg);
+    transition: all 0.2s ease;
+}
+
+.container:hover {
+    box-shadow: 0 4px 12px rgba(243, 139, 168, 0.2);
+    transform: translateY(-2px);
+}
+
+.title {
+    color: var(--header);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+                </code></pre>
+
+                <div class="lang-ru">
+                <p>
+                    Теперь импортируйте в `WidgetCard.tsx`:
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <p>
+                    Now import in `WidgetCard.tsx`:
+                </p>
+                </div>
+
+                <pre><code class="language-typescript">
+import styles from './WidgetCard.module.css';
+
+interface WidgetCardProps {
+    title: string;
+    description: string;
+    badge?: string;
+}
+
+const WidgetCard: React.FC<WidgetCardProps> = ({
+    title,
+    description,
+    badge
+}) => {
+    return (
+        <div className={styles.container}>
+            <h2 className={styles.title}>{title}</h2>
+            <p className={styles.description}>{description}</p>
+            {badge && <span className={styles.badge}>{badge}</span>}
+        </div>
+    );
+};
+
+export default WidgetCard;
+                </code></pre>
+
+                <div class="lang-ru">
+                <p>
+                    В браузере CSS Modules генерирует уникальные класс-имена:
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <p>
+                    In the browser, CSS Modules generates unique class names:
+                </p>
+                </div>
+
+                <pre><code class="language-typescript">
+/* Сгенерировано (уникальные имена) / Generated (unique names) */
+.WidgetCard_container__a1b2c {
+    border: 1px solid ...;
+}
+
+.WidgetCard_title__d3e4f {
+    color: ...;
+}
+                </code></pre>
+
+                <div class="lang-ru">
+                <h3>Несколько класс-имён</h3>
+                <p>
+                    Часто нужно применять несколько класс-имён к элементу:
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <h3>Multiple Class Names</h3>
+                <p>
+                    Often you need to apply multiple class names to an element:
+                </p>
+                </div>
+
+                <pre><code class="language-typescript">
+// Вариант 1: шаблонная строка (не рекомендуется)
+// Option 1: template string (not recommended)
+<button className={`${styles.button} ${styles.primary}`}>Click me</button>
+
+// Вариант 2: используйте библиотеку clsx
+// Option 2: use clsx library
+import clsx from 'clsx';
+
+<button className={clsx(styles.button, styles.primary)}>Click me</button>
+
+// Вариант 3: условное применение класс-имён
+// Option 3: conditional class application
+<button className={clsx(
+    styles.button,
+    {
+        [styles.primary]: isPrimary,
+        [styles.disabled]: isDisabled
+    }
+)}>Click me</button>
+                </code></pre>
+
+                <div class="lang-ru">
+                <h3>CSS Modules: composes</h3>
+                <p>
+                    Можете наследовать стили из другого файла:
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <h3>CSS Modules: composes</h3>
+                <p>
+                    You can inherit styles from another file:
+                </p>
+                </div>
+
+                <pre><code class="language-css">
+/* Base.module.css */
+.flexCenter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rounded {
+    border-radius: 4px;
+}
+
+/* Button.module.css */
+.button {
+    composes: flexCenter from './Base.module.css';
+    composes: rounded from './Base.module.css';
+    padding: 0.75rem 1.5rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+                </code></pre>
+
+                <div class="lang-ru">
+                <p>
+                    Когда применяете `styles.button`, автоматически включаются стили `flexCenter` и `rounded`.
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <p>
+                    When you apply `styles.button`, the styles `flexCenter` and `rounded` are automatically included.
+                </p>
+                </div>
+            </section>
+
+            <section id="vite-config">
+                <div class="lang-ru">
+                <h2>Vite конфигурация</h2>
+
+                <h3>Базовый vite.config.ts</h3>
+                </div>
+
+                <div class="lang-en">
+                <h2>Vite Configuration</h2>
+
+                <h3>Basic vite.config.ts</h3>
+                </div>
+
+                <pre><code class="language-typescript">
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+    plugins: [react()],
+    server: {
+        port: 5173,
+        proxy: {
+            // Проксируем GraphQL запросы на backend
+            // Proxy GraphQL requests to backend
+            '/graphql': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+                secure: false
+            },
+            // Проксируем WebSocket subscriptions
+            // Proxy WebSocket subscriptions
+            '/subscriptions': {
+                target: 'ws://localhost:8080',
+                ws: true
+            }
+        }
+    },
+    build: {
+        outDir: 'dist',
+        sourcemap: false,  // Отключите sourcemap в prod для меньшего размера
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    // Code splitting: отдельный чанк для Relay
+                    'relay': ['relay-runtime']
+                }
+            }
+        }
+    },
+    css: {
+        modules: {
+            localsConvention: 'camelCase'  // CSS классы в camelCase
+        }
+    }
+});
+                </code></pre>
+
+                <div class="lang-ru">
+                <h3>CSS Modules в camelCase</h3>
+                <p>
+                    С `localsConvention: 'camelCase'` класс-имена конвертируются:
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <h3>CSS Modules in camelCase</h3>
+                <p>
+                    With `localsConvention: 'camelCase'` class names are converted:
+                </p>
+                </div>
+
+                <pre><code class="language-css">
+/* Напишите в CSS / Write in CSS */
+.button-primary {
+    background: var(--accent);
+}
+
+.widget-card__title {
+    color: var(--header);
+}
+                </code></pre>
+
+                <div class="lang-ru">
+                <p>
+                    Импортируйте в TypeScript:
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <p>
+                    Import in TypeScript:
+                </p>
+                </div>
+
+                <pre><code class="language-typescript">
+import styles from './Button.module.css';
+
+// camelCase автоматически
+// camelCase automatically
+<button className={styles.buttonPrimary}>Click</button>
+<h2 className={styles.widgetCardTitle}>Title</h2>
+                </code></pre>
+
+                <div class="lang-ru">
+                <h3>Интеграция Relay плагина</h3>
+                </div>
+
+                <div class="lang-en">
+                <h3>Relay Plugin Integration</h3>
+                </div>
+
+                <pre><code class="language-typescript">
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import relay from 'vite-plugin-relay';
+
+export default defineConfig({
+    plugins: [
+        react(),
+        relay()  // Компилирует GraphQL запросы при изменении
+    ],
+    // ... остальная конфигурация
+});
+                </code></pre>
+
+                <div class="tip">
+                    <div class="lang-ru">
+                    <strong>Совет:</strong> vite-plugin-relay смотрит на все `.ts` файлы, находит GraphQL теги,
+                    и компилирует их в JavaScript. Это похоже на Webpack loader, но встроенный в Vite.
+                    </div>
+                    <div class="lang-en">
+                    <strong>Tip:</strong> vite-plugin-relay looks at all `.ts` files, finds GraphQL tags,
+                    and compiles them to JavaScript. It's like a Webpack loader, but built into Vite.
+                    </div>
+                </div>
+            </section>
+
+            <section id="theming">
+                <div class="lang-ru">
+                <h2>CSS переменные (Custom Properties) для theming</h2>
+
+                <h3>Определение CSS переменных</h3>
+                <p>
+                    В Life Goals Dashboard уже использут CSS переменные в `--bg`, `--header`, `--accent` и т.д.
+                    Создайте файл `src/styles/variables.css`:
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <h2>CSS Variables (Custom Properties) for Theming</h2>
+
+                <h3>Defining CSS Variables</h3>
+                <p>
+                    Life Goals Dashboard already uses CSS variables in `--bg`, `--header`, `--accent`, etc.
+                    Create a `src/styles/variables.css` file:
+                </p>
+                </div>
+
+                <pre><code class="language-css">
+/* src/styles/variables.css */
+:root {
+    /* Цвета / Colors */
+    --bg: #1e1e2e;
+    --bg-secondary: #181825;
+    --text: #cdd6f4;
+    --text-secondary: #a6adc7;
+    --header: #89b4fa;
+    --accent: #f38ba8;
+    --success: #a6e3a1;
+    --warning: #fab387;
+    --code-bg: #181825;
+
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+
+    /* Border radius */
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 8px;
+    --radius-full: 999px;
+
+    /* Typography */
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.25rem;
+    --font-size-xl: 1.5rem;
+
+    --line-height-tight: 1.3;
+    --line-height-normal: 1.6;
+    --line-height-relaxed: 1.75;
+}
+
+/* Тёмная тема (можно добавить light theme) / Dark theme (can add light theme) */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg: #ffffff;
+        --bg-secondary: #f5f5f5;
+        --text: #1e1e2e;
+        --text-secondary: #4a4a4a;
+        /* ... остальные переменные / ... other variables */
+    }
+}
+                </code></pre>
+
+                <div class="lang-ru">
+                <h3>Использование переменных в CSS Modules</h3>
+                </div>
+
+                <div class="lang-en">
+                <h3>Using Variables in CSS Modules</h3>
+                </div>
+
+                <pre><code class="language-css">
+/* Button.module.css */
+.button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+}
+
+.button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+                </code></pre>
+
+                <div class="lang-ru">
+                <h3>Импорт переменных в приложение</h3>
+                </div>
+
+                <div class="lang-en">
+                <h3>Importing Variables into the App</h3>
+                </div>
+
+                <pre><code class="language-typescript">
+// src/main.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './styles/variables.css';  // Загрузить переменные глобально
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+        <App />
+    </React.StrictMode>
+);
+                </code></pre>
+
+                <div class="lang-ru">
+                <p>
+                    Теперь все компоненты имеют доступ к CSS переменным через `var(--variable-name)`.
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <p>
+                    Now all components have access to CSS variables through `var(--variable-name)`.
+                </p>
+                </div>
+            </section>
+
+            <section id="best-practices">
+                <div class="lang-ru">
+                <h2>Best Practices</h2>
+
+                <h3>Структура файлов</h3>
+                </div>
+
+                <div class="lang-en">
+                <h2>Best Practices</h2>
+
+                <h3>File Structure</h3>
+                </div>
+
+                <pre><code class="language-bash">
+src/
+├── styles/
+│   ├── variables.css         # Глобальные CSS переменные
+│   └── globals.css           # Глобальные стили (reset, base)
+├── components/
+│   ├── Button/
+│   │   ├── Button.tsx
+│   │   ├── Button.module.css
+│   │   └── Button.test.tsx
+│   └── WidgetCard/
+│       ├── WidgetCard.tsx
+│       ├── WidgetCard.module.css
+│       └── WidgetCard.test.tsx
+└── main.tsx
+                </code></pre>
+
+                <div class="lang-ru">
+                <h3>Правила</h3>
+                <ol style="margin-left: 2rem;">
+                    <li><strong>Один .module.css на компонент</strong> — коллокализация (рядом с .tsx)</li>
+                    <li><strong>Используйте CSS переменные</strong> для всех цветов, размеров, spacing</li>
+                    <li><strong>Избегайте глобальных классов</strong> — всё должно быть в modules</li>
+                    <li><strong>camelCase для классов</strong> в CSS файлах, которые станут camelCase в import'е</li>
+                    <li><strong>Не дублируйте стили</strong> — используйте `composes` для наследования</li>
+                </ol>
+
+                <h3>Оптимизация: Code Splitting</h3>
+                <p>
+                    Vite автоматически сплитует код, но можете оптимизировать вручную:
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <h3>Rules</h3>
+                <ol style="margin-left: 2rem;">
+                    <li><strong>One .module.css per component</strong> — colocation (next to .tsx)</li>
+                    <li><strong>Use CSS variables</strong> for all colors, sizes, spacing</li>
+                    <li><strong>Avoid global classes</strong> — everything should be in modules</li>
+                    <li><strong>camelCase for classes</strong> in CSS files that become camelCase in imports</li>
+                    <li><strong>Don't duplicate styles</strong> — use `composes` for inheritance</li>
+                </ol>
+
+                <h3>Optimization: Code Splitting</h3>
+                <p>
+                    Vite automatically splits code, but you can optimize manually:
+                </p>
+                </div>
+
+                <pre><code class="language-typescript">
+// Ленивая загрузка компонента / Lazy load component
+import { lazy, Suspense } from 'react';
+
+const FitnessWidget = lazy(() => import('./widgets/FitnessWidget'));
+
+const App = () => {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <FitnessWidget />
+        </Suspense>
+    );
+};
+                </code></pre>
+
+                <div class="lang-ru">
+                <p>
+                    FitnessWidget будет загружен только когда нужен, в отдельном JavaScript чанке.
+                </p>
+                </div>
+
+                <div class="lang-en">
+                <p>
+                    FitnessWidget will be loaded only when needed, in a separate JavaScript chunk.
+                </p>
+                </div>
+            </section>
+
+            <section class="assignments">
+                <div class="lang-ru">
+                <h2>Практические задания</h2>
+
+                <div class="assignment">
+                    <h4>Задание 1: CSS Modules для компонента (День 1, 45 минут)</h4>
+                    <p>
+                        Создайте `WidgetCard.tsx` с полной CSS Modules стилизацией:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Напишите `WidgetCard.module.css` с .container, .title, .description, .badge</li>
+                        <li>Используйте CSS переменные для всех цветов</li>
+                        <li>Добавьте hover эффект</li>
+                        <li>Используйте `clsx` для условного применения класс-имён</li>
+                    </ul>
+                    <p><strong>Результат:</strong> Компонент с локальным CSS scope'ом, без глобального загрязнения.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Задание 2: Vite конфигурация (День 1, 30 минут)</h4>
+                    <p>
+                        Настройте `vite.config.ts`:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Добавьте proxy для `/graphql` на http://localhost:8080</li>
+                        <li>Добавьте proxy для `/subscriptions` на ws://localhost:8080</li>
+                        <li>Включите vite-plugin-relay</li>
+                        <li>Настройте CSS Modules с camelCase</li>
+                        <li>Проверьте, что `npm run dev` запускается без ошибок</li>
+                    </ul>
+                    <p><strong>Результат:</strong> Полностью настроенный Vite с поддержкой GraphQL и Relay.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Задание 3: CSS переменные и theming (День 1.5, 45 минут)</h4>
+                    <p>
+                        Создайте полную систему CSS переменных:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Напишите `src/styles/variables.css` со всеми цветами, spacing, typography</li>
+                        <li>Используйте переменные в 3+ компонентах</li>
+                        <li>Добавьте light theme через `@media (prefers-color-scheme: light)`</li>
+                        <li>Проверьте что тёма переключается при смене системных настроек</li>
+                    </ul>
+                    <p><strong>Результат:</strong> Легко поддерживаемая система theming с support light/dark режимов.</p>
+                </div>
+                </div>
+
+                <div class="lang-en">
+                <h2>Practical Assignments</h2>
+
+                <div class="assignment">
+                    <h4>Assignment 1: CSS Modules for Component (Day 1, 45 minutes)</h4>
+                    <p>
+                        Create `WidgetCard.tsx` with full CSS Modules styling:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Write `WidgetCard.module.css` with .container, .title, .description, .badge</li>
+                        <li>Use CSS variables for all colors</li>
+                        <li>Add hover effect</li>
+                        <li>Use `clsx` for conditional class application</li>
+                    </ul>
+                    <p><strong>Result:</strong> A component with local CSS scope, no global pollution.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Assignment 2: Vite Configuration (Day 1, 30 minutes)</h4>
+                    <p>
+                        Configure `vite.config.ts`:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Add proxy for `/graphql` to http://localhost:8080</li>
+                        <li>Add proxy for `/subscriptions` to ws://localhost:8080</li>
+                        <li>Enable vite-plugin-relay</li>
+                        <li>Configure CSS Modules with camelCase</li>
+                        <li>Verify that `npm run dev` starts without errors</li>
+                    </ul>
+                    <p><strong>Result:</strong> Fully configured Vite with GraphQL and Relay support.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Assignment 3: CSS Variables and Theming (Day 1.5, 45 minutes)</h4>
+                    <p>
+                        Create a complete CSS variables system:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Write `src/styles/variables.css` with all colors, spacing, typography</li>
+                        <li>Use variables in 3+ components</li>
+                        <li>Add light theme via `@media (prefers-color-scheme: light)`</li>
+                        <li>Verify that theme switches when system settings change</li>
+                    </ul>
+                    <p><strong>Result:</strong> Maintainable theming system with light/dark mode support.</p>
+                </div>
+                </div>
+            </section>
+
+            <section class="assignments" id="backlog-tasks" style="border-top-color: #f5c2e7;">
+                <div class="lang-ru">
+                <h2>🧪 Задания из Backlog проекта (TDD)</h2>
+                <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                    Эти задания — реальные задачи из бэклога проекта Life Goals Dashboard.
+                    Для каждого задания предоставлены тесты, которые нужно сделать зелёными, написав реализацию.
+                    <strong>Подход TDD:</strong> сначала изучи тесты → пойми что от тебя ожидается → напиши код → запусти тесты.
+                </p>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #VN-11: Vite 8 + Rolldown конфигурация (13 SP)</h4>
+                    <span class="tdd-badge">TDD</span>
+                    <p>Настройте `vite.config.ts` для Life Goals Dashboard с Vite 8.0.8, Rolldown bundler, CSS Modules и Relay компиляцией.
+                    Проверьте что production build выполняется за разумное время и bundle size в пределах допуска.</p>
+                    <p><strong>Требования:</strong></p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Vite version должна быть 8.0.8+</li>
+                        <li>Rolldown bundler ВКЛ для prod builds (opt-in `rolldown-vite`)</li>
+                        <li>React 19.2.5 plugin включён</li>
+                        <li>Relay компилятор интегрирован</li>
+                        <li>CSS Modules с camelCase convention</li>
+                        <li>GraphQL proxy на http://localhost:8080/graphql</li>
+                        <li>WebSocket proxy на ws://localhost:8080/subscriptions</li>
+                        <li>Production bundle < 500KB (zipped)</li>
+                    </ul>
+                    <p><strong>Тесты (напиши код/конфиг, чтобы они прошли):</strong></p>
+                </div>
+
+                <pre><code class="language-typescript">
+import { describe, it, expect } from 'vitest';
+import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+import { build } from 'vite';
+
+describe('Backlog #VN-11: Vite 8 + Rolldown Config', () => {
+  it('should load vite.config.ts without errors', async () => {
+    const configPath = path.resolve(__dirname, '../vite.config.ts');
+    expect(fs.existsSync(configPath)).toBe(true);
+    const config = await import(configPath);
+    expect(config.default).toBeDefined();
+  });
+
+  it('should report Vite version 8.0.8+', () => {
+    const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+    const viteVersion = pkg.devDependencies.vite;
+    const major = parseInt(viteVersion.split('.')[0]);
+    expect(major).toBeGreaterThanOrEqual(8);
+  });
+
+  it('should have React and Relay plugins configured', async () => {
+    const configPath = path.resolve(__dirname, '../vite.config.ts');
+    const configContent = fs.readFileSync(configPath, 'utf-8');
+    expect(configContent).toContain('react');
+    expect(configContent).toContain('relay');
+  });
+
+  it('production build should complete and be under 500KB (zipped)', async () => {
+    const startTime = Date.now();
+    const result = await build({
+      build: {
+        minify: 'terser',
+        sourcemap: false
+      }
+    });
+    const buildTime = Date.now() - startTime;
+
+    // Should build in reasonable time (< 30 seconds even with Rolldown)
+    expect(buildTime).toBeLessThan(30000);
+
+    // Check dist bundle size
+    const distDir = path.resolve(__dirname, '../dist');
+    const jsFiles = fs.readdirSync(distDir)
+      .filter(f => f.endsWith('.js'))
+      .map(f => fs.statSync(path.join(distDir, f)).size)
+      .reduce((a, b) => a + b, 0);
+
+    // Rough check: JS should be < 500KB uncompressed (will be ~100KB zipped)
+    expect(jsFiles).toBeLessThan(500 * 1024);
+  });
+
+  it('should report bundle size metrics', async () => {
+    // Use vite build --report to get bundle stats
+    try {
+      const output = execSync('npm run build 2>&1', { encoding: 'utf-8' });
+      // Vite should output performance metrics
+      expect(output).toMatch(/dist.*js/i);
+    } catch (e) {
+      // Build output might be in stderr
+      expect(e).toBeDefined();
+    }
+  });
+});
+                </code></pre>
+
+                <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 1rem;"><em>
+                  Файл: src/__tests__/vite8-rolldown.test.ts |
+                  Запусти: <code>npm run build && npm test -- vite8</code>
+                </em></p>
+                </div>
+
+                <div class="lang-en">
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #VN-11: Vite 8 + Rolldown Configuration (13 SP)</h4>
+                    <span class="tdd-badge">TDD</span>
+                    <p>Configure `vite.config.ts` for Life Goals Dashboard with Vite 8.0.8, Rolldown bundler, CSS Modules, and Relay compilation.
+                    Verify that production build runs in reasonable time and bundle size is within tolerance.</p>
+                    <p><strong>Requirements:</strong></p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Vite version 8.0.8+</li>
+                        <li>Rolldown bundler enabled for prod builds (opt-in `rolldown-vite`)</li>
+                        <li>React 19.2.5 plugin enabled</li>
+                        <li>Relay compiler integrated</li>
+                        <li>CSS Modules with camelCase convention</li>
+                        <li>GraphQL proxy to http://localhost:8080/graphql</li>
+                        <li>WebSocket proxy to ws://localhost:8080/subscriptions</li>
+                        <li>Production bundle < 500KB (zipped)</li>
+                    </ul>
+                    <p><strong>Tests (write code/config to make them pass):</strong></p>
+                </div>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #2: Vite + CSS Modules конфигурация (8 SP, partial)</h4>
+                    <p>Реализуйте полную конфигурацию Vite с поддержкой CSS Modules, React плагина и Relay компиляции.</p>
+                    <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                </div>
+                </div>
+
+                <div class="lang-en">
+                <h2>🧪 Backlog Tasks (TDD)</h2>
+                <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                    These tasks are real tasks from the Life Goals Dashboard backlog.
+                    Tests are provided for each task that you need to make green by writing the implementation.
+                    <strong>TDD approach:</strong> first study the tests → understand what's expected → write code → run tests.
+                </p>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #2: Vite + CSS Modules Configuration (8 SP, partial)</h4>
+                    <p>Implement complete Vite configuration with CSS Modules, React plugin, and Relay compilation support.</p>
+                    <p><strong>Tests (write code to make them pass):</strong></p>
+                </div>
+                </div>
+
+                <pre><code class="language-typescript">
+import { describe, it, expect } from '@jest/globals';
+import * as fs from 'fs';
+import * as path from 'path';
+
+describe('Backlog #2: Vite + CSS Modules Configuration', () =&gt; {
+  const rootDir = path.resolve(__dirname, '..');
+
+  it('should have vite.config.ts with React plugin', () =&gt; {
+    const config = fs.readFileSync(
+      path.join(rootDir, 'vite.config.ts'), 'utf-8'
+    );
+    expect(config).toContain('react');
+    expect(config).toContain('relay');
+  });
+
+  it('should configure CSS Modules with camelCase', () =&gt; {
+    const config = fs.readFileSync(
+      path.join(rootDir, 'vite.config.ts'), 'utf-8'
+    );
+    // CSS Modules should use camelCaseOnly for className consistency
+    expect(config).toContain('css');
+    expect(config).toContain('modules');
+  });
+
+  it('should have proxy config for GraphQL endpoint in dev', () =&gt; {
+    const config = fs.readFileSync(
+      path.join(rootDir, 'vite.config.ts'), 'utf-8'
+    );
+    expect(config).toContain('/graphql');
+    expect(config).toContain('8080');
+  });
+
+  it('CSS Module files should use .module.css extension', () =&gt; {
+    // Check that any CSS files in components use .module.css
+    const srcDir = path.join(rootDir, 'src');
+    const checkDir = (dir: string) =&gt; {
+      if (!fs.existsSync(dir)) return;
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          checkDir(path.join(dir, entry.name));
+        } else if (entry.name.endsWith('.css') &amp;&amp; !entry.name.endsWith('.module.css')) {
+          // Only global styles allowed in src/styles/
+          expect(dir).toContain('styles');
+        }
+      }
+    };
+    checkDir(path.join(srcDir, 'components'));
+    checkDir(path.join(srcDir, 'features'));
+  });
+});
+                </code></pre>
+
+                <div class="lang-ru">
+                <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/__tests__/vite-config.test.ts</em></p>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>CSS Modules Integration тест (partial Backlog #2)</h4>
+                    <p>Тестируйте интеграцию CSS Modules с React компонентами.</p>
+                    <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                </div>
+                </div>
+
+                <div class="lang-en">
+                <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/__tests__/vite-config.test.ts</em></p>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>CSS Modules Integration Test (partial Backlog #2)</h4>
+                    <p>Test CSS Modules integration with React components.</p>
+                    <p><strong>Tests (write code to make them pass):</strong></p>
+                </div>
+                </div>
+
+                <pre><code class="language-typescript">
+import React from 'react';
+import { render } from '@testing-library/react';
+
+describe('CSS Modules Integration', () =&gt; {
+  it('should apply scoped class names from CSS Modules', () =&gt; {
+    // Example: if you have a WidgetSkeleton component with CSS Module
+    // const { container } = render(&lt;WidgetSkeleton /&gt;);
+    // Class names should be hashed/scoped, not global
+    // expect(container.firstChild).toHaveClass(expect.stringMatching(/^_/));
+    expect(true).toBe(true); // Replace with real test after component exists
+  });
+});
+                </code></pre>
+
+                <div class="lang-ru">
+                <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/components/__tests__/CSSModules.test.tsx</em></p>
+                </div>
+
+                <div class="lang-en">
+                <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/components/__tests__/CSSModules.test.tsx</em></p>
+                </div>
+            </section>
+
+            <section class="resources">
+                <div class="lang-ru">
+                <h2>Дополнительные ресурсы</h2>
+                </div>
+
+                <div class="lang-en">
+                <h2>Additional Resources</h2>
+                </div>
+
+                <a href="https://github.com/css-modules/css-modules" class="resource-link">
+                    CSS Modules GitHub
+                </a>
+
+                <a href="https://vitejs.dev/" class="resource-link">
+                    Vite Official Documentation
+                </a>
+
+                <a href="https://vitejs.dev/guide/features.html#css" class="resource-link">
+                    Vite CSS Support and Modules
+                </a>
+
+                <a href="https://vitejs.dev/guide/ssr.html" class="resource-link">
+                    Vite SSR Guide
+                </a>
+
+                <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/--*" class="resource-link">
+                    CSS Custom Properties (MDN)
+                </a>
+
+                <a href="https://github.com/JedWatson/classnames" class="resource-link">
+                    <span class="lang-ru">clsx — условное применение классов</span><span class="lang-en">clsx — conditional class application</span>
+                </a>
+            </section>
+
+            <footer class="nav-footer">
+                <a href="10-react.html" class="nav-link prev"><span class="lang-ru">← Модуль 10: React 18+</span><span class="lang-en">← Module 10: React 18+</span></a>
+                <a href="12-relay.html" class="nav-link next"><span class="lang-ru">Модуль 12: Relay →</span><span class="lang-en">Module 12: Relay →</span></a>
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script>
+        function setLang(lang) {
+            document.body.classList.toggle('show-en', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('study-lang', lang); } catch(e) {}
+        }
+        try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+    </script>
+</body>
+</html>

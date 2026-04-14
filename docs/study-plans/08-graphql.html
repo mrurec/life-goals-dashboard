@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 8: GraphQL (General Theory) - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Language Switching */
+        .lang-en {
+            display: none;
+        }
+
+        .lang-ru {
+            display: block;
+        }
+
+        .show-en .lang-en {
+            display: block;
+        }
+
+        .show-en .lang-ru {
+            display: none;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .language-switcher {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .lang-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--text-secondary);
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .lang-button.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .lang-button:hover {
+            border-color: var(--header);
+            color: var(--header);
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .language-graphql::before {
+            content: attr(data-lang);
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details/Collapse */
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        /* Assignments */
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .tdd-badge {
+            display: inline-block;
+            background: #f5c2e7;
+            color: #1e1e2e;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+
+        /* Resources */
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        /* Navigation */
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Prism Customization */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="module-number"><span class="lang-ru">МОДУЛЬ 8 / 16</span><span class="lang-en">MODULE 8 / 16</span></div>
+            <h1><span class="lang-ru">GraphQL (общая теория)</span><span class="lang-en">GraphQL (General Theory)</span></h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="language-switcher">
+            <button class="lang-button active" onclick="setLang('ru')">РУ</button>
+            <button class="lang-button" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3><span class="lang-ru">Содержание</span><span class="lang-en">Contents</span></h3>
+            <ul>
+                <li><a href="#intro"><span class="lang-ru">Введение</span><span class="lang-en">Introduction</span></a></li>
+                <li><a href="#vs-rest"><span class="lang-ru">GraphQL vs REST</span><span class="lang-en">GraphQL vs REST</span></a></li>
+                <li><a href="#schema"><span class="lang-ru">Schema и Types</span><span class="lang-en">Schema and Types</span></a></li>
+                <li><a href="#queries"><span class="lang-ru">Queries & Mutations</span><span class="lang-en">Queries & Mutations</span></a></li>
+                <li><a href="#subscriptions"><span class="lang-ru">Subscriptions</span><span class="lang-en">Subscriptions</span></a></li>
+                <li><a href="#relay"><span class="lang-ru">Relay Connection Pattern</span><span class="lang-en">Relay Connection Pattern</span></a></li>
+                <li><a href="#directives"><span class="lang-ru">Directives</span><span class="lang-en">Directives</span></a></li>
+                <li><a href="#assignments"><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></a></li>
+                <li><a href="#backlog-tasks"><span class="lang-ru">🧪 Задания из Backlog (TDD)</span><span class="lang-en">🧪 Backlog Tasks (TDD)</span></a></li>
+                <li><a href="#resources"><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <h2><span class="lang-ru">Введение: GraphQL для Life Goals Dashboard</span><span class="lang-en">Introduction: GraphQL for Life Goals Dashboard</span></h2>
+                <div class="lang-ru">
+                    <p>
+                        <strong>GraphQL</strong> — это язык запросов для API. Клиент запрашивает РОВНО те данные, которые ему нужны,
+                        на одном endpoint. Нет overfetching (лишние данные) и underfetching (нужны доп. запросы).
+                    </p>
+                    <p>
+                        GraphQL используется на всех крупных компаниях (Meta, GitHub, Shopify, Twitter).
+                        Life Goals Dashboard использует Netflix DGS (Domain Graph Service) для реализации GraphQL на Spring Boot.
+                    </p>
+                    <p>
+                        За 2 дня вы освоите GraphQL schema, типы, queries, mutations, subscriptions, Relay Connection pattern
+                        и directives (@defer для оптимизации).
+                    </p>
+
+                    <div class="tip">
+                        <strong>Совет:</strong> GraphQL можно тестировать в GraphiQL IDE (встроена в DGS на :8080/graphiql).
+                        Пишите запросы прямо в браузере и видите результаты в реальном времени.
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        <strong>GraphQL</strong> is a query language for APIs. A client requests exactly the data it needs,
+                        on a single endpoint. No overfetching (unnecessary data) and no underfetching (need for additional requests).
+                    </p>
+                    <p>
+                        GraphQL is used by major companies (Meta, GitHub, Shopify, Twitter).
+                        Life Goals Dashboard uses Netflix DGS (Domain Graph Service) to implement GraphQL on Spring Boot.
+                    </p>
+                    <p>
+                        In 2 days, you will master GraphQL schema, types, queries, mutations, subscriptions, Relay Connection pattern,
+                        and directives (@defer for optimization).
+                    </p>
+
+                    <div class="tip">
+                        <strong>Tip:</strong> GraphQL can be tested in GraphiQL IDE (built-in to DGS at :8080/graphiql).
+                        Write queries directly in the browser and see results in real-time.
+                    </div>
+                </div>
+            </section>
+
+            <section id="vs-rest">
+                <h2><span class="lang-ru">GraphQL vs REST</span><span class="lang-en">GraphQL vs REST</span></h2>
+
+                <h3><span class="lang-ru">Проблемы REST</span><span class="lang-en">REST Problems</span></h3>
+                <div class="lang-ru">
+                    <p><strong>Overfetching:</strong> Клиент запрашивает `GET /users/123` и получает все поля пользователя,
+                    даже если нужны только имя и email.</p>
+
+                    <p><strong>Underfetching:</strong> Клиент запрашивает `GET /users/123`, получает пользователя,
+                    потом делает `GET /users/123/workouts` для тренировок. Два запроса вместо одного.</p>
+                </div>
+                <div class="lang-en">
+                    <p><strong>Overfetching:</strong> Client requests `GET /users/123` and receives all user fields,
+                    even if only name and email are needed.</p>
+
+                    <p><strong>Underfetching:</strong> Client requests `GET /users/123`, gets the user,
+                    then makes `GET /users/123/workouts` for workouts. Two requests instead of one.</p>
+                </div>
+
+                <h3><span class="lang-ru">Решение: GraphQL</span><span class="lang-en">Solution: GraphQL</span></h3>
+                <pre><code class="language-graphql">
+# Client requests exactly what it needs
+query {
+  me {
+    id
+    name
+    email
+    workouts {
+      id
+      date
+      durationMinutes
+    }
+  }
+}
+
+# Response contains exactly these fields, nothing extra
+{
+  "me": {
+    "id": "uuid-123",
+    "name": "mrurec",
+    "email": "yura@example.com",
+    "workouts": [
+      {
+        "id": "workout-1",
+        "date": "2026-04-13",
+        "durationMinutes": 45
+      }
+    ]
+  }
+}
+                </code></pre>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th><span class="lang-ru">Аспект</span><span class="lang-en">Aspect</span></th>
+                            <th><span class="lang-ru">REST</span><span class="lang-en">REST</span></th>
+                            <th><span class="lang-ru">GraphQL</span><span class="lang-en">GraphQL</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="lang-ru">Endpoints</span><span class="lang-en">Endpoints</span></td>
+                            <td><span class="lang-ru">Много (/users, /users/:id, /workouts, /recipes)</span><span class="lang-en">Many (/users, /users/:id, /workouts, /recipes)</span></td>
+                            <td><span class="lang-ru">Один (/graphql)</span><span class="lang-en">One (/graphql)</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Типы запросов</span><span class="lang-en">Query Types</span></td>
+                            <td><span class="lang-ru">GET, POST, PUT, DELETE</span><span class="lang-en">GET, POST, PUT, DELETE</span></td>
+                            <td><span class="lang-ru">Query (GET), Mutation (POST), Subscription (WebSocket)</span><span class="lang-en">Query (GET), Mutation (POST), Subscription (WebSocket)</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Выбор полей</span><span class="lang-en">Field Selection</span></td>
+                            <td><span class="lang-ru">Фиксировано сервером</span><span class="lang-en">Fixed by server</span></td>
+                            <td><span class="lang-ru">Клиент выбирает в запросе</span><span class="lang-en">Client chooses in query</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Overfetching</span><span class="lang-en">Overfetching</span></td>
+                            <td><span class="lang-ru">Часто</span><span class="lang-en">Often</span></td>
+                            <td><span class="lang-ru">Никогда — берёшь только нужное</span><span class="lang-en">Never — only take what you need</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Underfetching</span><span class="lang-en">Underfetching</span></td>
+                            <td><span class="lang-ru">Часто — нужны доп. запросы</span><span class="lang-en">Often — need additional requests</span></td>
+                            <td><span class="lang-ru">Никогда — один запрос для всех данных</span><span class="lang-en">Never — one request for all data</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Типизация</span><span class="lang-en">Typing</span></td>
+                            <td><span class="lang-ru">Нет встроенной</span><span class="lang-en">No built-in</span></td>
+                            <td><span class="lang-ru">Сильная типизация (schema)</span><span class="lang-en">Strong typing (schema)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="schema">
+                <h2><span class="lang-ru">Schema и Types</span><span class="lang-en">Schema and Types</span></h2>
+
+                <h3><span class="lang-ru">Что такое Schema?</span><span class="lang-en">What is Schema?</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        GraphQL Schema — это контракт между клиентом и сервером. Он определяет:
+                        - Какие данные доступны (types)
+                        - Какие операции возможны (Query, Mutation, Subscription)
+                        - Какие поля имеют какие типы
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        GraphQL Schema is a contract between client and server. It defines:
+                        - What data is available (types)
+                        - What operations are possible (Query, Mutation, Subscription)
+                        - What types fields have
+                    </p>
+                </div>
+
+                <h3><span class="lang-ru">Основные типы</span><span class="lang-en">Basic Types</span></h3>
+                <pre><code class="language-graphql">
+# Scalar types (built-in)
+scalar String
+scalar Int
+scalar Float
+scalar Boolean
+scalar ID          # Unique identifier
+scalar DateTime    # ISO 8601 date-time
+scalar Date        # Date (without time)
+scalar JSON        # Arbitrary JSON (e.g., widget config)
+
+# Object type — entity with fields
+type User {
+  id: ID!                    # ! means NOT NULL (required)
+  email: String!
+  name: String
+  workouts: [Workout!]!      # Array [Type!] — array of non-null elements
+  createdAt: DateTime!
+}
+
+# Interface — contract for multiple types
+interface Node {
+  id: ID!
+}
+
+type Workout implements Node {
+  id: ID!
+  userId: ID!
+  date: Date!
+  durationMinutes: Int!
+  caloriesBurned: Int
+}
+
+# Enum — enumeration of values
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+type Meal {
+  id: ID!
+  mealType: MealType!       # Can only be one of enum values
+  calories: Int!
+}
+
+# Union — "either one or the other" type
+union WidgetData = FitnessWidgetData | InterviewPrepWidgetData | BudgetWidgetData
+
+type FitnessWidgetData {
+  currentWeight: Float!
+  targetWeight: Float!
+  workoutsThisWeek: Int!
+}
+
+type InterviewPrepWidgetData {
+  nextReviewProblem: CodingProblem
+  readinessScore: Int!
+}
+
+type BudgetWidgetData {
+  saved: Float!
+  target: Float!
+  deadline: Date!
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Input типы (для мутаций)</span><span class="lang-en">Input Types (for Mutations)</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Input типы — это объекты, которые клиент ПЕРЕДАЁТ серверу (в мутациях).
+                        Output типы — это объекты, которые сервер ВОЗВРАЩАЕТ клиенту.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Input types are objects that the client SENDS to the server (in mutations).
+                        Output types are objects that the server RETURNS to the client.
+                    </p>
+                </div>
+
+                <pre><code class="language-graphql">
+input CreateWorkoutInput {
+  date: Date!
+  durationMinutes: Int!
+  caloriesBurned: Int
+}
+
+type CreateWorkoutPayload {
+  workout: Workout
+  errors: [UserError!]!
+}
+
+type UserError {
+  field: String
+  message: String!
+  code: ErrorCode!
+}
+
+enum ErrorCode {
+  VALIDATION_ERROR
+  UNAUTHORIZED
+  NOT_FOUND
+  INTERNAL_ERROR
+}
+                </code></pre>
+            </section>
+
+            <section id="queries">
+                <h2><span class="lang-ru">Queries и Mutations</span><span class="lang-en">Queries and Mutations</span></h2>
+
+                <h3><span class="lang-ru">Query — чтение данных</span><span class="lang-en">Query — Reading Data</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Query — это "GET" запрос. Не меняет данные, только читает.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Query is a "GET" request. Does not modify data, only reads.
+                    </p>
+                </div>
+
+                <pre><code class="language-graphql">
+type Query {
+  # Get current user
+  me: User!
+
+  # Get user by ID
+  user(id: ID!): User
+
+  # Get all recipes of current user
+  myRecipes: [Recipe!]!
+
+  # Search with parameters
+  searchRecipes(query: String!, limit: Int = 10): [Recipe!]!
+}
+
+# Examples of queries from client:
+query {
+  me {
+    id
+    name
+    email
+  }
+}
+
+query {
+  myRecipes {
+    id
+    name
+    servings
+    ingredients {
+      id
+      product {
+        name
+        caloriesPer100g
+      }
+      portionGrams
+    }
+  }
+}
+
+query SearchRecipes($query: String!) {
+  searchRecipes(query: $query, limit: 20) {
+    id
+    name
+  }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Mutation — изменение данных</span><span class="lang-en">Mutation — Modifying Data</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Mutation — это "POST/PUT/DELETE" запрос. Изменяет данные и возвращает новое состояние.
+                        ВСЕГДА возвращает Payload с errors массивом (никогда не кидаем исключения для бизнес-ошибок).
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Mutation is a "POST/PUT/DELETE" request. Modifies data and returns new state.
+                        ALWAYS returns a Payload with errors array (never throw exceptions for business errors).
+                    </p>
+                </div>
+
+                <pre><code class="language-graphql">
+type Mutation {
+  # Log a workout
+  logWorkout(input: LogWorkoutInput!): LogWorkoutPayload!
+
+  # Create recipe
+  createRecipe(input: CreateRecipeInput!): CreateRecipePayload!
+
+  # Log meal
+  logMeal(input: LogMealInput!): LogMealPayload!
+}
+
+input LogWorkoutInput {
+  date: Date!
+  durationMinutes: Int!
+  caloriesBurned: Int
+  notes: String
+}
+
+type LogWorkoutPayload {
+  workout: Workout
+  errors: [UserError!]!
+}
+
+# Example mutation from client:
+mutation LogWorkout($input: LogWorkoutInput!) {
+  logWorkout(input: $input) {
+    workout {
+      id
+      date
+      durationMinutes
+    }
+    errors {
+      field
+      message
+      code
+    }
+  }
+}
+                </code></pre>
+            </section>
+
+            <section id="subscriptions">
+                <h2><span class="lang-ru">Subscriptions (WebSocket)</span><span class="lang-en">Subscriptions (WebSocket)</span></h2>
+
+                <h3><span class="lang-ru">Real-time уведомления</span><span class="lang-en">Real-time Notifications</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Subscription — это "слушатель" на данные. Клиент подписывается через WebSocket,
+                        и сервер отправляет данные в реальном времени.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Subscription is a "listener" for data. Client subscribes via WebSocket,
+                        and server sends data in real-time.
+                    </p>
+                </div>
+
+                <pre><code class="language-graphql">
+type Subscription {
+  # Listen to notifications of current user
+  myNotifications: Notification!
+
+  # Listen to recipe updates in real-time
+  recipeUpdated(recipeId: ID!): Recipe!
+}
+
+type Notification {
+  id: ID!
+  type: NotificationType!
+  message: String!
+  timestamp: DateTime!
+}
+
+enum NotificationType {
+  ACHIEVEMENT_UNLOCKED
+  REMINDER
+  MILESTONE_REACHED
+  WARNING
+}
+
+# Example subscription from client:
+subscription {
+  myNotifications {
+    id
+    type
+    message
+    timestamp
+  }
+}
+
+# If server publishes an event via Redis pub/sub,
+# client receives it IMMEDIATELY via WebSocket:
+{
+  "myNotifications": {
+    "id": "notif-123",
+    "type": "ACHIEVEMENT_UNLOCKED",
+    "message": "3 workouts this week!",
+    "timestamp": "2026-04-13T10:30:00Z"
+  }
+}
+                </code></pre>
+            </section>
+
+            <section id="relay">
+                <h2><span class="lang-ru">Relay Connection Pattern</span><span class="lang-en">Relay Connection Pattern</span></h2>
+
+                <h3><span class="lang-ru">Курсорная пагинация</span><span class="lang-en">Cursor-based Pagination</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Relay Connection pattern — это стандарт для пагинации в GraphQL.
+                        Используется cursor-based pagination (вместо offset-based), что позволяет
+                        безопасно работать с изменяющимися данными.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Relay Connection pattern is a standard for pagination in GraphQL.
+                        Uses cursor-based pagination (instead of offset-based), which allows
+                        safe work with changing data.
+                    </p>
+                </div>
+
+                <pre><code class="language-graphql">
+# Relay types (standard for any API)
+interface Node {
+  id: ID!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+# Connection and Edge types for any type
+type RecipeConnection {
+  edges: [RecipeEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type RecipeEdge {
+  cursor: String!          # Unique identifier of row in list
+  node: Recipe!            # The entity itself (Recipe)
+}
+
+# Now Query uses Connection types
+type Query {
+  myRecipes(
+    first: Int                  # How many elements to take (forward)
+    after: String              # After which cursor to start
+    last: Int                  # How many elements to take (backward)
+    before: String             # Before which cursor to take
+  ): RecipeConnection!
+}
+
+# Client request:
+query MyRecipes($first: Int!, $after: String) {
+  myRecipes(first: $first, after: $after) {
+    edges {
+      cursor
+      node {
+        id
+        name
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}
+
+# Response:
+{
+  "myRecipes": {
+    "edges": [
+      {
+        "cursor": "recipe:uuid1",
+        "node": { "id": "uuid1", "name": "Pasta" }
+      },
+      {
+        "cursor": "recipe:uuid2",
+        "node": { "id": "uuid2", "name": "Salad" }
+      }
+    ],
+    "pageInfo": {
+      "hasNextPage": true,
+      "endCursor": "recipe:uuid2"
+    },
+    "totalCount": 42
+  }
+}
+
+# Next page:
+query NextRecipes($first: Int!, $after: String!) {
+  myRecipes(first: $first, after: $after) {
+    # ...
+  }
+}
+# Passed variables: { "first": 10, "after": "recipe:uuid2" }
+                </code></pre>
+            </section>
+
+            <section id="directives">
+                <h2><span class="lang-ru">Directives</span><span class="lang-en">Directives</span></h2>
+
+                <h3><span class="lang-ru">@defer — отложенная загрузка</span><span class="lang-en">@defer — Deferred Loading</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        @defer директива говорит серверу: "Отправь это поле позже, не ждите для основного ответа".
+                        Используется для тяжёлых полей (которые долго вычисляются).
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        @defer directive tells server: "Send this field later, don't wait for the main response".
+                        Used for heavy fields (that take long to compute).
+                    </p>
+                </div>
+
+                <pre><code class="language-graphql">
+# In schema we define @defer as possible:
+directive @defer(label: String, if: Boolean = true) on FIELD | FRAGMENT_SPREAD
+
+# In query:
+query DashboardPage {
+  myDashboard {
+    id
+    widgets {
+      id
+      type
+      position
+
+      # Server sends this data after main response
+      data @defer(label: "widget_data") {
+        __typename
+        ... on FitnessWidgetData {
+          currentWeight
+          targetWeight
+        }
+        ... on BudgetWidgetData {
+          saved
+          target
+        }
+      }
+    }
+  }
+}
+
+# Client receives response in 2 parts:
+# 1. Immediately (200ms):
+{
+  "myDashboard": {
+    "widgets": [
+      { "id": "1", "type": "FITNESS", "position": 0 }
+    ]
+  }
+}
+
+# 2. Later (1s), in separate chunk:
+{
+  "label": "widget_data",
+  "data": {
+    "__typename": "FitnessWidgetData",
+    "currentWeight": 82.5,
+    "targetWeight": 80
+  }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Fragments — переиспользуемые блоки запроса</span><span class="lang-en">Fragments — Reusable Query Blocks</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Fragment — это переиспользуемый блок полей. Колокируется с компонентом (в одном файле).
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Fragment is a reusable block of fields. Colocated with component (in the same file).
+                    </p>
+                </div>
+
+                <pre><code class="language-graphql">
+# Fragment definition
+fragment RecipeCard_recipe on Recipe {
+  id
+  name
+  servings
+  ingredients {
+    id
+    product {
+      name
+    }
+  }
+}
+
+# Fragment usage
+query MyRecipes {
+  myRecipes {
+    ...RecipeCard_recipe
+  }
+}
+                </code></pre>
+            </section>
+
+            <section class="assignments">
+                <h2><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></h2>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 1: Написать GraphQL Schema для Fitness Widget</span><span class="lang-en">Assignment 1: Write GraphQL Schema for Fitness Widget</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте schema.graphqls с типами: Workout, BodyMeasurement, NutritionSummary.
+                            Query: getMyWorkouts(after, first), getMyMeasurements.
+                            Mutation: logWorkout(input), recordMeasurement(input).
+                            Используйте Relay Connection pattern для getMyWorkouts.
+                        </p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create schema.graphqls with types: Workout, BodyMeasurement, NutritionSummary.
+                            Query: getMyWorkouts(after, first), getMyMeasurements.
+                            Mutation: logWorkout(input), recordMeasurement(input).
+                            Use Relay Connection pattern for getMyWorkouts.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 2: Payload + UserError для создания рецепта</span><span class="lang-en">Assignment 2: Payload + UserError for Recipe Creation</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте мутацию createRecipe с CreateRecipeInput и CreateRecipePayload.
+                            Payload должна возвращать recipe (может быть null) и errors [UserError!]!
+                            Валидируйте: имя не пустое, хотя бы 1 ингредиент, все продукты существуют.
+                        </p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create createRecipe mutation with CreateRecipeInput and CreateRecipePayload.
+                            Payload should return recipe (can be null) and errors [UserError!]!
+                            Validate: name not empty, at least 1 ingredient, all products exist.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 3: Написать Fragment для компонента</span><span class="lang-en">Assignment 3: Write Fragment for Component</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте React компонент RecipeCard.tsx.
+                            В одном файле напишите GraphQL fragment RecipeCard_recipe
+                            с полями: id, name, servings, ingredients { product { name } }.
+                            Компонент должен использовать этот fragment.
+                        </p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create React component RecipeCard.tsx.
+                            In the same file, write GraphQL fragment RecipeCard_recipe
+                            with fields: id, name, servings, ingredients { product { name } }.
+                            Component should use this fragment.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="backlog-tasks">
+                <h2><span class="lang-ru">🧪 Задания из Backlog (TDD)</span><span class="lang-en">🧪 Backlog Tasks (TDD)</span></h2>
+                <div class="lang-ru">
+                    <p>
+                        Ниже представлены реальные задачи из backlog проекта Life Goals Dashboard.
+                        Решайте их в TDD стиле: сначала напишите тест, потом реализацию.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Below are real tasks from the Life Goals Dashboard project backlog.
+                        Solve them TDD style: write the test first, then the implementation.
+                    </p>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Backlog #13: Core GraphQL Schema</span><span class="lang-en">Backlog #13: Core GraphQL Schema</span> <span class="tdd-badge">8 SP</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Реализуйте root Query и Mutation типы, Node interface, PageInfo, relay connection utilities.
+                            Query должна содержать: me (текущий пользователь), myDashboard (dashboard пользователя).
+                            Mutation: addWidgetToDashboard, removeWidgetFromDashboard, updateWidgetConfig.
+                        </p>
+                        <p><strong>Тест:</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Implement root Query and Mutation types, Node interface, PageInfo, relay connection utilities.
+                            Query should contain: me (current user), myDashboard (user's dashboard).
+                            Mutation: addWidgetToDashboard, removeWidgetFromDashboard, updateWidgetConfig.
+                        </p>
+                        <p><strong>Test:</strong></p>
+                    </div>
+                    <pre><code class="language-kotlin">
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class CoreSchemaTest {
+    @Autowired
+    private lateinit var graphQLTester: GraphQLTester
+
+    @Test
+    fun `query me should return current user`() {
+        val query = """
+            query {
+              me {
+                id
+                email
+              }
+            }
+        """
+
+        val result = graphQLTester.executeQuery(query)
+
+        assertThat(result.path("me.id")).isNotNull()
+        assertThat(result.path("me.email")).isNotNull()
+    }
+
+    @Test
+    fun `query myDashboard should return widgets`() {
+        val query = """
+            query {
+              myDashboard {
+                id
+                widgets {
+                  id
+                  type
+                  position
+                }
+              }
+            }
+        """
+
+        val result = graphQLTester.executeQuery(query)
+
+        assertThat(result.path("myDashboard.id")).isNotNull()
+        assertThat(result.path("myDashboard.widgets")).isInstanceOf(List::class.java)
+    }
+
+    @Test
+    fun `addWidgetToDashboard mutation should return widget and no errors`() {
+        val mutation = """
+            mutation AddWidget(${'$'}input: AddWidgetToDashboardInput!) {
+              addWidgetToDashboard(input: ${'$'}input) {
+                widget {
+                  id
+                  type
+                }
+                errors {
+                  field
+                  message
+                }
+              }
+            }
+        """
+        val variables = mapOf(
+            "input" to mapOf(
+                "widgetType" to "FITNESS",
+                "config" to mapOf(
+                    "targetWeightKg" to 80,
+                    "dailyCalorieTarget" to 2200
+                )
+            )
+        )
+
+        val result = graphQLTester.executeQuery(mutation, variables)
+
+        assertThat(result.path("addWidgetToDashboard.widget.id")).isNotNull()
+        assertThat(result.path("addWidgetToDashboard.errors")).isInstanceOf(List::class.java)
+    }
+}
+                    </code></pre>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Backlog #23: Interview Prep GraphQL Schema</span><span class="lang-en">Backlog #23: Interview Prep GraphQL Schema</span> <span class="tdd-badge">5 SP</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте schema с типами: CodingProblem, ProblemCategory (enum), Difficulty (enum),
+                            InterviewPrepWidgetData, мутация logProblemAttempt с логированием попытки решения.
+                            Используйте Relay connection pattern для getCodingProblems.
+                        </p>
+                        <p><strong>Тест:</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create schema with types: CodingProblem, ProblemCategory (enum), Difficulty (enum),
+                            InterviewPrepWidgetData, mutation logProblemAttempt for logging attempt.
+                            Use Relay connection pattern for getCodingProblems.
+                        </p>
+                        <p><strong>Test:</strong></p>
+                    </div>
+                    <pre><code class="language-kotlin">
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class InterviewPrepSchemaTest {
+    @Autowired
+    private lateinit var graphQLTester: GraphQLTester
+
+    @Test
+    fun `query codingProblems should support cursor pagination`() {
+        val query = """
+            query GetProblems(${'$'}first: Int!, ${'$'}after: String) {
+              codingProblems(first: ${'$'}first, after: ${'$'}after) {
+                edges {
+                  cursor
+                  node {
+                    id
+                    title
+                    category
+                    difficulty
+                    isTargetCompanyTagged
+                  }
+                }
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+                totalCount
+              }
+            }
+        """
+        val variables = mapOf("first" to 10)
+
+        val result = graphQLTester.executeQuery(query, variables)
+
+        assertThat(result.path("codingProblems.edges")).isInstanceOf(List::class.java)
+        assertThat(result.path("codingProblems.pageInfo.hasNextPage")).isInstanceOf(Boolean::class.java)
+        assertThat(result.path("codingProblems.totalCount")).isGreaterThanOrEqualTo(0)
+    }
+
+    @Test
+    fun `logProblemAttempt mutation should record attempt and return payload with errors`() {
+        val mutation = """
+            mutation LogAttempt(${'$'}input: LogProblemAttemptInput!) {
+              logProblemAttempt(input: ${'$'}input) {
+                attempt {
+                  id
+                  problemId
+                  status
+                  attemptedAt
+                }
+                errors {
+                  field
+                  message
+                  code
+                }
+              }
+            }
+        """
+        val variables = mapOf(
+            "input" to mapOf(
+                "problemId" to "uuid-123",
+                "status" to "SOLVED",
+                "timeSpentSeconds" to 1800
+            )
+        )
+
+        val result = graphQLTester.executeQuery(mutation, variables)
+
+        assertThat(result.path("logProblemAttempt.attempt.id")).isNotNull()
+        assertThat(result.path("logProblemAttempt.attempt.status")).isEqualTo("SOLVED")
+    }
+
+    @Test
+    fun `ProblemCategory enum should contain all categories`() {
+        val query = """
+            {
+              __type(name: "ProblemCategory") {
+                enumValues {
+                  name
+                }
+              }
+            }
+        """
+
+        val result = graphQLTester.executeQuery(query)
+
+        val enumValues = result.path("__type.enumValues") as List&lt;Map&lt;String, String&gt;&gt;
+        val names = enumValues.map { it["name"] }
+
+        assertThat(names).contains("ARRAY", "GRAPH", "DYNAMIC_PROGRAMMING", "SYSTEM_DESIGN")
+    }
+}
+                    </code></pre>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Backlog #32: Fitness Widget GraphQL Schema</span><span class="lang-en">Backlog #32: Fitness Widget GraphQL Schema</span> <span class="tdd-badge">5 SP</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте schema с типами: Workout, BodyMeasurement, FitnessWidgetData, мутации logWorkout и recordMeasurement.
+                            Используйте Relay connection pattern для getWorkouts с фильтром по дате.
+                            Payload должны содержать errors [UserError!]!.
+                        </p>
+                        <p><strong>Тест:</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create schema with types: Workout, BodyMeasurement, FitnessWidgetData, mutations logWorkout and recordMeasurement.
+                            Use Relay connection pattern for getWorkouts with date filter.
+                            Payloads should contain errors [UserError!]!.
+                        </p>
+                        <p><strong>Test:</strong></p>
+                    </div>
+                    <pre><code class="language-kotlin">
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class FitnessSchemaTest {
+    @Autowired
+    private lateinit var graphQLTester: GraphQLTester
+
+    @Test
+    fun `logWorkout mutation should validate and return errors`() {
+        val mutation = """
+            mutation LogWorkout(${'$'}input: LogWorkoutInput!) {
+              logWorkout(input: ${'$'}input) {
+                workout {
+                  id
+                  workoutDate
+                  totalDurationMinutes
+                }
+                errors {
+                  field
+                  message
+                }
+              }
+            }
+        """
+        val variables = mapOf(
+            "input" to mapOf(
+                "workoutDate" to "2026-04-13",
+                "totalDurationMinutes" to 60
+            )
+        )
+
+        val result = graphQLTester.executeQuery(mutation, variables)
+
+        assertThat(result.path("logWorkout.workout.id")).isNotNull()
+        assertThat(result.path("logWorkout.errors")).isInstanceOf(List::class.java)
+    }
+
+    @Test
+    fun `getWorkouts should filter by date range using Relay pagination`() {
+        val query = """
+            query GetWorkouts(${'$'}first: Int!, ${'$'}after: String, ${'$'}dateFrom: Date, ${'$'}dateTo: Date) {
+              getWorkouts(first: ${'$'}first, after: ${'$'}after, dateFrom: ${'$'}dateFrom, dateTo: ${'$'}dateTo) {
+                edges {
+                  node {
+                    id
+                    workoutDate
+                    totalDurationMinutes
+                  }
+                }
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+              }
+            }
+        """
+        val variables = mapOf(
+            "first" to 20,
+            "dateFrom" to "2026-04-01",
+            "dateTo" to "2026-04-13"
+        )
+
+        val result = graphQLTester.executeQuery(query, variables)
+
+        assertThat(result.path("getWorkouts.edges")).isInstanceOf(List::class.java)
+        assertThat(result.path("getWorkouts.pageInfo.hasNextPage")).isInstanceOf(Boolean::class.java)
+    }
+
+    @Test
+    fun `recordMeasurement mutation should handle optional macro targets`() {
+        val mutation = """
+            mutation RecordMeasurement(${'$'}input: RecordMeasurementInput!) {
+              recordMeasurement(input: ${'$'}input) {
+                measurement {
+                  id
+                  weightKg
+                  recordedAt
+                }
+                errors {
+                  message
+                }
+              }
+            }
+        """
+        val variables = mapOf(
+            "input" to mapOf(
+                "weightKg" to 82.5,
+                "recordedAt" to "2026-04-13T10:30:00Z"
+            )
+        )
+
+        val result = graphQLTester.executeQuery(mutation, variables)
+
+        assertThat(result.path("recordMeasurement.measurement.id")).isNotNull()
+        assertThat(result.path("recordMeasurement.measurement.weightKg")).isEqualTo(82.5)
+    }
+}
+                    </code></pre>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Backlog #40: Budget Widget GraphQL Schema</span><span class="lang-en">Backlog #40: Budget Widget GraphQL Schema</span> <span class="tdd-badge">3 SP</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте schema с типами: Transaction, SavingsGoal, BudgetWidgetData, ExchangeRate (cached).
+                            Мутация logTransaction с валидацией. Query getExchangeRate(from, to) с кэшированием в Redis.
+                            Subscription onTransactionLogged для real-time обновлений.
+                        </p>
+                        <p><strong>Тест:</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create schema with types: Transaction, SavingsGoal, BudgetWidgetData, ExchangeRate (cached).
+                            Mutation logTransaction with validation. Query getExchangeRate(from, to) with Redis caching.
+                            Subscription onTransactionLogged for real-time updates.
+                        </p>
+                        <p><strong>Test:</strong></p>
+                    </div>
+                    <pre><code class="language-kotlin">
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class BudgetSchemaTest {
+    @Autowired
+    private lateinit var graphQLTester: GraphQLTester
+
+    @Test
+    fun `logTransaction mutation should validate amount and currency`() {
+        val mutation = """
+            mutation LogTransaction(${'$'}input: LogTransactionInput!) {
+              logTransaction(input: ${'$'}input) {
+                transaction {
+                  id
+                  amount
+                  currency
+                  description
+                  transactionDate
+                }
+                errors {
+                  field
+                  message
+                  code
+                }
+              }
+            }
+        """
+        val variables = mapOf(
+            "input" to mapOf(
+                "amount" to 150.50,
+                "currency" to "EUR",
+                "description" to "Flight to South Korea",
+                "transactionDate" to "2026-04-13"
+            )
+        )
+
+        val result = graphQLTester.executeQuery(mutation, variables)
+
+        assertThat(result.path("logTransaction.transaction.id")).isNotNull()
+        assertThat(result.path("logTransaction.transaction.amount")).isEqualTo(150.50)
+    }
+
+    @Test
+    fun `getExchangeRate should return rate and be cached`() {
+        val query = """
+            query GetRate(${'$'}from: String!, ${'$'}to: String!) {
+              getExchangeRate(from: ${'$'}from, to: ${'$'}to) {
+                from
+                to
+                rate
+                timestamp
+              }
+            }
+        """
+        val variables = mapOf("from" to "EUR", "to" to "KRW")
+
+        val result1 = graphQLTester.executeQuery(query, variables)
+        val result2 = graphQLTester.executeQuery(query, variables)
+
+        assertThat(result1.path("getExchangeRate.rate")).isNotNull()
+        assertThat(result1.path("getExchangeRate.rate")).isEqualTo(result2.path("getExchangeRate.rate"))
+    }
+
+    @Test
+    fun `BudgetWidgetData should return progress towards goal`() {
+        val query = """
+            query {
+              myDashboard {
+                id
+                widgets {
+                  ... on BudgetWidgetData {
+                    goalName
+                    saved
+                    target
+                    targetCurrency
+                    deadline
+                    savingsForecast {
+                      projectedReachDate
+                      scenarios {
+                        label
+                        projectedAmount
+                      }
+                    }
+                  }
+                }
+              }
+            }
+        """
+
+        val result = graphQLTester.executeQuery(query)
+
+        assertThat(result.path("myDashboard.widgets[0].goalName")).isNotNull()
+        assertThat(result.path("myDashboard.widgets[0].savingsForecast.scenarios")).isInstanceOf(List::class.java)
+    }
+}
+                    </code></pre>
+                </div>
+            </section>
+
+            <section class="resources">
+                <h2><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></h2>
+                <a href="https://graphql.org/" class="resource-link"><span class="lang-ru">GraphQL Official</span><span class="lang-en">GraphQL Official</span></a>
+                <a href="https://www.apollographql.com/docs/apollo-server/" class="resource-link"><span class="lang-ru">Apollo GraphQL Documentation</span><span class="lang-en">Apollo GraphQL Documentation</span></a>
+                <a href="https://www.howtographql.com/" class="resource-link"><span class="lang-ru">How to GraphQL Tutorial</span><span class="lang-en">How to GraphQL Tutorial</span></a>
+                <a href="https://relay.dev/" class="resource-link"><span class="lang-ru">Relay Official (Connection Pattern)</span><span class="lang-en">Relay Official (Connection Pattern)</span></a>
+                <a href="https://spec.graphql.org/June2018/" class="resource-link"><span class="lang-ru">GraphQL Specification</span><span class="lang-en">GraphQL Specification</span></a>
+                <a href="https://production-ready-graphql.rocks/" class="resource-link"><span class="lang-ru">Production Ready GraphQL</span><span class="lang-en">Production Ready GraphQL</span></a>
+                <a href="https://netflix.github.io/dgs/" class="resource-link"><span class="lang-ru">Netflix DGS (Spring Boot GraphQL)</span><span class="lang-en">Netflix DGS (Spring Boot GraphQL)</span></a>
+            </section>
+
+            <div class="nav-footer">
+                <a href="07-spring-data-jpa.html" class="nav-link prev"><span class="lang-ru">← Предыдущий модуль</span><span class="lang-en">← Previous Module</span></a>
+                <a href="#" class="nav-link next" style="opacity: 0.5; cursor: not-allowed;"><span class="lang-ru">Следующий модуль →</span><span class="lang-en">Next Module →</span></a>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-graphql.min.js"></script>
+    <script>
+        function setLang(lang) {
+            const body = document.body;
+            const buttons = document.querySelectorAll('.lang-button');
+
+            if (lang === 'en') {
+                body.classList.add('show-en');
+            } else {
+                body.classList.remove('show-en');
+            }
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            localStorage.setItem('preferredLanguage', lang);
+        }
+
+        // Load saved language preference on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'ru';
+            const buttons = document.querySelectorAll('.lang-button');
+            const body = document.body;
+
+            if (savedLang === 'en') {
+                body.classList.add('show-en');
+                buttons[1].classList.add('active');
+            } else {
+                buttons[0].classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>
