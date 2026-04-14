@@ -1,0 +1,32 @@
+# Dev API service. Postgres + Redis are started separately via life-goals-api/docker-compose.yml.
+#
+# Usage (from repo root):
+#   docker-compose -f life-goals-api/docker-compose.yml up -d
+#   docker-compose -f deploy/docker-compose.dev.yml up -d
+#
+# NOTE: When the API runs inside Docker it reaches Postgres and Redis by their
+# service names ("postgres", "redis"), not "localhost". The DB_URL and REDIS_URL
+# below are wired accordingly. Your local .env may still use localhost-based
+# values for running the API outside Docker (./gradlew bootRun).
+
+services:
+  life-goals-api:
+    build:
+      context: ../life-goals-api
+      dockerfile: Dockerfile
+    image: life-goals-api:latest
+    ports:
+      - '8080:8080'
+    environment:
+      # Rewrite URLs to point at sibling containers, not localhost
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-lifegoals}
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_URL: redis://redis:6379
+      # Pass remaining secrets verbatim from .env
+      JWT_SECRET: ${JWT_SECRET}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+      EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
+      EXCHANGE_RATE_API_URL: ${EXCHANGE_RATE_API_URL:-https://api.exchangeratesapi.io/v1/latest}
+      FEATURE_FLAGS_PATH: ${FEATURE_FLAGS_PATH:-config/features.json}
