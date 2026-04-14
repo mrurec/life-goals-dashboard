@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Logback configuration for Life Goals API.
+
+    Profiles:
+      - dev:        pretty, colorized console output for humans.
+      - test, prod: structured JSON lines to stdout (one object per line),
+                    consumed by Railway/Render/stack log aggregators.
+
+    MDC fields carried on every event:
+      - userId         — viewer id, populated by the auth filter.
+      - queryHash      — persisted-query hash, populated by GraphQL instrumentation.
+      - operationName  — GraphQL operation name, populated by GraphQL instrumentation.
+
+    See CLAUDE.md → "Observability & Structured Logging".
+-->
+<configuration>
+
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="life-goals-api"/>
+
+    <!-- ========== dev: pretty console ========== -->
+    <springProfile name="dev">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg {userId=%X{userId:-}, op=%X{operationName:-}, qh=%X{queryHash:-}}%n</pattern>
+            </encoder>
+        </appender>Ï
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.mrurec.lifegoals" level="DEBUG"/>
+    </springProfile>
+
+    <!-- ========== test / prod: JSON lines ========== -->
+    <springProfile name="test,prod">
+        <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>userId</includeMdcKeyName>
+                <includeMdcKeyName>queryHash</includeMdcKeyName>
+                <includeMdcKeyName>operationName</includeMdcKeyName>
+                <customFields>{"app":"${appName}"}</customFields>
+                <timeZone>UTC</timeZone>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON"/>
+        </root>
+    </springProfile>
+
+</configuration>

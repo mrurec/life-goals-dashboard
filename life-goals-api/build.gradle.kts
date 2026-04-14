@@ -36,6 +36,9 @@ dependencies {
 
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
 
+    // Structured JSON logging — see logback-spring.xml (prod/test profiles).
+    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
+
     // Spring Modulith: module boundary enforcement + transactional event publication.
     // See docs/adr/ADR-004-module-boundary-enforcement.md
     implementation(platform("org.springframework.modulith:spring-modulith-bom:2.0.5"))
