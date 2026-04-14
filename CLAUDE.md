@@ -457,7 +457,7 @@ cd life-goals-web && npm run typecheck  # TypeScript
 # Build
 ./gradlew build                         # Backend JAR
 cd life-goals-web && npm run build      # Frontend bundle
-docker build -t life-goals-api .        # Docker image
+cd life-goals-api && docker build -t life-goals-api .  # Docker image
 ```
 
 ---
