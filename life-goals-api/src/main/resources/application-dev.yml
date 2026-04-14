@@ -10,14 +10,14 @@ spring:
       url: ${REDIS_URL:redis://localhost:6379}
   jpa:
     hibernate:
-      ddl-auto: validate
+      # TODO: switch to 'validate' and set flyway.enabled=true once the first Flyway migration is added
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
         format_sql: true
   flyway:
-    enabled: true
-    baseline-on-migrate: true
+    enabled: false
 
 management:
   endpoints:

@@ -36,6 +36,12 @@ dependencies {
 
     implementation("com.netflix.graphql.dgs:graphql-dgs-spring-graphql-starter")
 
+    // Spring Modulith: module boundary enforcement + transactional event publication.
+    // See docs/adr/ADR-004-module-boundary-enforcement.md
+    implementation(platform("org.springframework.modulith:spring-modulith-bom:2.0.5"))
+    implementation("org.springframework.modulith:spring-modulith-starter-core")
+    implementation("org.springframework.modulith:spring-modulith-starter-jpa")
+
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
@@ -44,7 +50,8 @@ dependencies {
     testImplementation("io.mockk:mockk:1.14.9")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
+    testImplementation("org.springframework.modulith:spring-modulith-starter-test")
+    // ArchUnit removed per ADR-004; add back only when a non-Modulith-expressible rule appears.
 
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")

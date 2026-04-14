@@ -100,6 +100,12 @@ com.mrurec.lifegoals/
 
 **Rule:** A widget type package may depend on `common/` but NEVER imports from another widget type's `repository/` or `model/` package. Cross-widget data flows through service interfaces only. This is the key to eventual microservice extraction.
 
+**Enforcement (Spring Modulith).** The rule above is enforced by [Spring Modulith](https://docs.spring.io/spring-modulith/reference/), not by convention or code review. Every top-level package under `com.mrurec.lifegoals/` is an `@ApplicationModule` with an explicit `allowedDependencies` list (widgets may only depend on `common`). A single JUnit test `ModularityTests#verifies module boundaries` runs `ApplicationModules.of(LifeGoalsApplication::class.java).verify()` — it fails the build on illegal cross-widget imports and on module cycles. The same test also generates PlantUML diagrams of the module graph under `build/spring-modulith-docs/`.
+
+**Cross-widget communication** uses Spring Modulith events via `ApplicationEventPublisher` + `@ApplicationModuleListener` (backed by the transactional event publication registry), never direct method calls. Example: `fitness` publishes `WorkoutLogged` → `notification` reacts via `AchievementChecker` listener with zero compile-time dependency on `fitness` internals.
+
+See `docs/adr/ADR-004-module-boundary-enforcement.md` for the decision record and the trade-off vs. ArchUnit.
+
 ### Widget Config (JSONB) — No Hardcoded Parameters
 
 Every widget instance carries a `config: JSONB` with user-supplied parameters. The widget type defines a config schema; the dashboard enforces it at add-time.
