@@ -1,0 +1,24 @@
+# Test-profile overrides. This file is in the test classpath and automatically
+# overrides src/main/resources/application.yml when tests run. No @ActiveProfiles
+# or SPRING_PROFILES_ACTIVE required.
+#
+# Datasource and Redis URLs are provided at runtime by Testcontainers
+# @ServiceConnection, so they are intentionally not set here.
+spring:
+  profiles:
+    active: test
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+
+app:
+  security:
+    jwt-secret: ${JWT_SECRET:test-secret-0000000000000000000000000000000000}
+  oauth:
+    client-id: ${OAUTH_CLIENT_ID:test-client-id}
+    client-secret: ${OAUTH_CLIENT_SECRET:test-client-secret}
+  exchange-rate:
+    api-key: ${EXCHANGE_RATE_API_KEY:test-exchange-rate-key}
