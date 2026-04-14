@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Budget Planner — Accounts Allocation (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  .chart-wrap-wide { height: 320px; position: relative; }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /widgets/budget/accounts — balances by account, allocation doughnut, 90d balance trend</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title">
+      <h1>Budget · Accounts</h1>
+      <div class="sub">Goal "South Korea Trip" · baseCurrency <b>EUR</b> · target <b>€3 000</b> by 2026-10 · <a href="budget.html">← Budget overview</a></div>
+    </div>
+    <div class="actions">
+      <a href="budget.html" class="btn">📊 Overview</a>
+      <a href="transactions.html" class="btn">💳 Transactions</a>
+      <button class="btn primary">+ Add account</button>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">Total across accounts</div><div class="value">€1 842.50</div><div class="delta up">▲ 61.4% of €3 000 goal</div></div>
+    <div class="kpi"><div class="label">Live-synced balance</div><div class="value">€1 412.30</div><div class="delta up">3 of 4 accounts via API</div></div>
+    <div class="kpi"><div class="label">Forecast reach date</div><div class="value">2026-09</div><div class="delta up">▲ 1 month ahead of deadline</div></div>
+  </div>
+
+  <div class="grid split">
+    <div class="card">
+      <h2>Allocation by account</h2>
+      <div class="chart-wrap"><canvas id="donut"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Total balance — last 90 days</h2>
+      <div class="chart-wrap-wide"><canvas id="line"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 20px;">
+    <h2>Accounts</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Provider</th>
+          <th>Sync</th>
+          <th class="num">Balance</th>
+          <th class="num">% of total</th>
+          <th>Last update</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="dot" style="background:#7c5cff"></span>Revolut Savings</td>
+          <td>Revolut (Open Banking / GoCardless)</td>
+          <td><span class="tag live">LIVE</span></td>
+          <td class="num">€820.00</td>
+          <td class="num">44.5%</td>
+          <td>2 min ago</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#22c55e"></span>Revolut Invest</td>
+          <td>Revolut (Open Banking)</td>
+          <td><span class="tag live">LIVE</span></td>
+          <td class="num">€412.30</td>
+          <td class="num">22.4%</td>
+          <td>2 min ago</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#f59e0b"></span>Revolut Crypto</td>
+          <td>Manual (no public API)</td>
+          <td><span class="tag manual">MANUAL</span></td>
+          <td class="num">€180.00</td>
+          <td class="num">9.8%</td>
+          <td>3 days ago</td>
+        </tr>
+        <tr>
+          <td><span class="dot" style="background:#06b6d4"></span>crypto.com Exchange</td>
+          <td>crypto.com Exchange API (read-only key)</td>
+          <td><span class="tag live">LIVE</span></td>
+          <td class="num">€430.20</td>
+          <td class="num">23.3%</td>
+          <td>1 min ago</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="footer-note">Crypto balances are converted to <code>config.baseCurrency</code> via cached exchange rates (Redis, 1h TTL, key includes pair).</div>
+  </div>
+</main>
+</div>
+
+<script>
+  const donutCtx = document.getElementById('donut').getContext('2d');
+  new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Revolut Savings', 'Revolut Invest', 'Revolut Crypto', 'crypto.com'],
+      datasets: [{
+        data: [820, 412.3, 180, 430.2],
+        backgroundColor: ['#7c5cff', '#22c55e', '#f59e0b', '#06b6d4'],
+        borderColor: '#121821',
+        borderWidth: 3,
+        hoverOffset: 10
+      }]
+    },
+    options: {
+      cutout: '65%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#e6edf3', padding: 14, font: { size: 12 } } },
+        tooltip: { callbacks: { label: (c) => ` ${c.label}: €${c.parsed.toFixed(2)}` } }
+      }
+    }
+  });
+
+  const days = 90;
+  const labels = [];
+  const data = [];
+  let v = 1180;
+  const today = new Date('2026-04-14');
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    labels.push(d.toISOString().slice(5, 10));
+    v += (Math.random() - 0.35) * 18;
+    data.push(Math.max(900, v));
+  }
+  data[data.length - 1] = 1842.5;
+
+  const lineCtx = document.getElementById('line').getContext('2d');
+  const gradient = lineCtx.createLinearGradient(0, 0, 0, 280);
+  gradient.addColorStop(0, 'rgba(124,92,255,0.5)');
+  gradient.addColorStop(1, 'rgba(124,92,255,0)');
+
+  new Chart(lineCtx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Total (€)',
+        data,
+        borderColor: '#7c5cff',
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        borderWidth: 2
+      }, {
+        label: 'Goal',
+        data: Array(days).fill(3000),
+        borderColor: 'rgba(34,197,94,0.5)',
+        borderDash: [6, 6],
+        pointRadius: 0,
+        borderWidth: 1.5,
+        fill: false
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: '#e6edf3' } },
+        tooltip: { mode: 'index', intersect: false }
+      },
+      scales: {
+        x: { ticks: { color: '#8b98a9', maxTicksLimit: 8 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { ticks: { color: '#8b98a9', callback: (v) => '€' + v }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      }
+    }
+  });
+</script>
+</body>
+</html>

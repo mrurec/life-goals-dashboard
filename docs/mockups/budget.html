@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Budget Planner widget (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  .deadline { display: flex; gap: 16px; margin-top: 12px; font-variant-numeric: tabular-nums; }
+  .deadline .u { text-align: center; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel-3); }
+  .deadline .u .n { font-size: 22px; font-weight: 700; }
+  .deadline .u .l { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /widgets/budget — savings progress, three-scenario forecast, recent transactions</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title">
+      <h1>Budget · South Korea Trip</h1>
+      <div class="sub">Base <b>EUR</b> ↔ Target <b>KRW</b> · Deadline <b>2026-10</b> · Target <b>€3 000</b> (≈ ₩4 430 000)</div>
+    </div>
+    <div class="actions">
+      <a href="budget-accounts.html" class="btn">🏦 Accounts</a>
+      <a href="forecast.html" class="btn">📈 Forecast</a>
+      <a href="trip-budget.html" class="btn">🧳 Trip breakdown</a>
+      <a href="transactions.html" class="btn primary">+ Transaction</a>
+    </div>
+  </div>
+
+  <div class="grid split">
+    <div class="card">
+      <h2>Savings progress</h2>
+      <div style="display:flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px;">
+        <div>
+          <div class="muted" style="font-size:11px; text-transform:uppercase;">Saved</div>
+          <div style="font-size: 34px; font-weight: 800;">€1 842.50</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="muted" style="font-size:11px; text-transform:uppercase;">Of target</div>
+          <div style="font-size: 34px; font-weight: 800; color: var(--accent-2);">61.4%</div>
+        </div>
+      </div>
+      <div class="progress" style="height: 12px; margin-bottom: 10px;"><span style="width:61.4%"></span></div>
+      <div class="muted" style="font-size: 12px;">€1 157.50 left · avg monthly savings €310 · at current pace: <b>2026-09</b> (one month ahead).</div>
+
+      <h3 style="margin-top: 18px;">Countdown to deadline</h3>
+      <div class="deadline">
+        <div class="u"><div class="n">5</div><div class="l">Months</div></div>
+        <div class="u"><div class="n">23</div><div class="l">Weeks</div></div>
+        <div class="u"><div class="n">169</div><div class="l">Days</div></div>
+        <div class="u"><div class="n">€6.85</div><div class="l">Needed / day</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Forecast · 3 scenarios</h2>
+      <div class="chart-wrap"><canvas id="forecast"></canvas></div>
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px;">
+        <div style="padding: 10px; border: 1px solid var(--border); border-radius: 10px;">
+          <div class="muted" style="font-size:11px; text-transform:uppercase;">Current pace</div>
+          <div style="font-size: 18px; font-weight: 700;">2026-09-22</div>
+          <div style="color: var(--accent-2); font-size: 12px;">1 month ahead</div>
+        </div>
+        <div style="padding: 10px; border: 1px solid var(--border); border-radius: 10px;">
+          <div class="muted" style="font-size:11px; text-transform:uppercase;">+10%</div>
+          <div style="font-size: 18px; font-weight: 700;">2026-08-28</div>
+          <div style="color: var(--accent-2); font-size: 12px;">2 months ahead</div>
+        </div>
+        <div style="padding: 10px; border: 1px solid var(--border); border-radius: 10px;">
+          <div class="muted" style="font-size:11px; text-transform:uppercase;">+20%</div>
+          <div style="font-size: 18px; font-weight: 700;">2026-08-02</div>
+          <div style="color: var(--accent-2); font-size: 12px;">2 months 4 weeks ahead</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid cols-2" style="margin-top: 20px;">
+    <div class="card">
+      <h2>Exchange rate EUR → KRW</h2>
+      <div style="display:flex; align-items: baseline; gap: 14px; margin-bottom: 10px;">
+        <div style="font-size: 30px; font-weight: 700;">1 476.8</div>
+        <div class="muted">₩ per €</div>
+        <span class="tag live">LIVE · 1 min ago</span>
+      </div>
+      <div class="chart-wrap sm"><canvas id="rate"></canvas></div>
+      <div class="muted" style="font-size:12px; margin-top: 8px;">Redis cache 1h · <code>lifegoals:budget:exchange_rate:EUR:KRW</code>. Hourly scheduler refreshes active pairs.</div>
+    </div>
+
+    <div class="card">
+      <h2>Recent transactions</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="num">Amount</th></tr></thead>
+        <tbody>
+          <tr><td>Apr 13</td><td><b>Monthly transfer</b> → savings</td><td><span class="tag accent">Savings</span></td><td class="num up">+€300</td></tr>
+          <tr><td>Apr 12</td><td>Grocery run</td><td><span class="tag neutral">Food</span></td><td class="num down">−€48.20</td></tr>
+          <tr><td>Apr 10</td><td>Freelance invoice #204</td><td><span class="tag live">Income</span></td><td class="num up">+€650</td></tr>
+          <tr><td>Apr 09</td><td>Revolut card top-up</td><td><span class="tag neutral">Transport</span></td><td class="num down">−€30</td></tr>
+          <tr><td>Apr 07</td><td>Subscription (Claude)</td><td><span class="tag neutral">Subscriptions</span></td><td class="num down">−€20</td></tr>
+        </tbody>
+      </table>
+      <a href="transactions.html" class="btn sm" style="margin-top:10px;">All transactions →</a>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+  const fc = document.getElementById('forecast').getContext('2d');
+  const months = ['Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'];
+  const current = [1180, 1490, 1842, 2152, 2462, 2772, 3082, null, null];
+  const p10 = [1180, 1490, 1842, 2183, 2524, 2865, 3206, null, null];
+  const p20 = [1180, 1490, 1842, 2214, 2586, 2958, 3330, null, null];
+  new Chart(fc, { type:'line', data:{labels: months, datasets:[
+    {label:'Current pace', data: current, borderColor:'#7c5cff', tension:.3, pointRadius:3, borderWidth:2},
+    {label:'+10% savings', data: p10, borderColor:'#22c55e', tension:.3, pointRadius:3, borderWidth:2, borderDash:[4,3]},
+    {label:'+20% savings', data: p20, borderColor:'#06b6d4', tension:.3, pointRadius:3, borderWidth:2, borderDash:[2,3]},
+    {label:'Target €3 000', data: Array(9).fill(3000), borderColor:'rgba(245,158,11,0.6)', borderDash:[6,6], pointRadius:0, borderWidth:1.3}
+  ]}, options:{plugins:{legend:{labels:{color:'#e6edf3', font:{size:11}}}, tooltip:{mode:'index',intersect:false}},
+    scales:{x:{ticks:{color:'#8b98a9'}, grid:{color:'rgba(255,255,255,0.04)'}},
+      y:{ticks:{color:'#8b98a9', callback:v=>'€'+v}, grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+
+  const rc = document.getElementById('rate').getContext('2d');
+  const rLabels = Array.from({length:30},(_,i)=>i+1);
+  let r = 1460;
+  const rData = rLabels.map(()=>{ r += (Math.random()-0.5)*8; return +r.toFixed(1); });
+  rData[rData.length-1] = 1476.8;
+  new Chart(rc, { type:'line', data:{labels: rLabels, datasets:[
+    {data: rData, borderColor:'#06b6d4', tension:.3, pointRadius:0, borderWidth:2}
+  ]}, options:{plugins:{legend:{display:false}},
+    scales:{x:{display:false}, y:{ticks:{color:'#8b98a9', callback:v=>v}, grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+</script>
+</body>
+</html>

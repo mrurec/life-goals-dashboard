@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Dashboard — 3 widgets (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  .widget-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .widget-head .title { display: flex; align-items: center; gap: 10px; }
+  .widget-head .title h2 { margin: 0; }
+  .widget-head .kebab { color: var(--muted); cursor: pointer; }
+  .mini-kpi { display: flex; gap: 16px; margin-bottom: 14px; }
+  .mini-kpi .item .v { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .mini-kpi .item .l { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /dashboard — logged-in shell with 3 rendered widgets (@defer)</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+
+<main class="main">
+  <div class="topbar">
+    <div class="title">
+      <h1>Good morning, mrurec 👋</h1>
+      <div class="sub">Tuesday, 14 April 2026 · 3 active widgets · streak 12 days</div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost">🔍 Quick add</button>
+      <a href="add-widget.html" class="btn primary">+ Add widget</a>
+      <div class="avatar">IS</div>
+    </div>
+  </div>
+
+  <div class="grid cols-3">
+    <!-- Widget: Interview Prep -->
+    <div class="card">
+      <div class="widget-head">
+        <div class="title"><span style="font-size:20px">💻</span><h2>Interview Prep</h2></div>
+        <span class="kebab">⋯</span>
+      </div>
+      <div class="mini-kpi">
+        <div class="item"><div class="v">72</div><div class="l">Readiness</div></div>
+        <div class="item"><div class="v">11/15</div><div class="l">Week goal</div></div>
+        <div class="item"><div class="v">3</div><div class="l">Due today</div></div>
+      </div>
+      <div class="chart-wrap sm"><canvas id="prepChart"></canvas></div>
+      <div class="sub" style="margin-top:12px; font-size:12px;">Target: Meta E5 · Focus: Graph, DP</div>
+      <a href="interview-prep.html" class="btn sm" style="margin-top:10px;">Open widget →</a>
+    </div>
+
+    <!-- Widget: Fitness Tracker -->
+    <div class="card">
+      <div class="widget-head">
+        <div class="title"><span style="font-size:20px">🏋️</span><h2>Fitness Tracker</h2></div>
+        <span class="kebab">⋯</span>
+      </div>
+      <div class="mini-kpi">
+        <div class="item"><div class="v">87.2<span style="font-size:13px">kg</span></div><div class="l">Weight</div></div>
+        <div class="item"><div class="v">3/4</div><div class="l">Workouts</div></div>
+        <div class="item"><div class="v">1 840</div><div class="l">kcal today</div></div>
+      </div>
+      <div class="chart-wrap sm"><canvas id="weightChart"></canvas></div>
+      <div class="sub" style="margin-top:12px; font-size:12px;">Target 80 kg · 7.2 kg to go</div>
+      <a href="fitness.html" class="btn sm" style="margin-top:10px;">Open widget →</a>
+    </div>
+
+    <!-- Widget: Budget Planner -->
+    <div class="card">
+      <div class="widget-head">
+        <div class="title"><span style="font-size:20px">💰</span><h2>Budget — South Korea Trip</h2></div>
+        <span class="kebab">⋯</span>
+      </div>
+      <div class="mini-kpi">
+        <div class="item"><div class="v">€1 842</div><div class="l">Saved</div></div>
+        <div class="item"><div class="v">61.4%</div><div class="l">Of €3 000</div></div>
+        <div class="item"><div class="v">2026-09</div><div class="l">ETA</div></div>
+      </div>
+      <div class="progress" style="margin-bottom:14px"><span style="width:61.4%"></span></div>
+      <div class="chart-wrap sm"><canvas id="budgetChart"></canvas></div>
+      <a href="budget.html" class="btn sm" style="margin-top:10px;">Open widget →</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h2>Recent activity</h2>
+    <div class="list-item">
+      <div><span class="tag accent">INTERVIEW</span> &nbsp; Logged attempt · <b>LC 207 — Course Schedule</b> (solved, quality 4)</div>
+      <div class="meta">12 min ago</div>
+    </div>
+    <div class="list-item">
+      <div><span class="tag info">FITNESS</span> &nbsp; Meal logged · <b>Oatmeal bowl</b> (520 kcal)</div>
+      <div class="meta">2 h ago</div>
+    </div>
+    <div class="list-item">
+      <div><span class="tag live">BUDGET</span> &nbsp; Synced balance · <b>Revolut Savings</b> € 820.00</div>
+      <div class="meta">today 09:02</div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+  const prep = document.getElementById('prepChart').getContext('2d');
+  const prepDays = Array.from({length: 14}, (_,i) => i+1);
+  new Chart(prep, { type:'bar', data:{
+    labels: prepDays, datasets:[{
+      data:[1,2,0,3,2,1,0,2,4,1,3,2,1,3], backgroundColor:'rgba(124,92,255,0.7)', borderRadius:4
+    }]},
+    options:{plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#6b7688'}, grid:{display:false}}, y:{ticks:{color:'#6b7688'}, grid:{color:'rgba(255,255,255,0.04)'}}}
+    }
+  });
+
+  const wc = document.getElementById('weightChart').getContext('2d');
+  const grad = wc.createLinearGradient(0,0,0,180);
+  grad.addColorStop(0,'rgba(34,197,94,0.45)'); grad.addColorStop(1,'rgba(34,197,94,0)');
+  const wLabels = Array.from({length:30}, (_,i)=>i+1);
+  let w = 92; const wData = wLabels.map(()=>{ w -= 0.13 + Math.random()*0.18; return +w.toFixed(1); });
+  new Chart(wc, { type:'line', data:{ labels: wLabels, datasets:[
+    {data: wData, borderColor:'#22c55e', backgroundColor: grad, fill:true, tension:.35, pointRadius:0, borderWidth:2},
+    {data: Array(30).fill(80), borderColor:'rgba(245,158,11,0.6)', borderDash:[4,4], pointRadius:0, borderWidth:1.5}
+  ]}, options:{plugins:{legend:{display:false}},
+    scales:{x:{display:false}, y:{ticks:{color:'#6b7688'}, grid:{color:'rgba(255,255,255,0.04)'}}}
+  }});
+
+  const bc = document.getElementById('budgetChart').getContext('2d');
+  const bg = bc.createLinearGradient(0,0,0,180);
+  bg.addColorStop(0,'rgba(124,92,255,0.45)'); bg.addColorStop(1,'rgba(124,92,255,0)');
+  let bv = 1180; const bData = Array.from({length:30}, ()=>{ bv += (Math.random()-0.2)*25; return Math.max(900, bv); });
+  bData[bData.length-1] = 1842.5;
+  new Chart(bc, { type:'line', data:{ labels: Array(30).fill(''), datasets:[
+    {data: bData, borderColor:'#7c5cff', backgroundColor: bg, fill:true, tension:.35, pointRadius:0, borderWidth:2},
+    {data: Array(30).fill(3000), borderColor:'rgba(34,197,94,0.5)', borderDash:[4,4], pointRadius:0, borderWidth:1.5}
+  ]}, options:{plugins:{legend:{display:false}},
+    scales:{x:{display:false}, y:{ticks:{color:'#6b7688'}, grid:{color:'rgba(255,255,255,0.04)'}}}
+  }});
+</script>
+</body>
+</html>

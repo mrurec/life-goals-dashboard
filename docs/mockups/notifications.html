@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Notifications — dropdown + full page (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<style>
+  .notif {
+    display: flex; gap: 12px; padding: 14px; border: 1px solid var(--border);
+    border-radius: 12px; background: var(--panel-3); margin-bottom: 10px;
+  }
+  .notif.unread { border-color: rgba(124,92,255,0.4); background: rgba(124,92,255,0.05); }
+  .notif .icn {
+    width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .i-achv { background: rgba(34,197,94,0.15); color: var(--accent-2); }
+  .i-warn { background: rgba(245,158,11,0.15); color: var(--warn); }
+  .i-rem  { background: rgba(6,182,212,0.15); color: var(--accent-3); }
+  .i-mile { background: rgba(124,92,255,0.15); color: #bfb0ff; }
+  .notif .body { flex: 1; }
+  .notif .body .t { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .notif .body .d { color: var(--muted); font-size: 13px; line-height: 1.45; }
+  .notif .time { color: var(--muted-2); font-size: 11px; flex-shrink: 0; }
+  .dropdown-preview {
+    position: fixed; top: 70px; right: 32px; width: 380px; max-height: 540px; overflow: auto;
+    background: var(--panel-2); border: 1px solid var(--border-2);
+    border-radius: 14px; padding: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .dropdown-preview header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .dropdown-preview .notif { padding: 10px; }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /notifications — full page + bell dropdown (right). Real-time via GraphQL Subscriptions.</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title"><h1>Notifications</h1><div class="sub">3 unread · WS transport /subscriptions · backed by Redis pub/sub</div></div>
+    <div class="actions">
+      <button class="btn ghost">Mark all as read</button>
+      <button class="btn">Filter</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Today</h2>
+    <div class="notif unread">
+      <div class="icn i-achv">🏆</div>
+      <div class="body">
+        <div class="t">Achievement · 3 workouts this week!</div>
+        <div class="d">You hit your <code>targetWorkoutsPerWeek</code> of 4 — one more tomorrow locks in the bonus streak.</div>
+      </div>
+      <div class="time">12 min ago</div>
+    </div>
+    <div class="notif unread">
+      <div class="icn i-mile">💎</div>
+      <div class="body">
+        <div class="t">Milestone · 50% of €3 000 savings goal</div>
+        <div class="d">"South Korea Trip" crossed €1 500. Forecast ETA still 2026-09 — one month ahead of deadline.</div>
+      </div>
+      <div class="time">2 h ago</div>
+    </div>
+    <div class="notif unread">
+      <div class="icn i-rem">⏰</div>
+      <div class="body">
+        <div class="t">Reminder · 3 problems due for review</div>
+        <div class="d">SM-2 queued: <b>LC 133 Clone Graph</b>, <b>LC 200 Islands</b>, <b>LC 207 Course Schedule</b>.</div>
+      </div>
+      <div class="time">this morning</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Earlier</h2>
+    <div class="notif">
+      <div class="icn i-warn">⚠️</div>
+      <div class="body">
+        <div class="t">Warning · Calorie target exceeded</div>
+        <div class="d">Yesterday: 2 480 kcal (target 2 200). Macros were still in range.</div>
+      </div>
+      <div class="time">Yesterday 22:14</div>
+    </div>
+    <div class="notif">
+      <div class="icn i-achv">🏆</div>
+      <div class="body">
+        <div class="t">Achievement · 10 problems solved</div>
+        <div class="d">You've now solved 10 target-company-tagged problems across GRAPH and DP.</div>
+      </div>
+      <div class="time">Apr 12</div>
+    </div>
+    <div class="notif">
+      <div class="icn i-rem">⏰</div>
+      <div class="body">
+        <div class="t">Reminder · Weekly goal at 40% mid-week</div>
+        <div class="d">6/15 problems solved. 4 days left in this week.</div>
+      </div>
+      <div class="time">Apr 10</div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- Bell dropdown preview -->
+<div class="dropdown-preview">
+  <header>
+    <strong style="font-size: 14px;">Notifications</strong>
+    <a href="#" style="font-size: 12px;">View all</a>
+  </header>
+  <div class="notif unread">
+    <div class="icn i-achv">🏆</div>
+    <div class="body"><div class="t" style="font-size:13px;">3 workouts this week!</div><div class="d" style="font-size:12px;">Goal reached (4 target)</div></div>
+  </div>
+  <div class="notif unread">
+    <div class="icn i-mile">💎</div>
+    <div class="body"><div class="t" style="font-size:13px;">50% of savings goal</div><div class="d" style="font-size:12px;">€1 500 / €3 000</div></div>
+  </div>
+  <div class="notif unread">
+    <div class="icn i-rem">⏰</div>
+    <div class="body"><div class="t" style="font-size:13px;">3 problems due for review</div><div class="d" style="font-size:12px;">SM-2 queue</div></div>
+  </div>
+  <button class="btn sm ghost" style="width:100%; margin-top: 6px;">Mark all as read</button>
+</div>
+</body>
+</html>

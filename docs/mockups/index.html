@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Life Goals Dashboard — mockups gallery</title>
+<link rel="stylesheet" href="_theme.css"/>
+<style>
+  .hero { padding: 28px; border-radius: 16px; background: linear-gradient(135deg, rgba(124,92,255,0.18), rgba(6,182,212,0.10)); border: 1px solid var(--border); margin-bottom: 24px; }
+  .hero h1 { margin: 0 0 8px 0; font-size: 28px; }
+  .hero p { margin: 0; color: var(--muted); max-width: 760px; }
+  .group { margin-bottom: 28px; }
+  .group h2 { margin: 0 0 12px 0; font-size: 15px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .tile { display: block; padding: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-2); color: inherit; text-decoration: none; transition: transform .12s, border-color .12s; }
+  .tile:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .tile .route { font-family: ui-monospace, monospace; font-size: 11px; color: var(--accent); margin-bottom: 6px; }
+  .tile h3 { margin: 0 0 6px 0; font-size: 15px; }
+  .tile p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+  .tile .icon { font-size: 22px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockups index</span> · Life Goals Dashboard — static HTML previews of every screen</span>
+  <a href="../ARCHITECTURE.en.md">Architecture →</a>
+</div>
+
+<div class="shell" style="display:block; padding: 28px; max-width: 1200px; margin: 0 auto;">
+  <div class="hero">
+    <h1>🎯 Life Goals Dashboard — Mockups</h1>
+    <p>Static HTML previews of every screen in the widget-based dashboard. Built with a shared <code>_theme.css</code> so changes to design tokens propagate across all pages. Each mockup has a route label at the top matching the backend/frontend route it represents.</p>
+  </div>
+
+  <div class="group">
+    <h2>Shell &amp; Account</h2>
+    <div class="tile-grid">
+      <a class="tile" href="login.html"><div class="icon">🔐</div><div class="route">/login</div><h3>Login</h3><p>OAuth sign-in via Google + GitHub. Entry point for unauthenticated users.</p></a>
+      <a class="tile" href="dashboard.html"><div class="icon">⚏</div><div class="route">/dashboard</div><h3>Dashboard</h3><p>Main logged-in view — renders widget instances from user config. Activity feed + cross-widget KPIs.</p></a>
+      <a class="tile" href="dashboard-empty.html"><div class="icon">✨</div><div class="route">/dashboard (empty)</div><h3>Empty state / onboarding</h3><p>First-time user flow. Pick a widget type to add to the dashboard.</p></a>
+      <a class="tile" href="add-widget.html"><div class="icon">➕</div><div class="route">/dashboard · modal</div><h3>Add widget</h3><p>Config form generated from JsonSchema. Chip-based category picker + live JSON preview.</p></a>
+      <a class="tile" href="settings.html"><div class="icon">⚙️</div><div class="route">/settings</div><h3>Settings</h3><p>Profile, appearance, notifications, OAuth connections, feature flags, danger zone.</p></a>
+      <a class="tile" href="notifications.html"><div class="icon">🔔</div><div class="route">/notifications</div><h3>Notifications</h3><p>In-app notification list + bell dropdown preview. Achievement / milestone / reminder / warning types.</p></a>
+    </div>
+  </div>
+
+  <div class="group">
+    <h2>Widget · Interview Prep</h2>
+    <div class="tile-grid">
+      <a class="tile" href="interview-prep.html"><div class="icon">💻</div><div class="route">/widgets/interview-prep</div><h3>Interview Prep overview</h3><p>Readiness score ring, SM-2 next review, 53×7 heat map, weekly goal chart, category radar.</p></a>
+      <a class="tile" href="coding-problems.html"><div class="icon">📋</div><div class="route">/widgets/interview-prep/problems</div><h3>Coding problems</h3><p>Filterable list with difficulty badges, category chips, cursor pagination (Relay).</p></a>
+      <a class="tile" href="coding-problem-form.html"><div class="icon">✏️</div><div class="route">/widgets/interview-prep/problems/:id</div><h3>Problem detail &amp; log attempt</h3><p>Edit form + SM-2 quality buttons 1–5. Spaced-repetition state, attempts history.</p></a>
+      <a class="tile" href="system-design.html"><div class="icon">🏗️</div><div class="route">/widgets/interview-prep/system-design</div><h3>System design &amp; behavioral</h3><p>Tabbed — topic confidence bars and STAR story cards.</p></a>
+    </div>
+  </div>
+
+  <div class="group">
+    <h2>Widget · Fitness Tracker</h2>
+    <div class="tile-grid">
+      <a class="tile" href="fitness.html"><div class="icon">🏋️</div><div class="route">/widgets/fitness</div><h3>Fitness overview</h3><p>KPIs, 90-day weight chart, macro split doughnut, weekly dots, achievements.</p></a>
+      <a class="tile" href="workout-logger.html"><div class="icon">⏱️</div><div class="route">/widgets/fitness/workout</div><h3>Workout logger</h3><p>Live timer, exercise cards with set rows, quick-add picker, templates.</p></a>
+      <a class="tile" href="meal-diary.html"><div class="icon">🍽️</div><div class="route">/widgets/fitness/meals</div><h3>Meal diary &amp; recipes</h3><p>Daily totals vs target, meal sections, food search, recipe builder.</p></a>
+      <a class="tile" href="body-weight.html"><div class="icon">⚖️</div><div class="route">/widgets/fitness/measurements</div><h3>Body measurements</h3><p>Trend classification, dual-axis weight+bodyfat 180d chart, quick log.</p></a>
+    </div>
+  </div>
+
+  <div class="group">
+    <h2>Widget · Budget Planner</h2>
+    <div class="tile-grid">
+      <a class="tile" href="budget.html"><div class="icon">💰</div><div class="route">/widgets/budget</div><h3>Budget overview</h3><p>Savings progress, deadline countdown, 3-scenario forecast, live FX rate, transactions.</p></a>
+      <a class="tile" href="budget-accounts.html"><div class="icon">🏦</div><div class="route">/widgets/budget/accounts</div><h3>Bank accounts</h3><p>Balances by account (LIVE / MANUAL), allocation doughnut, 30d balance trend.</p></a>
+      <a class="tile" href="transactions.html"><div class="icon">💳</div><div class="route">/widgets/budget/transactions</div><h3>Transactions</h3><p>Full list with filters + inline create form. Dual-currency display.</p></a>
+      <a class="tile" href="forecast.html"><div class="icon">📈</div><div class="route">/widgets/budget/forecast</div><h3>Savings forecast</h3><p>3-scenario projection detail with sensitivity analysis of levers.</p></a>
+      <a class="tile" href="trip-budget.html"><div class="icon">🧳</div><div class="route">/widgets/budget/trip</div><h3>Trip budget breakdown</h3><p>Per-category allocation (from <code>config.budgetCategories[]</code>), dual-currency cards.</p></a>
+    </div>
+  </div>
+
+  <div class="group">
+    <h2>Shared assets</h2>
+    <div class="tile-grid">
+      <a class="tile" href="_theme.css"><div class="icon">🎨</div><div class="route">_theme.css</div><h3>Design tokens &amp; layout</h3><p>CSS variables, sidebar/topbar, cards, KPIs, grid, tags, buttons, forms, charts, modal.</p></a>
+      <a class="tile" href="_sidebar.html"><div class="icon">📐</div><div class="route">_sidebar.html</div><h3>Sidebar snippet</h3><p>Reusable navigation markup copy-pasted into every page for consistency.</p></a>
+    </div>
+  </div>
+
+  <div class="footer-note" style="margin-top: 28px;">
+    These are <b>static HTML mockups</b> — no backend, no live data. Values are illustrative and match the example configurations in <code>CLAUDE.md</code>. The real app will generate widget pages from Relay fragments fed by the Netflix DGS GraphQL schema.
+  </div>
+</div>
+</body>
+</html>

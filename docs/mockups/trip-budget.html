@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Trip budget breakdown (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  .cat-card {
+    border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--panel-3);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .cat-card h3 { margin: 0; display:flex; align-items: center; gap: 8px; }
+  .cur-pair { display: flex; align-items: baseline; gap: 10px; }
+  .cur-pair .main { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cur-pair .alt { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /widgets/budget/trip — categories from <code>config.budgetCategories[]</code>, dual-currency</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title"><h1>Trip budget · South Korea</h1><div class="sub">5 categories · EUR ↔ KRW @ 1 476.8 · live rate · <a href="budget.html">← Budget</a></div></div>
+    <div class="actions">
+      <button class="btn">⚙ Edit categories</button>
+      <button class="btn primary">+ Allocate</button>
+    </div>
+  </div>
+
+  <div class="grid split">
+    <div class="card">
+      <h2>Allocation by category</h2>
+      <div class="chart-wrap"><canvas id="alloc"></canvas></div>
+    </div>
+    <div class="card">
+      <h2>Totals</h2>
+      <table>
+        <thead><tr><th>Category</th><th class="num">Estimated</th><th class="num">Actual</th><th class="num">Coverage</th></tr></thead>
+        <tbody>
+          <tr><td><span class="dot" style="background:#7c5cff"></span>Flights</td><td class="num">€800</td><td class="num">€512</td><td class="num">64%</td></tr>
+          <tr><td><span class="dot" style="background:#22c55e"></span>Accommodation</td><td class="num">€900</td><td class="num">€420</td><td class="num">47%</td></tr>
+          <tr><td><span class="dot" style="background:#f59e0b"></span>Food</td><td class="num">€600</td><td class="num">€380</td><td class="num">63%</td></tr>
+          <tr><td><span class="dot" style="background:#06b6d4"></span>Entertainment</td><td class="num">€400</td><td class="num">€200</td><td class="num">50%</td></tr>
+          <tr><td><span class="dot" style="background:#ef4444"></span>Transport</td><td class="num">€300</td><td class="num">€140</td><td class="num">47%</td></tr>
+          <tr style="font-weight:700; border-top: 2px solid var(--border);"><td>Total</td><td class="num">€3 000</td><td class="num">€1 652</td><td class="num">55%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid cols-3" style="margin-top: 20px;">
+    <div class="cat-card">
+      <h3>✈️ Flights</h3>
+      <div class="cur-pair"><div class="main">€512 / €800</div></div>
+      <div class="cur-pair"><div class="alt">₩756 122 / ₩1 181 440</div></div>
+      <div class="progress"><span style="width:64%; background: #7c5cff;"></span></div>
+      <div class="muted" style="font-size: 12px;">Booked Warsaw → ICN (LOT, Jun 14). Return still open.</div>
+    </div>
+
+    <div class="cat-card">
+      <h3>🏨 Accommodation</h3>
+      <div class="cur-pair"><div class="main">€420 / €900</div></div>
+      <div class="cur-pair"><div class="alt">₩620 256 / ₩1 329 120</div></div>
+      <div class="progress"><span style="width:47%; background: #22c55e;"></span></div>
+      <div class="muted" style="font-size: 12px;">3 nights Seoul booked, 2 more + Busan pending.</div>
+    </div>
+
+    <div class="cat-card">
+      <h3>🍜 Food</h3>
+      <div class="cur-pair"><div class="main">€380 / €600</div></div>
+      <div class="cur-pair"><div class="alt">₩561 184 / ₩886 080</div></div>
+      <div class="progress"><span style="width:63%; background: #f59e0b;"></span></div>
+      <div class="muted" style="font-size: 12px;">Budget for Korean BBQ, street food, convenience store runs.</div>
+    </div>
+
+    <div class="cat-card">
+      <h3>🎭 Entertainment</h3>
+      <div class="cur-pair"><div class="main">€200 / €400</div></div>
+      <div class="cur-pair"><div class="alt">₩295 360 / ₩590 720</div></div>
+      <div class="progress"><span style="width:50%; background: #06b6d4;"></span></div>
+      <div class="muted" style="font-size: 12px;">Palaces, DMZ tour, one K-pop-themed experience.</div>
+    </div>
+
+    <div class="cat-card">
+      <h3>🚆 Transport</h3>
+      <div class="cur-pair"><div class="main">€140 / €300</div></div>
+      <div class="cur-pair"><div class="alt">₩206 752 / ₩443 040</div></div>
+      <div class="progress"><span style="width:47%; background: #ef4444;"></span></div>
+      <div class="muted" style="font-size: 12px;">T-money card + Seoul ↔ Busan KTX round-trip.</div>
+    </div>
+
+    <div class="cat-card" style="border-style: dashed; opacity: .7;">
+      <h3>＋ Add category</h3>
+      <div class="muted" style="font-size: 12px;">Append to <code>config.budgetCategories[]</code> — does not require a schema migration.</div>
+    </div>
+  </div>
+
+  <div class="footer-note">All conversions use <code>ExchangeRateService</code>. Base/Target currencies come from widget config — the code is currency-agnostic.</div>
+</main>
+</div>
+
+<script>
+  new Chart(document.getElementById('alloc').getContext('2d'), {
+    type:'bar',
+    data:{labels:['Flights','Accommodation','Food','Entertainment','Transport'],
+      datasets:[
+        {label:'Estimated', data:[800,900,600,400,300], backgroundColor:'rgba(255,255,255,0.12)', borderRadius: 6},
+        {label:'Actual', data:[512,420,380,200,140], backgroundColor:['#7c5cff','#22c55e','#f59e0b','#06b6d4','#ef4444'], borderRadius: 6}
+      ]},
+    options:{indexAxis:'y', plugins:{legend:{labels:{color:'#e6edf3'}}, tooltip:{callbacks:{label:c=>' '+c.dataset.label+': €'+c.parsed.x}}},
+      scales:{x:{stacked:false, ticks:{color:'#8b98a9', callback:v=>'€'+v}, grid:{color:'rgba(255,255,255,0.04)'}},
+        y:{ticks:{color:'#e6edf3'}, grid:{display:false}}}}
+  });
+</script>
+</body>
+</html>

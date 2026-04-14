@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Workout logger (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<style>
+  .timer { font-size: 34px; font-variant-numeric: tabular-nums; font-weight: 800; }
+  .ex-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--panel-3); }
+  .ex-card h3 { margin: 0 0 10px; display:flex; justify-content: space-between; }
+  .set-row { display: grid; grid-template-columns: 40px 90px 90px 90px 1fr; gap: 8px; padding: 6px 0; align-items: center; font-size: 13px; }
+  .set-row input { padding: 6px 8px; font-size: 13px; }
+  .set-row .status-check { width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; }
+  .set-row.done .status-check { background: rgba(34,197,94,0.2); color: var(--accent-2); }
+  .set-row .status-check::after { content: "○"; }
+  .set-row.done .status-check::after { content: "✓"; }
+  .exercise-picker input { background: var(--panel-3); }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /widgets/fitness/workout/:id — interactive set logger with rest timer</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title">
+      <h1>Push day · in progress</h1>
+      <div class="sub">Started 18:32 · <a href="fitness.html">← Back to Fitness</a></div>
+    </div>
+    <div class="actions">
+      <div style="text-align:right;">
+        <div class="muted" style="font-size: 11px;">ELAPSED</div>
+        <div class="timer">00:24:18</div>
+      </div>
+      <button class="btn primary">Finish workout</button>
+    </div>
+  </div>
+
+  <div class="grid split">
+    <div>
+      <div class="ex-card">
+        <h3>Bench press <span class="tag accent">3 sets</span></h3>
+        <div class="set-row done"><div class="status-check"></div><input class="input" value="1"/><input class="input" value="8"/><input class="input" value="70"/><span class="muted">Warm-up</span></div>
+        <div class="set-row done"><div class="status-check"></div><input class="input" value="2"/><input class="input" value="6"/><input class="input" value="82.5"/><span class="muted">PR matched</span></div>
+        <div class="set-row"><div class="status-check"></div><input class="input" value="3"/><input class="input" placeholder="reps"/><input class="input" placeholder="weight"/><button class="btn sm primary">Log set</button></div>
+        <div class="muted" style="font-size:12px; margin-top:6px;">Rest 90s · next set ready in 00:52</div>
+      </div>
+
+      <div class="ex-card">
+        <h3>Incline dumbbell press <span class="tag neutral">2 / 3</span></h3>
+        <div class="set-row done"><div class="status-check"></div><input class="input" value="1"/><input class="input" value="10"/><input class="input" value="28"/><span class="muted">RPE 7</span></div>
+        <div class="set-row done"><div class="status-check"></div><input class="input" value="2"/><input class="input" value="9"/><input class="input" value="28"/><span class="muted">RPE 8</span></div>
+        <div class="set-row"><div class="status-check"></div><input class="input" value="3"/><input class="input" placeholder="reps"/><input class="input" placeholder="weight"/><button class="btn sm">Log set</button></div>
+      </div>
+
+      <div class="ex-card">
+        <h3>Cable tricep pushdown <span class="tag neutral">Pending</span></h3>
+        <div class="muted" style="font-size: 13px;">4 sets planned · 12-15 reps · 25-30 kg</div>
+      </div>
+
+      <button class="btn">+ Add exercise</button>
+      <div class="card exercise-picker" style="margin-top: 14px;">
+        <h2>Quick-add</h2>
+        <input class="input" placeholder="Search exercise (e.g. 'squat', 'row')…" style="margin-bottom: 10px;"/>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <span class="tag neutral">Barbell squat</span>
+          <span class="tag neutral">Romanian deadlift</span>
+          <span class="tag neutral">Pull-up</span>
+          <span class="tag neutral">Seated row</span>
+          <span class="tag neutral">Overhead press</span>
+          <span class="tag neutral">Lateral raise</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Workout summary (live)</h2>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <div><div class="muted" style="font-size:11px; text-transform:uppercase;">Volume</div><div style="font-size:20px; font-weight:700;">2 480 kg</div></div>
+          <div><div class="muted" style="font-size:11px; text-transform:uppercase;">Sets logged</div><div style="font-size:20px; font-weight:700;">4 / 10</div></div>
+          <div><div class="muted" style="font-size:11px; text-transform:uppercase;">Est. kcal</div><div style="font-size:20px; font-weight:700;">214</div></div>
+          <div><div class="muted" style="font-size:11px; text-transform:uppercase;">Avg RPE</div><div style="font-size:20px; font-weight:700;">7.5</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Previous — Push day (Apr 11)</h2>
+        <div class="list-item"><div><b>Bench press</b> · 3×8 @ 80kg</div><div class="meta">PR+2.5 kg</div></div>
+        <div class="list-item"><div><b>Incline dumbbell</b> · 3×10 @ 26kg</div><div class="meta">matched</div></div>
+        <div class="list-item"><div><b>Tricep pushdown</b> · 4×12 @ 25kg</div><div class="meta">+1 rep</div></div>
+        <div class="muted" style="font-size:12px; margin-top:10px;">Previous workout loaded for reference. Auto-suggest progression: +2.5 kg on compound lifts.</div>
+      </div>
+
+      <div class="card">
+        <h2>Workout templates</h2>
+        <div class="list-item"><div><b>Push day</b> · 4 exercises · 45-60 min</div><div><button class="btn sm">Load</button></div></div>
+        <div class="list-item"><div><b>Pull day</b> · 4 exercises · 50 min</div><div><button class="btn sm">Load</button></div></div>
+        <div class="list-item"><div><b>Legs</b> · 5 exercises · 60 min</div><div><button class="btn sm">Load</button></div></div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

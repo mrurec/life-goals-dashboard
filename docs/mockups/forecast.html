@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Savings forecast (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /widgets/budget/forecast — three-scenario projection detail</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title"><h1>Savings forecast · 3 scenarios</h1><div class="sub"><a href="budget.html">← Budget</a> · based on last 3 months average savings: €310/mo</div></div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">Current pace ETA</div><div class="value">2026-09-22</div><div class="delta up">▲ 1 month ahead · €310/mo</div></div>
+    <div class="kpi"><div class="label">+10% scenario ETA</div><div class="value">2026-08-28</div><div class="delta up">▲ 2 months ahead · €341/mo</div></div>
+    <div class="kpi"><div class="label">+20% scenario ETA</div><div class="value">2026-08-02</div><div class="delta up">▲ ~3 months ahead · €372/mo</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Projected balance to €3 000 target</h2>
+    <div class="chart-wrap lg"><canvas id="forecast"></canvas></div>
+    <div class="muted" style="font-size: 12px; margin-top: 10px;">Starting point: €1 842.50 (today). Dashed horizontal: target €3 000. Dashed vertical: deadline 2026-10.</div>
+  </div>
+
+  <div class="grid cols-3" style="margin-top: 20px;">
+    <div class="card">
+      <h2>Current pace</h2>
+      <div style="margin-bottom: 10px;">Monthly savings: <b>€310</b></div>
+      <div style="margin-bottom: 10px;">Months to target: <b>3.7</b></div>
+      <div style="margin-bottom: 10px;">ETA: <b>2026-09-22</b></div>
+      <div class="muted" style="font-size: 12px;">Heuristic: average of last 3 months of net flow (income − expense), extrapolated linearly.</div>
+    </div>
+    <div class="card">
+      <h2>+10% savings</h2>
+      <div style="margin-bottom: 10px;">Monthly savings: <b>€341</b></div>
+      <div style="margin-bottom: 10px;">Months to target: <b>3.4</b></div>
+      <div style="margin-bottom: 10px;">ETA: <b>2026-08-28</b></div>
+      <div class="muted" style="font-size: 12px;">Practical levers: cut one €30 subscription, one fewer dine-out per week.</div>
+    </div>
+    <div class="card">
+      <h2>+20% savings</h2>
+      <div style="margin-bottom: 10px;">Monthly savings: <b>€372</b></div>
+      <div style="margin-bottom: 10px;">Months to target: <b>3.1</b></div>
+      <div style="margin-bottom: 10px;">ETA: <b>2026-08-02</b></div>
+      <div class="muted" style="font-size: 12px;">Aggressive: requires batching grocery/meal prep + pausing one recurring.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 20px;">
+    <h2>Sensitivity — what changes the ETA most?</h2>
+    <table>
+      <thead><tr><th>Lever</th><th class="num">€/mo delta</th><th>New ETA</th><th>Months saved</th></tr></thead>
+      <tbody>
+        <tr><td>Cancel Claude Pro (€20/mo)</td><td class="num up">+€20</td><td>2026-09-08</td><td>0.5 m</td></tr>
+        <tr><td>2 fewer dine-outs (€60/mo)</td><td class="num up">+€60</td><td>2026-08-20</td><td>1.1 m</td></tr>
+        <tr><td>Weekly groceries −15% (€30/mo)</td><td class="num up">+€30</td><td>2026-09-02</td><td>0.7 m</td></tr>
+        <tr><td>Side gig +€150/mo</td><td class="num up">+€150</td><td>2026-07-28</td><td>1.9 m</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+</div>
+
+<script>
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'];
+  const current = [860, 1180, 1490, 1842, 2152, 2462, 2772, 3082, 3392, 3702];
+  const p10 = [860, 1180, 1490, 1842, 2183, 2524, 2865, 3206, 3547, 3888];
+  const p20 = [860, 1180, 1490, 1842, 2214, 2586, 2958, 3330, 3702, 4074];
+
+  new Chart(document.getElementById('forecast').getContext('2d'), {
+    type:'line', data:{labels: months, datasets:[
+      {label:'Actual history', data:[860,1180,1490,1842,null,null,null,null,null,null], borderColor:'#e6edf3', borderWidth:3, tension:.3, pointRadius:4},
+      {label:'Current pace (€310/mo)', data: current.map((v,i)=>i<3?null:v), borderColor:'#7c5cff', borderDash:[4,2], tension:.3, pointRadius:3, borderWidth:2},
+      {label:'+10% (€341/mo)', data: p10.map((v,i)=>i<3?null:v), borderColor:'#22c55e', borderDash:[4,2], tension:.3, pointRadius:3, borderWidth:2},
+      {label:'+20% (€372/mo)', data: p20.map((v,i)=>i<3?null:v), borderColor:'#06b6d4', borderDash:[2,3], tension:.3, pointRadius:3, borderWidth:2},
+      {label:'Target €3 000', data: Array(10).fill(3000), borderColor:'rgba(245,158,11,0.7)', borderDash:[6,6], pointRadius:0, borderWidth:1.5}
+    ]}, options:{plugins:{legend:{labels:{color:'#e6edf3', font:{size:11}}}, tooltip:{mode:'index',intersect:false}},
+      scales:{x:{ticks:{color:'#8b98a9'}, grid:{color:'rgba(255,255,255,0.04)'}},
+        y:{ticks:{color:'#8b98a9', callback:v=>'€'+v}, grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+</script>
+</body>
+</html>

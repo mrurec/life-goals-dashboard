@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Transactions — list + form (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<style>
+  .ttype { padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; }
+  .t-inc { background: rgba(34,197,94,0.15); color: var(--accent-2); }
+  .t-exp { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .cat-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cat-picker .c { padding: 6px 10px; border: 1px solid var(--border); border-radius: 999px; font-size: 12px; background: var(--panel-3); color: var(--muted); cursor: pointer; }
+  .cat-picker .c.on { background: rgba(124,92,255,0.15); border-color: var(--accent); color: #c9beff; }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /widgets/budget/transactions — list + inline form (mutation <code>createTransaction</code>)</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title"><h1>Transactions</h1><div class="sub">284 total · income €4 140 · expenses €2 298 · <a href="budget.html">← Budget</a></div></div>
+    <div class="actions">
+      <input class="input" placeholder="🔍 Search…" style="width: 220px;"/>
+    </div>
+  </div>
+
+  <div class="grid" style="grid-template-columns: 1.5fr 1fr;">
+    <div class="card">
+      <div style="display:flex; gap:8px; margin-bottom: 14px; flex-wrap: wrap;">
+        <span class="tag accent">ALL</span>
+        <span class="tag live">INCOME</span>
+        <span class="tag danger">EXPENSE</span>
+        <span class="tag neutral">Last 30 days</span>
+        <span class="tag neutral">Food · 8</span>
+        <span class="tag neutral">Transport · 3</span>
+        <span class="tag neutral">Savings · 4</span>
+      </div>
+      <table>
+        <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th class="num">Amount (EUR)</th><th class="num">In KRW</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Apr 13</td><td>Monthly transfer → savings</td><td>Savings</td><td><span class="ttype t-inc">INCOME</span></td><td class="num up">+300.00</td><td class="num muted">₩443 040</td><td><a>✎</a></td></tr>
+          <tr><td>Apr 12</td><td>Lidl — weekly groceries</td><td>Food</td><td><span class="ttype t-exp">EXPENSE</span></td><td class="num down">−48.20</td><td class="num muted">₩71 183</td><td><a>✎</a></td></tr>
+          <tr><td>Apr 10</td><td>Freelance invoice #204</td><td>Income</td><td><span class="ttype t-inc">INCOME</span></td><td class="num up">+650.00</td><td class="num muted">₩959 920</td><td><a>✎</a></td></tr>
+          <tr><td>Apr 09</td><td>BlaBlaCar</td><td>Transport</td><td><span class="ttype t-exp">EXPENSE</span></td><td class="num down">−30.00</td><td class="num muted">₩44 304</td><td><a>✎</a></td></tr>
+          <tr><td>Apr 07</td><td>Claude Pro subscription</td><td>Subscriptions</td><td><span class="ttype t-exp">EXPENSE</span></td><td class="num down">−20.00</td><td class="num muted">₩29 536</td><td><a>✎</a></td></tr>
+          <tr><td>Apr 05</td><td>Restaurant · Seoul-themed</td><td>Food</td><td><span class="ttype t-exp">EXPENSE</span></td><td class="num down">−38.90</td><td class="num muted">₩57 450</td><td><a>✎</a></td></tr>
+          <tr><td>Apr 01</td><td>Salary</td><td>Income</td><td><span class="ttype t-inc">INCOME</span></td><td class="num up">+3 190.00</td><td class="num muted">₩4 712 992</td><td><a>✎</a></td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" style="display:flex; justify-content: space-between; margin-top: 14px;">
+        <div class="muted" style="font-size: 12px;">Showing 1–7 of 284 · cursor-based (Relay)</div>
+        <div style="display:flex; gap:8px;"><button class="btn sm" disabled style="opacity:.5">←</button><button class="btn sm">Next →</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>New transaction</h2>
+      <div class="field">
+        <label>Type</label>
+        <div style="display:flex; gap:8px;">
+          <button class="btn sm" style="flex:1;">Income</button>
+          <button class="btn sm primary" style="flex:1;">Expense</button>
+        </div>
+      </div>
+      <div class="schema-row">
+        <div class="field">
+          <label>Amount</label>
+          <input class="input" type="number" step="0.01" placeholder="0.00"/>
+        </div>
+        <div class="field">
+          <label>Currency</label>
+          <select class="select"><option>EUR (base)</option><option>KRW</option><option>USD</option><option>PLN</option></select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <input class="input" placeholder="e.g. Lidl — weekly groceries"/>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <div class="cat-picker">
+          <span class="c on">Food</span>
+          <span class="c">Transport</span>
+          <span class="c">Housing</span>
+          <span class="c">Subscriptions</span>
+          <span class="c">Entertainment</span>
+          <span class="c">Savings</span>
+          <span class="c">Income</span>
+          <span class="c">Other</span>
+        </div>
+      </div>
+      <div class="schema-row">
+        <div class="field">
+          <label>Date</label>
+          <input class="input" type="date" value="2026-04-14"/>
+        </div>
+        <div class="field">
+          <label>Link to trip-budget category</label>
+          <select class="select"><option>— none —</option><option>Food</option><option>Transport</option><option>Accommodation</option></select>
+        </div>
+      </div>
+      <button class="btn primary" style="width: 100%;">Save transaction</button>
+      <div class="footer-note">Mutation <code>createTransaction</code> returns <code>CreateTransactionPayload { transaction, errors: [UserError!]! }</code>. Optimistic update via Relay.</div>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

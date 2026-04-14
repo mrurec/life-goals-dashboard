@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Meal diary + Recipe builder + Food search (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<style>
+  .meal-section { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--panel-3); }
+  .meal-section header { display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .meal-section header h3 { margin: 0; }
+  .entry { display: grid; grid-template-columns: 1fr 90px 90px 80px; gap: 8px; padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 13px; align-items: center; }
+  .entry:last-child { border-bottom: none; }
+  .entry .name { display: flex; align-items: center; gap: 8px; }
+  .entry .portion { color: var(--muted); font-size: 12px; }
+  .food-row { display: grid; grid-template-columns: 1fr 100px 80px 80px 80px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; align-items: center; }
+  .food-row.head { color: var(--muted); text-transform: uppercase; font-size: 11px; letter-spacing: .06em; }
+  .mini-bar { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; margin-top: 4px; }
+  .mini-bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-3)); }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /widgets/fitness/meals/:date — meal diary + food search + recipe builder</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title"><h1>Meal diary · Tue 14 Apr 2026</h1><div class="sub">Target 2 200 kcal · 30/40/30 · <a href="fitness.html">← Fitness</a></div></div>
+    <div class="actions">
+      <button class="btn">← Apr 13</button>
+      <button class="btn">Today</button>
+      <button class="btn">Apr 15 →</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Daily totals vs target</h2>
+    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+      <div>
+        <div class="muted" style="font-size:11px; text-transform:uppercase;">Calories</div>
+        <div style="font-size:22px; font-weight:700;">1 840 <span style="font-size:13px; color: var(--muted);">/ 2 200</span></div>
+        <div class="mini-bar"><span style="width:84%"></span></div>
+      </div>
+      <div>
+        <div class="muted" style="font-size:11px; text-transform:uppercase;">Protein</div>
+        <div style="font-size:22px; font-weight:700;">124<span style="font-size:13px; color: var(--muted);">g / 165g</span></div>
+        <div class="mini-bar"><span style="width:75%"></span></div>
+      </div>
+      <div>
+        <div class="muted" style="font-size:11px; text-transform:uppercase;">Carbs</div>
+        <div style="font-size:22px; font-weight:700;">210<span style="font-size:13px; color: var(--muted);">g / 220g</span></div>
+        <div class="mini-bar"><span style="width:95%"></span></div>
+      </div>
+      <div>
+        <div class="muted" style="font-size:11px; text-transform:uppercase;">Fat</div>
+        <div style="font-size:22px; font-weight:700;">58<span style="font-size:13px; color: var(--muted);">g / 73g</span></div>
+        <div class="mini-bar"><span style="width:79%"></span></div>
+      </div>
+    </div>
+    <div class="muted" style="font-size:12px; margin-top:10px;">Computed by <code>NutritionCalculator</code> server-side; client previews for UX only.</div>
+  </div>
+
+  <div class="grid split">
+    <div>
+      <div class="meal-section">
+        <header><h3>🥣 Breakfast <span class="tag neutral">08:20</span></h3><div class="muted" style="font-size:13px;">520 kcal</div></header>
+        <div class="entry"><div class="name">📖 <b>Protein oatmeal bowl</b> <span class="portion">(recipe · 1 serving)</span></div><div>34g</div><div>62g</div><div>520 kcal</div></div>
+        <div class="entry"><div class="name">☕ <b>Coffee</b> <span class="portion">(250ml)</span></div><div>0g</div><div>0g</div><div>2 kcal</div></div>
+        <button class="btn sm" style="margin-top:8px;">+ Add entry</button>
+      </div>
+
+      <div class="meal-section">
+        <header><h3>🍱 Lunch <span class="tag neutral">13:15</span></h3><div class="muted" style="font-size:13px;">760 kcal</div></header>
+        <div class="entry"><div class="name">🍗 <b>Grilled chicken breast</b> <span class="portion">(200g)</span></div><div>62g</div><div>0g</div><div>330 kcal</div></div>
+        <div class="entry"><div class="name">🍚 <b>Jasmine rice, cooked</b> <span class="portion">(180g)</span></div><div>5g</div><div>58g</div><div>234 kcal</div></div>
+        <div class="entry"><div class="name">🥑 <b>Avocado</b> <span class="portion">(100g)</span></div><div>2g</div><div>9g</div><div>160 kcal</div></div>
+        <div class="entry"><div class="name">🥗 <b>Cucumber salad</b> <span class="portion">(150g)</span></div><div>1g</div><div>4g</div><div>36 kcal</div></div>
+      </div>
+
+      <div class="meal-section">
+        <header><h3>🥤 Snack <span class="tag neutral">16:40</span></h3><div class="muted" style="font-size:13px;">210 kcal</div></header>
+        <div class="entry"><div class="name">🥤 <b>Whey protein shake</b> <span class="portion">(30g)</span></div><div>24g</div><div>3g</div><div>120 kcal</div></div>
+        <div class="entry"><div class="name">🍌 <b>Banana</b> <span class="portion">(1 piece)</span></div><div>1g</div><div>23g</div><div>89 kcal</div></div>
+      </div>
+
+      <div class="meal-section">
+        <header><h3>🍝 Dinner <span class="tag info">planned</span></h3><div class="muted" style="font-size:13px;">~350 kcal</div></header>
+        <div class="muted" style="font-size: 13px;">Not logged yet.</div>
+        <button class="btn sm" style="margin-top:8px;">+ Log dinner</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Food search 🔍</h2>
+        <input class="input" value="chicken breast" style="margin-bottom: 12px;"/>
+        <div class="food-row head"><div>Product</div><div class="num">kcal/100g</div><div class="num">Protein</div><div class="num">Carbs</div><div class="num">Fat</div></div>
+        <div class="food-row"><div><b>Chicken breast, raw</b> <span class="muted" style="font-size:11px;">catalog</span></div><div class="num">165</div><div class="num">31g</div><div class="num">0g</div><div class="num">3.6g</div></div>
+        <div class="food-row"><div><b>Chicken breast, grilled</b> <span class="muted" style="font-size:11px;">catalog</span></div><div class="num">165</div><div class="num">31g</div><div class="num">0g</div><div class="num">3.6g</div></div>
+        <div class="food-row"><div><b>Chicken breast, breaded</b> <span class="tag manual" style="font-size:10px;">USER</span></div><div class="num">242</div><div class="num">22g</div><div class="num">14g</div><div class="num">11g</div></div>
+        <div class="muted" style="font-size: 11px; margin-top: 8px;">Debounced search · Redis cache 30 min · key <code>lifegoals:fitness:food_search:{hash}</code></div>
+      </div>
+
+      <div class="card">
+        <h2>Recipe builder · "Protein oatmeal bowl"</h2>
+        <div class="field">
+          <label>Servings</label>
+          <input class="input" type="number" value="1" style="width:100px;"/>
+        </div>
+        <div class="food-row head"><div>Ingredient</div><div class="num">Amount</div><div class="num">Protein</div><div class="num">Carbs</div><div class="num">kcal</div></div>
+        <div class="food-row"><div>Rolled oats</div><div class="num">60 g</div><div class="num">8g</div><div class="num">40g</div><div class="num">234</div></div>
+        <div class="food-row"><div>Milk 2%</div><div class="num">200 g</div><div class="num">7g</div><div class="num">10g</div><div class="num">100</div></div>
+        <div class="food-row"><div>Whey protein</div><div class="num">30 g</div><div class="num">24g</div><div class="num">3g</div><div class="num">120</div></div>
+        <div class="food-row"><div>Banana</div><div class="num">60 g</div><div class="num">1g</div><div class="num">14g</div><div class="num">53</div></div>
+        <div class="food-row"><div>Peanut butter</div><div class="num">10 g</div><div class="num">2g</div><div class="num">2g</div><div class="num">63</div></div>
+        <div class="food-row" style="font-weight:700; border-top: 2px solid var(--border);"><div>Per serving</div><div class="num">—</div><div class="num">42g</div><div class="num">69g</div><div class="num">570</div></div>
+        <div class="muted" style="font-size: 12px; margin-top: 10px;">Nutrition auto-aggregated by <code>RecipeService</code>. Divided by <code>servings</code>.</div>
+        <button class="btn primary" style="margin-top: 10px;">Save recipe</button>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

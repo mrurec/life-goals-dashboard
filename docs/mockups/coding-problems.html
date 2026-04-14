@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Coding problems list (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<style>
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .filters .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; background: var(--panel-3); color: var(--muted); font-size: 12px; cursor: pointer; }
+  .filters .chip.on { background: rgba(124,92,255,0.15); border-color: var(--accent); color: #c9beff; }
+  .diff { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 5px; }
+  .d-easy { background: rgba(34,197,94,0.15); color: var(--accent-2); }
+  .d-med  { background: rgba(245,158,11,0.15); color: var(--warn); }
+  .d-hard { background: rgba(239,68,68,0.15); color: var(--danger); }
+  .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /widgets/interview-prep/problems — Relay cursor pagination + filters</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title"><h1>Coding problems</h1><div class="sub">84 total · 68 solved · 12 target-company-tagged (Meta)</div></div>
+    <div class="actions">
+      <input class="input" placeholder="🔍 Search problems…" style="width: 260px;"/>
+      <a href="coding-problem-form.html" class="btn primary">+ New problem</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="filters">
+      <span class="chip on">ALL 84</span>
+      <span class="chip">SOLVED 68</span>
+      <span class="chip">UNSOLVED 16</span>
+      <span class="chip">DUE FOR REVIEW 3</span>
+      <span class="chip">META-TAGGED 12</span>
+    </div>
+    <div class="filters">
+      <span class="muted" style="font-size:12px; align-self:center;">Category:</span>
+      <span class="chip on">GRAPH</span>
+      <span class="chip on">DP</span>
+      <span class="chip on">TREE</span>
+      <span class="chip">ARRAY</span>
+      <span class="chip">STRING</span>
+      <span class="chip">BACKTRACKING</span>
+      <span class="chip">BINARY_SEARCH</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:70px">LC #</th>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Difficulty</th>
+          <th>Attempts</th>
+          <th>Last attempt</th>
+          <th>Next review</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>207</td>
+          <td><b>Course Schedule</b> <span class="tag accent" style="margin-left:4px">META</span></td>
+          <td>GRAPH</td>
+          <td><span class="diff d-med">MEDIUM</span></td>
+          <td>4 (3 solved)</td>
+          <td>Apr 8</td>
+          <td><span class="tag accent">DUE TODAY</span></td>
+          <td><a href="coding-problem-form.html">Open →</a></td>
+        </tr>
+        <tr>
+          <td>200</td>
+          <td><b>Number of Islands</b> <span class="tag accent" style="margin-left:4px">META</span></td>
+          <td>GRAPH</td>
+          <td><span class="diff d-med">MEDIUM</span></td>
+          <td>3 (3 solved)</td>
+          <td>Apr 6</td>
+          <td>Apr 15</td>
+          <td><a href="coding-problem-form.html">Open →</a></td>
+        </tr>
+        <tr>
+          <td>300</td>
+          <td><b>Longest Increasing Subsequence</b></td>
+          <td>DP</td>
+          <td><span class="diff d-med">MEDIUM</span></td>
+          <td>2 (1 solved)</td>
+          <td>Apr 10</td>
+          <td>Apr 16</td>
+          <td><a href="coding-problem-form.html">Open →</a></td>
+        </tr>
+        <tr>
+          <td>124</td>
+          <td><b>Binary Tree Maximum Path Sum</b> <span class="tag accent" style="margin-left:4px">META</span></td>
+          <td>TREE</td>
+          <td><span class="diff d-hard">HARD</span></td>
+          <td>5 (4 solved)</td>
+          <td>Apr 11</td>
+          <td>Apr 18</td>
+          <td><a href="coding-problem-form.html">Open →</a></td>
+        </tr>
+        <tr>
+          <td>133</td>
+          <td><b>Clone Graph</b></td>
+          <td>GRAPH</td>
+          <td><span class="diff d-med">MEDIUM</span></td>
+          <td>2 (2 solved)</td>
+          <td>Apr 9</td>
+          <td>Apr 15</td>
+          <td><a href="coding-problem-form.html">Open →</a></td>
+        </tr>
+        <tr>
+          <td>547</td>
+          <td><b>Number of Provinces</b></td>
+          <td>GRAPH</td>
+          <td><span class="diff d-med">MEDIUM</span></td>
+          <td>1 (0 solved)</td>
+          <td>Apr 12</td>
+          <td>Apr 13 (overdue)</td>
+          <td><a href="coding-problem-form.html">Open →</a></td>
+        </tr>
+        <tr>
+          <td>121</td>
+          <td><b>Best Time to Buy and Sell Stock</b></td>
+          <td>DP</td>
+          <td><span class="diff d-easy">EASY</span></td>
+          <td>1 (1 solved)</td>
+          <td>Apr 3</td>
+          <td>Apr 20</td>
+          <td><a href="coding-problem-form.html">Open →</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <div class="muted" style="font-size: 12px;">Showing 1–7 of 84 · cursor=<code>Y3Vyc29yOjc=</code></div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn sm" disabled style="opacity:.5">← Previous</button>
+        <button class="btn sm">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Data fetched via <code>codingProblems(first: 20, after: $cursor, filter: {categories, difficulties, status})</code> — Relay Connection pattern. Per-row <code>category</code> and <code>nextReview</code> resolved through DataLoaders.</div>
+</main>
+</div>
+</body>
+</html>

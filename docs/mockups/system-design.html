@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>System Design + Behavioral stories (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<style>
+  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .tabs a { padding: 10px 16px; color: var(--muted); font-size: 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tabs a.active { color: var(--text); border-bottom-color: var(--accent); }
+  .conf-bar { width: 120px; height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; display: inline-block; vertical-align: middle; }
+  .conf-bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+  .star-block { display: grid; grid-template-columns: 80px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .star-block .label { color: var(--accent); font-weight: 700; letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /widgets/interview-prep/system-design + behavioral — companion pages</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title"><h1>Interview Prep · System Design & Behavioral</h1><div class="sub">Confidence tracking · STAR stories</div></div>
+  </div>
+
+  <nav class="tabs">
+    <a href="coding-problems.html">Coding problems</a>
+    <a class="active">System design</a>
+    <a>Behavioral (STAR)</a>
+  </nav>
+
+  <div class="grid cols-2">
+    <div class="card">
+      <h2>System design topics</h2>
+      <table>
+        <thead><tr><th>Topic</th><th>Confidence</th><th>Resources</th><th></th></tr></thead>
+        <tbody>
+          <tr><td><b>Design TinyURL</b></td><td><span class="conf-bar"><span style="width:75%"></span></span> 75%</td><td>3 videos, 1 article</td><td><a href="#">Edit</a></td></tr>
+          <tr><td><b>Design Instagram feed</b></td><td><span class="conf-bar"><span style="width:60%"></span></span> 60%</td><td>2 articles</td><td><a href="#">Edit</a></td></tr>
+          <tr><td><b>Design WhatsApp</b></td><td><span class="conf-bar"><span style="width:45%"></span></span> 45%</td><td>4 videos</td><td><a href="#">Edit</a></td></tr>
+          <tr><td><b>Design rate limiter</b></td><td><span class="conf-bar"><span style="width:82%"></span></span> 82%</td><td>1 video</td><td><a href="#">Edit</a></td></tr>
+          <tr><td><b>Design distributed cache</b></td><td><span class="conf-bar"><span style="width:55%"></span></span> 55%</td><td>2 videos</td><td><a href="#">Edit</a></td></tr>
+          <tr><td><b>Design Uber</b></td><td><span class="conf-bar"><span style="width:30%"></span></span> 30%</td><td>—</td><td><a href="#">Edit</a></td></tr>
+        </tbody>
+      </table>
+      <button class="btn sm" style="margin-top:10px;">+ Add topic</button>
+    </div>
+
+    <div class="card">
+      <h2>Behavioral stories · STAR</h2>
+      <div style="border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;">
+        <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
+          <b>"Led migration of legacy billing system"</b>
+          <span class="tag accent">LEADERSHIP</span>
+        </div>
+        <div class="star-block"><div class="label">S</div><div>Legacy Oracle-based billing generating inconsistent invoices, blocking a key customer launch.</div></div>
+        <div class="star-block"><div class="label">T</div><div>Replace billing pipeline without downtime, within 8 weeks, across 3 time zones.</div></div>
+        <div class="star-block"><div class="label">A</div><div>Proposed strangler pattern, built shadow writes first, wrote migration playbook, paired with two backend engineers each week.</div></div>
+        <div class="star-block" style="border:none;"><div class="label">R</div><div>Zero downtime cutover, 99.99% invoice correctness, customer launched on schedule.</div></div>
+      </div>
+
+      <div style="border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;">
+        <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
+          <b>"Disagreed with senior engineer on architecture"</b>
+          <span class="tag info">CONFLICT</span>
+        </div>
+        <div class="muted" style="font-size: 13px;">Draft · S and T filled · A and R pending.</div>
+      </div>
+
+      <div style="border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;">
+        <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
+          <b>"Shipped under ambiguity"</b>
+          <span class="tag accent">OWNERSHIP</span>
+        </div>
+        <div class="muted" style="font-size: 13px;">Complete · 4 practice reps logged.</div>
+      </div>
+
+      <button class="btn sm">+ New STAR story</button>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>

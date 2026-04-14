@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Dashboard — empty state / onboarding (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<style>
+  .empty-hero { text-align: center; padding: 40px 20px 24px; }
+  .empty-hero .badge {
+    display: inline-block; padding: 5px 12px; background: rgba(124,92,255,0.15);
+    color: #c9beff; font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; border-radius: 999px; margin-bottom: 16px;
+  }
+  .empty-hero h1 { font-size: 34px; margin-bottom: 10px; }
+  .empty-hero p { color: var(--muted); font-size: 15px; max-width: 600px; margin: 0 auto; }
+  .picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+  .widget-choice {
+    background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;
+    cursor: pointer; transition: all .15s ease;
+  }
+  .widget-choice:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .widget-choice.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,92,255,0.15); }
+  .widget-choice .ico { font-size: 28px; margin-bottom: 10px; }
+  .widget-choice h3 { margin-bottom: 6px; }
+  .widget-choice p { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 0 0 12px; }
+  .widget-choice .fields { font-size: 11px; color: var(--muted-2); }
+  .steps { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 20px; }
+  .step { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+  .step.current { color: var(--text); }
+  .step .dot-step {
+    width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border);
+    display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  }
+  .step.current .dot-step { background: var(--accent); border-color: var(--accent); color: white; }
+  .step-sep { width: 24px; height: 1px; background: var(--border); }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /dashboard — first-time user onboarding (empty state, widget picker step)</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+
+<main class="main">
+  <div class="empty-hero">
+    <span class="badge">Welcome · new account</span>
+    <h1>Your dashboard is a blank canvas</h1>
+    <p>Add a widget to start tracking a goal. You can add as many as you want, reorder them, and configure each one with your own targets — the platform never hardcodes your goals.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step current"><div class="dot-step">1</div> Pick widget type</div>
+    <div class="step-sep"></div>
+    <div class="step"><div class="dot-step">2</div> Configure</div>
+    <div class="step-sep"></div>
+    <div class="step"><div class="dot-step">3</div> Done</div>
+  </div>
+
+  <div class="picker">
+    <div class="widget-choice selected">
+      <div class="ico">💻</div>
+      <h3>Interview Prep</h3>
+      <p>Track coding problems, spaced repetition, readiness score for a target company and level.</p>
+      <div class="fields">Config: targetCompany · targetLevel · weeklyProblemGoal · focusCategories[]</div>
+    </div>
+    <div class="widget-choice">
+      <div class="ico">🏋️</div>
+      <h3>Fitness Tracker</h3>
+      <p>Log workouts, body measurements, meals and recipes. Targets for weight, calories, macros.</p>
+      <div class="fields">Config: targetWeightKg · dailyCalorieTarget · targetWorkoutsPerWeek · macroTargets{}</div>
+    </div>
+    <div class="widget-choice">
+      <div class="ico">💰</div>
+      <h3>Budget Planner</h3>
+      <p>Save toward any goal in any currency. Automatic forecast in three scenarios.</p>
+      <div class="fields">Config: goalName · targetAmount · baseCurrency ↔ targetCurrency · deadline</div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 24px;">
+    <a href="add-widget.html" class="btn primary">Continue → Configure Interview Prep</a>
+    <div class="footer-note">More widget types coming soon. Built-ins are registered via <code>WidgetRegistry</code>.</div>
+  </div>
+</main>
+</div>
+</body>
+</html>

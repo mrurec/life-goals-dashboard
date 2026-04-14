@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Body measurements (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /widgets/fitness/measurements — weight, body fat, trend direction</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title"><h1>Body measurements</h1><div class="sub">Trend classification runs on last 14 measurements.</div></div>
+    <div class="actions">
+      <button class="btn primary">+ Log measurement</button>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="label">Current weight</div><div class="value">87.2 kg</div><div class="delta down">▼ Trend DOWN · -0.6 kg / week</div></div>
+    <div class="kpi"><div class="label">Body fat %</div><div class="value">19.8%</div><div class="delta down">▼ Trend DOWN · -0.4 p.p. / week</div></div>
+    <div class="kpi"><div class="label">Forecast reach 80 kg</div><div class="value">2026-07-02</div><div class="delta up">At current pace</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Weight + body fat — 180 days</h2>
+    <div class="chart-wrap lg"><canvas id="dual"></canvas></div>
+  </div>
+
+  <div class="grid cols-2" style="margin-top:20px">
+    <div class="card">
+      <h2>Measurements log</h2>
+      <table>
+        <thead><tr><th>Date</th><th class="num">Weight</th><th class="num">Body fat</th><th class="num">Δ kg</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Apr 14</td><td class="num">87.2</td><td class="num">19.8%</td><td class="num up">-0.3</td><td><a>Edit</a></td></tr>
+          <tr><td>Apr 11</td><td class="num">87.5</td><td class="num">20.0%</td><td class="num up">-0.4</td><td><a>Edit</a></td></tr>
+          <tr><td>Apr 7</td><td class="num">87.9</td><td class="num">20.2%</td><td class="num up">-0.6</td><td><a>Edit</a></td></tr>
+          <tr><td>Apr 3</td><td class="num">88.5</td><td class="num">20.6%</td><td class="num up">-0.2</td><td><a>Edit</a></td></tr>
+          <tr><td>Mar 30</td><td class="num">88.7</td><td class="num">20.8%</td><td class="num up">-0.5</td><td><a>Edit</a></td></tr>
+          <tr><td>Mar 25</td><td class="num">89.2</td><td class="num">21.1%</td><td class="num down">+0.1</td><td><a>Edit</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Quick log</h2>
+      <div class="schema-row">
+        <div class="field"><label>Weight (kg)</label><input class="input" type="number" step="0.1"/></div>
+        <div class="field"><label>Body fat (%)</label><input class="input" type="number" step="0.1"/></div>
+      </div>
+      <div class="schema-row">
+        <div class="field"><label>Date</label><input class="input" type="date" value="2026-04-14"/></div>
+        <div class="field"><label>Time</label><input class="input" type="time" value="07:30"/></div>
+      </div>
+      <div class="field">
+        <label>Note</label>
+        <textarea class="input" rows="2" placeholder="morning weight, after bathroom, before breakfast…"></textarea>
+      </div>
+      <button class="btn primary">Save measurement</button>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+  const ctx = document.getElementById('dual').getContext('2d');
+  const labels = []; const w = []; const bf = [];
+  let wv = 92; let bfv = 23.5;
+  const today = new Date('2026-04-14');
+  for (let i=179; i>=0; i-=2) {
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    labels.push(d.toISOString().slice(5,10));
+    wv -= 0.04 + Math.random()*0.08; if (Math.random() < 0.25) wv += Math.random()*0.35;
+    bfv -= 0.02 + Math.random()*0.04;
+    w.push(+wv.toFixed(1));
+    bf.push(+bfv.toFixed(2));
+  }
+  w[w.length-1] = 87.2; bf[bf.length-1] = 19.8;
+  new Chart(ctx, { data:{labels, datasets:[
+    {type:'line', label:'Weight (kg)', data:w, yAxisID:'y', borderColor:'#22c55e', tension:.3, pointRadius:0, borderWidth:2},
+    {type:'line', label:'Body fat (%)', data:bf, yAxisID:'y1', borderColor:'#f59e0b', tension:.3, pointRadius:0, borderWidth:2, borderDash:[4,3]},
+    {type:'line', label:'Target 80 kg', data: Array(w.length).fill(80), yAxisID:'y', borderColor:'rgba(124,92,255,0.6)', borderDash:[6,6], pointRadius:0, borderWidth:1.3}
+  ]}, options:{interaction:{mode:'index',intersect:false},
+    plugins:{legend:{labels:{color:'#e6edf3'}}},
+    scales:{x:{ticks:{color:'#8b98a9', maxTicksLimit:10}, grid:{color:'rgba(255,255,255,0.04)'}},
+      y:{position:'left', ticks:{color:'#22c55e', callback:v=>v+'kg'}, grid:{color:'rgba(255,255,255,0.04)'}},
+      y1:{position:'right', ticks:{color:'#f59e0b', callback:v=>v+'%'}, grid:{display:false}}}}
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Add widget — configure step (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<style>
+  .modal { width: min(720px, 92vw); }
+  .step-hint { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+    border: 1px solid var(--border); border-radius: 999px; background: var(--panel-3);
+    color: var(--muted); font-size: 12px; cursor: pointer;
+  }
+  .chip.on { background: rgba(124,92,255,0.15); border-color: var(--accent); color: #c9beff; }
+  .schema-box { padding: 12px 14px; border: 1px dashed var(--border-2); border-radius: 10px;
+    background: rgba(255,255,255,0.02); font-family: 'SF Mono', Consolas, monospace;
+    font-size: 12px; color: var(--muted); white-space: pre-wrap; }
+  .error-line { color: var(--danger); font-size: 12px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · Add widget — config form generated from <code>WidgetProvider.configSchema</code></span>
+  <a href="index.html">← All mockups</a>
+</div>
+
+<div class="modal-backdrop">
+  <div class="modal">
+    <header>
+      <div>
+        <h3 style="margin-bottom:4px;">Configure · Interview Prep</h3>
+        <div class="step-hint">Step 2 of 3 · This config is stored in <code>user_dashboard_widget.config</code> (JSONB). Nothing about your goals is hardcoded.</div>
+      </div>
+      <button class="btn ghost">✕</button>
+    </header>
+
+    <div class="schema-row">
+      <div class="field">
+        <label>targetCompany *</label>
+        <input class="input" value="Meta"/>
+        <div class="hint">Any string — Meta, Google, Amazon, a startup…</div>
+      </div>
+      <div class="field">
+        <label>targetLevel *</label>
+        <input class="input" value="E5"/>
+        <div class="hint">Free-form. Used only for display.</div>
+      </div>
+    </div>
+
+    <div class="schema-row">
+      <div class="field">
+        <label>weeklyProblemGoal *</label>
+        <input class="input" type="number" value="15"/>
+      </div>
+      <div class="field">
+        <label>reviewIntervalDays *</label>
+        <input class="input" type="number" value="3"/>
+        <div class="hint">Base interval for SM-2 spaced repetition.</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>focusCategories[]</label>
+      <div class="chip-row">
+        <span class="chip on">✓ GRAPH</span>
+        <span class="chip on">✓ DYNAMIC_PROGRAMMING</span>
+        <span class="chip on">✓ TREE</span>
+        <span class="chip">ARRAY</span>
+        <span class="chip">STRING</span>
+        <span class="chip">BINARY_SEARCH</span>
+        <span class="chip">BACKTRACKING</span>
+        <span class="chip">LINKED_LIST</span>
+        <span class="chip">SYSTEM_DESIGN</span>
+      </div>
+      <div class="hint">Enum-bound, validated server-side. Readiness score weights these categories higher.</div>
+    </div>
+
+    <div class="field">
+      <label>Resulting config (preview)</label>
+      <div class="schema-box">{
+  "targetCompany": "Meta",
+  "targetLevel": "E5",
+  "weeklyProblemGoal": 15,
+  "reviewIntervalDays": 3,
+  "focusCategories": ["GRAPH", "DYNAMIC_PROGRAMMING", "TREE"]
+}</div>
+    </div>
+
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+      <a href="dashboard-empty.html" class="btn ghost">← Back</a>
+      <div style="display:flex; gap:10px;">
+        <button class="btn">Cancel</button>
+        <button class="btn primary">Add to dashboard</button>
+      </div>
+    </div>
+    <div class="footer-note">Mutation: <code>addWidgetToDashboard(type: INTERVIEW_PREP, config)</code> — validated via JSON Schema, returns <code>AddWidgetPayload</code>.</div>
+  </div>
+</div>
+</body>
+</html>

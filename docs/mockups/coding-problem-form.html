@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Coding problem — detail + log attempt (mockup)</title>
+<link rel="stylesheet" href="_theme.css"/>
+<style>
+  .attempt-row { display: grid; grid-template-columns: 80px 90px 1fr 80px 100px; gap: 10px; padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; align-items: center; }
+  .attempt-row .q { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .q-5 { color: var(--accent-2); } .q-4 { color: #86efac; } .q-3 { color: var(--warn); } .q-2 { color: #f59e0b; } .q-1 { color: var(--danger); }
+</style>
+</head>
+<body>
+<div class="mockup-bar">
+  <span><span class="mb-tag">Mockup</span> · /problems/:id — problem detail, edit form, attempts history, log-attempt mutation</span>
+  <a href="index.html">← All mockups</a>
+</div>
+<div class="shell">
+<aside class="sidebar"></aside>
+<script src="_sidebar.js" defer></script>
+<main class="main">
+  <div class="topbar">
+    <div class="title">
+      <h1>LC 207 · Course Schedule</h1>
+      <div class="sub"><a href="coding-problems.html">← All problems</a> · GRAPH · Medium · <span class="tag accent">META</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn">🔗 leetcode.com/207</button>
+      <button class="btn danger sm">Delete</button>
+    </div>
+  </div>
+
+  <div class="grid split">
+    <div>
+      <div class="card">
+        <h2>Problem details</h2>
+        <div class="schema-row">
+          <div class="field"><label>Title</label><input class="input" value="Course Schedule"/></div>
+          <div class="field"><label>LeetCode #</label><input class="input" value="207"/></div>
+        </div>
+        <div class="schema-row">
+          <div class="field">
+            <label>Category</label>
+            <select class="select"><option>GRAPH (topological sort)</option></select>
+          </div>
+          <div class="field">
+            <label>Difficulty</label>
+            <select class="select"><option>MEDIUM</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Target-company tagged</label>
+          <div><span class="tag accent">✓ META</span> <span class="muted" style="font-size:12px; margin-left:8px;">Shown when <code>config.targetCompany</code> matches.</span></div>
+        </div>
+        <div class="field">
+          <label>Tags (free-form)</label>
+          <div><span class="tag neutral">topological-sort</span> <span class="tag neutral">cycle-detection</span> <span class="tag neutral">bfs</span> <span class="tag neutral">dfs</span></div>
+        </div>
+        <div class="field">
+          <label>Notes</label>
+          <textarea class="input" rows="5">Two approaches: Kahn's algorithm (BFS + indegree) or DFS with 3-color cycle detection. Watch for:
+- empty prerequisites → always true
+- self-loops (edge from course to itself) → always false
+- Time O(V+E), Space O(V+E)</textarea>
+        </div>
+        <button class="btn primary">Save changes</button>
+      </div>
+
+      <div class="card">
+        <h2>Log attempt</h2>
+        <div class="schema-row">
+          <div class="field"><label>Duration (min)</label><input class="input" type="number" value="18"/></div>
+          <div class="field"><label>Attempted on</label><input class="input" type="date" value="2026-04-14"/></div>
+        </div>
+        <div class="field">
+          <label>Quality (SM-2)</label>
+          <div style="display:flex; gap:8px;">
+            <button class="btn sm danger">1 — gave up</button>
+            <button class="btn sm">2 — attempted</button>
+            <button class="btn sm">3 — slow solve</button>
+            <button class="btn sm primary">4 — solved</button>
+            <button class="btn sm primary">5 — fast</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Notes on this attempt</label>
+          <textarea class="input" rows="2" placeholder="What was hard, what clicked…"></textarea>
+        </div>
+        <button class="btn primary">Log attempt</button>
+        <div class="footer-note">Mutation <code>logProblemAttempt</code> → triggers SM-2 update → invalidates readiness cache → publishes achievement event.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Spaced repetition state</h2>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div><div class="muted" style="font-size:11px; text-transform:uppercase;">Next review</div><div style="font-size: 20px; font-weight:700; color: var(--accent);">Today</div></div>
+          <div><div class="muted" style="font-size:11px; text-transform:uppercase;">Interval</div><div style="font-size: 20px; font-weight:700;">6 days</div></div>
+          <div><div class="muted" style="font-size:11px; text-transform:uppercase;">easeFactor</div><div style="font-size: 20px; font-weight:700;">2.36</div></div>
+          <div><div class="muted" style="font-size:11px; text-transform:uppercase;">Repetitions</div><div style="font-size: 20px; font-weight:700;">4</div></div>
+        </div>
+        <div class="muted" style="font-size: 12px;">Base interval from widget config: <code>reviewIntervalDays: 3</code>. SM-2 adjusts dynamically.</div>
+      </div>
+
+      <div class="card">
+        <h2>Attempts history</h2>
+        <div class="attempt-row" style="background: rgba(255,255,255,0.03); font-weight: 600; color: var(--muted); text-transform: uppercase; font-size: 11px; letter-spacing: .06em;">
+          <div>Date</div><div>Quality</div><div>Note</div><div class="num">Duration</div><div>Result</div>
+        </div>
+        <div class="attempt-row">
+          <div>Apr 8</div><div class="q q-4">4</div><div class="muted">BFS / Kahn worked, clean</div><div class="num">22 m</div><div><span class="tag live">SOLVED</span></div>
+        </div>
+        <div class="attempt-row">
+          <div>Apr 2</div><div class="q q-3">3</div><div class="muted">Forgot cycle edge case</div><div class="num">34 m</div><div><span class="tag live">SOLVED</span></div>
+        </div>
+        <div class="attempt-row">
+          <div>Mar 25</div><div class="q q-4">4</div><div class="muted">DFS 3-color, no hints</div><div class="num">28 m</div><div><span class="tag live">SOLVED</span></div>
+        </div>
+        <div class="attempt-row">
+          <div>Mar 18</div><div class="q q-2">2</div><div class="muted">First try, had to read editorial</div><div class="num">45 m</div><div><span class="tag danger">FAILED</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+</body>
+</html>
