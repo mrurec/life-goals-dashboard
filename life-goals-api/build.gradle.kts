@@ -18,6 +18,14 @@ java {
     }
 }
 
+// Kotlin-only project: keep everything under src/main/kotlin, but let javac
+// also scan that dir so Spring Modulith's `package-info.java` files (which
+// Kotlin cannot compile) are picked up and emitted to the classpath.
+sourceSets {
+    main { java.srcDirs("src/main/kotlin") }
+    test { java.srcDirs("src/test/kotlin") }
+}
+
 repositories {
     mavenCentral()
 }
@@ -54,6 +62,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.modulith:spring-modulith-starter-test")
+    testImplementation("org.springframework.modulith:spring-modulith-docs")
     // ArchUnit removed per ADR-004; add back only when a non-Modulith-expressible rule appears.
 
     runtimeOnly("org.postgresql:postgresql")
@@ -78,7 +87,7 @@ kotlin {
 
 tasks.generateJava {
     schemaPaths.add("$projectDir/src/main/resources/graphql-client")
-    packageName = "com.mrurec.lifegoals.codegen"
+    packageName = "com.mrurec.lifegoals.common.codegen"
     generateClient = true
 }
 
