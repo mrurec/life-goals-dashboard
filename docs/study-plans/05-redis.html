@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 5: Redis - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 31.25%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .language-bash::before,
+        .language-kotlin::before,
+        .language-redis::before {
+            content: attr(data-lang);
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details/Collapse */
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        /* Assignments */
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .assignment .tdd-badge {
+            display: inline-block;
+            background: #f5c2e7;
+            color: #1e1e2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Resources */
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        /* Navigation */
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Prism Customization */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+
+        /* Language switcher */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button {
+            padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px;
+            cursor: pointer; font-size: 0.85rem; background: transparent;
+            color: var(--text-secondary); transition: all 0.2s;
+        }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="module-number"><span class="lang-ru">МОДУЛЬ 5 / 16</span><span class="lang-en">MODULE 5 / 16</span></div>
+            <h1>Redis</h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3><span class="lang-ru">Содержание</span><span class="lang-en">Contents</span></h3>
+            <ul>
+                <li><a href="#intro"><span class="lang-ru">Введение</span><span class="lang-en">Introduction</span></a></li>
+                <li><a href="#data-structures"><span class="lang-ru">Структуры данных</span><span class="lang-en">Data Structures</span></a></li>
+                <li><a href="#key-naming"><span class="lang-ru">Правила именования ключей</span><span class="lang-en">Key Naming Rules</span></a></li>
+                <li><a href="#caching"><span class="lang-ru">Стратегии кеширования</span><span class="lang-en">Caching Strategies</span></a></li>
+                <li><a href="#pubsub"><span class="lang-ru">Pub/Sub система</span><span class="lang-en">Pub/Sub System</span></a></li>
+                <li><a href="#spring-boot"><span class="lang-ru">Redis в Spring Boot</span><span class="lang-en">Redis in Spring Boot</span></a></li>
+                <li><a href="#assignments"><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></a></li>
+                <li><a href="#backlog-tasks">🧪 <span class="lang-ru">Задания из Backlog (TDD)</span><span class="lang-en">Backlog Tasks (TDD)</span></a></li>
+                <li><a href="#resources"><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <h2><span class="lang-ru">Введение: Redis для Life Goals Dashboard</span><span class="lang-en">Introduction: Redis for Life Goals Dashboard</span></h2>
+                <div class="lang-ru">
+                    <p>
+                        <strong>Redis</strong> — это высокопроизводительное хранилище данных в памяти (in-memory data store),
+                        которое используется для кеширования и pub/sub систем. В Life Goals Dashboard Redis кеширует часто используемые данные
+                        (курсы обмена валют, статистику проблем) и доставляет notifications в реальном времени через WebSocket.
+                    </p>
+                    <p>
+                        За 2 дня вы освоите Redis data structures, поймёте стратегии кеширования (Cache-Aside, Write-Through),
+                        реализуете pub/sub для GraphQL Subscriptions и интегрируете Redis в Spring Boot приложение.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Совет:</strong> Установите Redis локально (`redis-server`) или используйте Docker:
+                        <code>docker run -d -p 6379:6379 redis:7</code>. Тестируйте в Redis CLI (`redis-cli`).
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        <strong>Redis</strong> is a high-performance in-memory data store used for caching and pub/sub systems. In Life Goals Dashboard, Redis caches frequently accessed data
+                        (exchange rates, problem statistics) and delivers real-time notifications via WebSocket.
+                    </p>
+                    <p>
+                        Over 2 days you will master Redis data structures, understand caching strategies (Cache-Aside, Write-Through),
+                        implement pub/sub for GraphQL Subscriptions, and integrate Redis into a Spring Boot application.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Tip:</strong> Install Redis locally (`redis-server`) or use Docker:
+                        <code>docker run -d -p 6379:6379 redis:7</code>. Test in Redis CLI (`redis-cli`).
+                    </div>
+                </div>
+            </section>
+
+            <section id="data-structures">
+                <h2>Redis Data Structures</h2>
+
+                <h3><span class="lang-ru">Strings (Строки)</span><span class="lang-en">Strings</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Самая простая и универсальная структура. Хранит любые данные: текст, числа, JSON.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        The simplest and most universal structure. Stores any data: text, numbers, JSON.
+                    </p>
+                </div>
+                <pre><code class="language-bash">
+# Установка значения
+SET key value
+SET lifegoals:user:123:name "mrurec"
+
+# Получение значения
+GET key
+GET lifegoals:user:123:name  # => "mrurec"
+
+# Установить с истечением (время жизни)
+SETEX key seconds value
+SETEX lifegoals:exchange:EUR:KRW 3600 1270.5   # Истечёт через 1 час
+
+# Проверить оставшееся время жизни (в секундах)
+TTL key
+TTL lifegoals:exchange:EUR:KRW  # => 3599 (осталось 3599 сек)
+
+# Установить и получить за одну операцию
+GETSET key newvalue
+
+# Если ключ существует, не устанавливать (ATOMIC SET-IF-NOT-EXIST)
+SETNX key value
+                </code></pre>
+
+                <h3><span class="lang-ru">Hashes (Хеши)</span><span class="lang-en">Hashes</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Структура вида "ключ → словарь полей-значений". Идеальна для объектов с несколькими свойствами.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        A "key → field-value dictionary" structure. Ideal for objects with multiple properties.
+                    </p>
+                </div>
+                <pre><code class="language-bash">
+# Установить одно поле в хеше
+HSET hash field value
+HSET lifegoals:user:123 name "mrurec" email "yura@example.com"
+
+# Получить одно поле
+HGET hash field
+HGET lifegoals:user:123 name  # => "mrurec"
+
+# Получить все поля и значения
+HGETALL hash
+HGETALL lifegoals:user:123  # => name, mrurec, email, yura@example.com
+
+# Увеличить числовое поле (атомарно)
+HINCRBY hash field increment
+HINCRBY lifegoals:user:123:stats workouts_week 1  # Добавить 1 тренировку
+
+# Проверить существование поля
+HEXISTS hash field
+HEXISTS lifegoals:user:123 email  # => 1 (существует) или 0
+                </code></pre>
+
+                <h3><span class="lang-ru">Lists (Списки)</span><span class="lang-en">Lists</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Упорядоченный список элементов. Поддерживает операции вставки/удаления с обоих концов (O(1)).
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        An ordered list of elements. Supports insert/delete operations from both ends (O(1)).
+                    </p>
+                </div>
+                <pre><code class="language-bash">
+# Добавить в конец (right push)
+RPUSH list value1 value2
+RPUSH lifegoals:workout:history "2026-04-13" "2026-04-12"
+
+# Добавить в начало (left push)
+LPUSH list value
+
+# Получить диапазон элементов
+LRANGE list start stop
+LRANGE lifegoals:workout:history 0 -1  # Все элементы (новые в конце)
+
+# Получить длину списка
+LLEN list
+LLEN lifegoals:workout:history
+
+# Удалить первый элемент
+LPOP list
+                </code></pre>
+
+                <h3><span class="lang-ru">Sets (Множества)</span><span class="lang-en">Sets</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Неупорядоченное уникальное множество. Используется для тегов, категорий, фильтрации.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        An unordered unique set. Used for tags, categories, filtering.
+                    </p>
+                </div>
+                <pre><code class="language-bash">
+# Добавить элемент в множество
+SADD set member1 member2
+SADD lifegoals:interview:categories GRAPH DYNAMIC_PROGRAMMING SYSTEM_DESIGN
+
+# Получить все элементы множества
+SMEMBERS set
+SMEMBERS lifegoals:interview:categories
+
+# Проверить, входит ли элемент в множество
+SISMEMBER set member
+SISMEMBER lifegoals:interview:categories GRAPH  # => 1
+
+# Размер множества
+SCARD set
+                </code></pre>
+
+                <h3><span class="lang-ru">Sorted Sets (Упорядоченные множества)</span><span class="lang-en">Sorted Sets</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Как множества, но каждый элемент имеет оценку (score). Упорядочены по score.
+                        Идеальны для рейтингов, лидербордов, временных рядов.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Like sets, but each element has a score. Ordered by score.
+                        Ideal for rankings, leaderboards, time series.
+                    </p>
+                </div>
+                <pre><code class="language-bash">
+# Добавить элемент с оценкой
+ZADD zset score1 member1 score2 member2
+ZADD lifegoals:problem:difficulty 1 "Two Sum" 2 "Add Two Numbers" 5 "Median of Sorted Arrays"
+
+# Получить элементы по диапазону score
+ZRANGE zset min max BYSCORE
+ZRANGE lifegoals:problem:difficulty 1 3 BYSCORE  # Проблемы сложностью 1-3
+
+# Получить элементы в обратном порядке
+ZREVRANGE zset start stop
+ZREVRANGE lifegoals:problem:difficulty 0 -1  # От сложной к простой
+
+# Получить оценку элемента
+ZSCORE zset member
+ZSCORE lifegoals:problem:difficulty "Median of Sorted Arrays"  # => 5
+
+# Увеличить оценку элемента
+ZINCRBY zset increment member
+ZINCRBY lifegoals:problem:difficulty 1 "Two Sum"  # Теперь 2
+                </code></pre>
+            </section>
+
+            <section id="key-naming">
+                <h2><span class="lang-ru">Правила именования ключей</span><span class="lang-en">Key Naming Rules</span></h2>
+
+                <div class="lang-ru">
+                    <p>
+                        В Life Goals Dashboard следуем строгому паттерну именования ключей:
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        In Life Goals Dashboard we follow a strict key naming pattern:
+                    </p>
+                </div>
+
+                <pre><code class="language-bash">
+lifegoals:{widget_type}:{entity}:{id_or_query_hash}
+                </code></pre>
+
+                <div class="lang-ru">
+                    <p><strong>Компоненты:</strong></p>
+                    <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                        <li><code>lifegoals</code> — префикс приложения (избегает коллизии в Redis если используется несколько приложений)</li>
+                        <li><code>widget_type</code> — тип виджета: `budget`, `fitness`, `interviewprep`</li>
+                        <li><code>entity</code> — тип сущности: `exchange_rate`, `problem_stats`, `food_product`, `dashboard_widget`</li>
+                        <li><code>id_or_query_hash</code> — идентификатор (UUID, пара валют, хеш запроса)</li>
+                    </ul>
+
+                    <p><strong>Примеры реальных ключей:</strong></p>
+                </div>
+                <div class="lang-en">
+                    <p><strong>Components:</strong></p>
+                    <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                        <li><code>lifegoals</code> — application prefix (avoids collisions in Redis if multiple apps use it)</li>
+                        <li><code>widget_type</code> — widget type: `budget`, `fitness`, `interviewprep`</li>
+                        <li><code>entity</code> — entity type: `exchange_rate`, `problem_stats`, `food_product`, `dashboard_widget`</li>
+                        <li><code>id_or_query_hash</code> — identifier (UUID, currency pair, query hash)</li>
+                    </ul>
+
+                    <p><strong>Real key examples:</strong></p>
+                </div>
+                <pre><code class="language-bash">
+# Budget widget — курсы обмена
+lifegoals:budget:exchange_rate:EUR:KRW          # Курс EUR → KRW
+lifegoals:budget:exchange_rate:USD:EUR          # Курс USD → EUR
+
+# Interview Prep widget — статистика проблем
+lifegoals:interviewprep:problem_stats:uuid-123  # Статистика по проблеме с ID uuid-123
+lifegoals:interviewprep:heat_map:user-456       # Heat map (граф активности) пользователя
+
+# Fitness widget — поиск продуктов
+lifegoals:fitness:food_product:uuid-789         # Каш продукта
+lifegoals:fitness:food_search:banana             # Результаты поиска по слову "banana"
+
+# Dashboard widget — данные виджета
+lifegoals:dashboard:widget_data:widget-001       # Каш данных виджета #1
+
+# Notifications
+lifegoals:notification:pending:user-123          # Очередь уведомлений для пользователя
+                </code></pre>
+
+                <div class="warning">
+                    <strong><span class="lang-ru">Важно:</span><span class="lang-en">Important:</span></strong> <span class="lang-ru">Никогда не смешивайте типы данных для одного логического ключа!
+                    Если ключ начинается как String, он должен оставаться String. Меняйте тип только через DEL + ZADD.</span><span class="lang-en">Never mix data types for one logical key!
+                    If a key starts as a String, it should remain a String. Change type only via DEL + ZADD.</span>
+                </div>
+            </section>
+
+            <section id="caching">
+                <h2><span class="lang-ru">Стратегии кеширования</span><span class="lang-en">Caching Strategies</span></h2>
+
+                <h3><span class="lang-ru">Cache-Aside (Lazy Loading)</span><span class="lang-en">Cache-Aside (Lazy Loading)</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Клиент проверяет кеш. Если данных нет — получает из БД, сохраняет в кеш и возвращает.
+                        Кеш автоматически истекает по TTL.
+                    </p>
+
+                    <p><strong>Блок-схема:</strong></p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Client checks cache. If data doesn't exist, fetch from database, save to cache, and return.
+                        Cache expires automatically by TTL.
+                    </p>
+
+                    <p><strong>Flowchart:</strong></p>
+                </div>
+                <div class="lang-ru">
+                    <ol style="margin-left: 2rem; margin-bottom: 1rem;">
+                        <li>Запрос данных (например, курс EUR → KRW)</li>
+                        <li>Проверить Redis GET ключ → если есть, вернуть</li>
+                        <li>Если нет → получить из ExchangeRate API</li>
+                        <li>SETEX в Redis с TTL 1 час</li>
+                        <li>Вернуть клиенту</li>
+                    </ol>
+
+                    <p><strong>Пример: ExchangeRateCacheService в Kotlin</strong></p>
+                </div>
+                <div class="lang-en">
+                    <ol style="margin-left: 2rem; margin-bottom: 1rem;">
+                        <li>Request data (e.g., EUR → KRW rate)</li>
+                        <li>Check Redis GET key → if exists, return</li>
+                        <li>If not → fetch from ExchangeRate API</li>
+                        <li>SETEX to Redis with 1-hour TTL</li>
+                        <li>Return to client</li>
+                    </ol>
+
+                    <p><strong>Example: ExchangeRateCacheService in Kotlin</strong></p>
+                </div>
+                <pre><code class="language-kotlin">
+@Service
+class ExchangeRateCacheService(
+    private val redisTemplate: RedisTemplate&lt;String, String&gt;,
+    private val exchangeRateApi: ExchangeRateApi
+) {
+    private val TTL_SECONDS = 3600L  // 1 час
+
+    fun getExchangeRate(baseCurrency: String, targetCurrency: String): BigDecimal {
+        val cacheKey = "lifegoals:budget:exchange_rate:$baseCurrency:$targetCurrency"
+
+        // 1. Проверить Redis
+        val cachedRate = redisTemplate.opsForValue().get(cacheKey)
+        if (cachedRate != null) {
+            return BigDecimal(cachedRate)
+        }
+
+        // 2. Получить из API
+        val rate = exchangeRateApi.fetchRate(baseCurrency, targetCurrency)
+
+        // 3. Сохранить в кеш на 1 час
+        redisTemplate.opsForValue().set(
+            cacheKey,
+            rate.toPlainString(),
+            Duration.ofSeconds(TTL_SECONDS)
+        )
+
+        return rate
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Write-Through (Запись сквозь кеш)</span><span class="lang-en">Write-Through</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        При обновлении данных: сначала пишется в БД, затем в кеш. Кеш всегда валидный.
+                        При мутации кеш инвалидируется (DEL) и пересчитывается при следующем запросе.
+                    </p>
+
+                    <p><strong>Пример: Dashboard Widget Cache Invalidation</strong></p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        On data update: write to DB first, then to cache. Cache is always valid.
+                        On mutation, cache is invalidated (DEL) and recalculated on next request.
+                    </p>
+
+                    <p><strong>Example: Dashboard Widget Cache Invalidation</strong></p>
+                </div>
+                <pre><code class="language-kotlin">
+@Service
+class DashboardWidgetService(
+    private val redisTemplate: RedisTemplate&lt;String, String&gt;,
+    private val widgetRepository: DashboardWidgetRepository
+) {
+    fun updateWidgetConfig(widgetId: UUID, newConfig: JsonNode): DashboardWidget {
+        // 1. Обновить в БД
+        val updated = widgetRepository.save(
+            DashboardWidget(
+                id = widgetId,
+                config = newConfig,
+                updatedAt = Instant.now()
+            )
+        )
+
+        // 2. Инвалидировать кеш (DELETE из Redis)
+        val cacheKey = "lifegoals:dashboard:widget_data:$widgetId"
+        redisTemplate.delete(cacheKey)
+
+        // Следующий запрос пересчитает данные с новым конфигом
+        return updated
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Полная таблица кеширования Life Goals Dashboard</span><span class="lang-en">Complete Life Goals Dashboard Caching Table</span></h3>
+                <p><span class="lang-ru">Все кеши в проекте со сроками жизни и стратегиями:</span><span class="lang-en">All caches in the project with lifetimes and strategies:</span></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><span class="lang-ru">Данные</span><span class="lang-en">Data</span></th>
+                            <th><span class="lang-ru">Хранилище</span><span class="lang-en">Storage</span></th>
+                            <th>TTL</th>
+                            <th><span class="lang-ru">Стратегия</span><span class="lang-en">Strategy</span></th>
+                            <th><span class="lang-ru">Инвалидация</span><span class="lang-en">Invalidation</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="lang-ru">Курс валют (любая пара)</span><span class="lang-en">Exchange rate (any pair)</span></td>
+                            <td>Redis</td>
+                            <td>1 hour</td>
+                            <td>Cache-Aside</td>
+                            <td><span class="lang-ru">Часовой scheduler для активных пар</span><span class="lang-en">Hourly scheduler for active pairs</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Данные виджета Dashboard</span><span class="lang-en">Dashboard widget data</span></td>
+                            <td>Redis</td>
+                            <td>5 min</td>
+                            <td>Write-Through</td>
+                            <td><span class="lang-ru">На любую мутацию в модуле</span><span class="lang-en">On any module mutation</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Статистика проблем + heat map</span><span class="lang-en">Problem stats + heat map</span></td>
+                            <td>Redis</td>
+                            <td>10 min</td>
+                            <td>Cache-Aside</td>
+                            <td><span class="lang-ru">На CREATE/UPDATE/DELETE проблемы</span><span class="lang-en">On problem CREATE/UPDATE/DELETE</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Поиск пищевых продуктов</span><span class="lang-en">Food product search</span></td>
+                            <td>Redis</td>
+                            <td>30 min</td>
+                            <td>Cache-Aside</td>
+                            <td><span class="lang-ru">На создание нового продукта</span><span class="lang-en">On new product creation</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Еженедельный summary питания</span><span class="lang-en">Weekly nutrition summary</span></td>
+                            <td>Redis</td>
+                            <td>15 min</td>
+                            <td>Cache-Aside</td>
+                            <td><span class="lang-ru">На добавление записи о еде</span><span class="lang-en">On food entry addition</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="pubsub">
+                <h2><span class="lang-ru">Redis Pub/Sub для GraphQL Subscriptions</span><span class="lang-en">Redis Pub/Sub for GraphQL Subscriptions</span></h2>
+
+                <h3><span class="lang-ru">Архитектура Pub/Sub</span><span class="lang-en">Pub/Sub Architecture</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Redis Pub/Sub — это система "издатель-подписчик". Когда происходит событие (например, логирование тренировки),
+                        сервис публикует сообщение в Redis канал. WebSocket подписчики получают сообщение в реальном времени.
+                    </p>
+
+                    <p><strong>Поток данных:</strong></p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Redis Pub/Sub is a "publisher-subscriber" system. When an event occurs (e.g., logging a workout),
+                        the service publishes a message to a Redis channel. WebSocket subscribers receive the message in real-time.
+                    </p>
+
+                    <p><strong>Data flow:</strong></p>
+                </div>
+                <pre><code class="language-bash">
+Client (WebSocket) ← GraphQL DGS Subscription ← Redis SUBSCRIBE ← Service (PUBLISH)
+                </code></pre>
+
+                <h3>Redis SUBSCRIBE <span class="lang-ru">и</span><span class="lang-en">and</span> PUBLISH</h3>
+                <pre><code class="language-bash">
+# Подписаться на канал (слушатель)
+SUBSCRIBE channel-name
+SUBSCRIBE lifegoals:fitness:notifications
+
+# Опубликовать сообщение (издатель)
+PUBLISH channel-name message
+PUBLISH lifegoals:fitness:notifications '{"type": "WORKOUT_LOGGED", "userId": "123", "workoutId": "456"}'
+
+# Подписаться на паттерн каналов
+PSUBSCRIBE lifegoals:*:notifications
+                </code></pre>
+
+                <h3><span class="lang-ru">Реализация в Kotlin: Pub/Sub для уведомлений</span><span class="lang-en">Implementation in Kotlin: Pub/Sub for Notifications</span></h3>
+
+                <p><strong><span class="lang-ru">1. Слушатель канала Redis (MessageListener)</span><span class="lang-en">1. Redis Channel Listener (MessageListener)</span></strong></p>
+                <pre><code class="language-kotlin">
+@Component
+class NotificationMessageListener(
+    private val notificationService: NotificationService
+) : MessageListener {
+    override fun onMessage(message: Message, pattern: ByteArray?) {
+        val payload = String(message.body)
+        val notification = ObjectMapper().readValue(payload, Notification::class.java)
+
+        // Отправить уведомление клиенту через WebSocket
+        notificationService.sendToUser(notification.userId, notification)
+    }
+}
+                </code></pre>
+
+                <p><strong><span class="lang-ru">2. Регистрация слушателя в конфиге</span><span class="lang-en">2. Register Listener in Config</span></strong></p>
+                <pre><code class="language-kotlin">
+@Configuration
+class RedisConfig {
+    @Bean
+    fun messageListenerContainer(
+        connectionFactory: LettuceConnectionFactory,
+        messageListener: NotificationMessageListener
+    ): RedisMessageListenerContainer {
+        val container = RedisMessageListenerContainer()
+        container.setConnectionFactory(connectionFactory)
+
+        // Подписываемся на паттерн lifegoals:*:notifications
+        container.addMessageListener(
+            messageListener,
+            PatternTopic("lifegoals:*:notifications")
+        )
+
+        return container
+    }
+}
+                </code></pre>
+
+                <p><strong><span class="lang-ru">3. Публикация события из сервиса</span><span class="lang-en">3. Publish Event from Service</span></strong></p>
+                <pre><code class="language-kotlin">
+@Service
+class WorkoutService(
+    private val redisTemplate: RedisTemplate&lt;String, String&gt;,
+    private val workoutRepository: WorkoutRepository
+) {
+    fun logWorkout(userId: UUID, workout: WorkoutInput): Workout {
+        // 1. Сохранить в БД
+        val saved = workoutRepository.save(Workout(...))
+
+        // 2. Опубликовать event в Redis pub/sub
+        val event = mapOf(
+            "type" to "ACHIEVEMENT_UNLOCKED",
+            "userId" to userId.toString(),
+            "message" to "3 тренировки на этой неделе!",
+            "icon" to "trophy"
+        )
+        redisTemplate.convertAndSend(
+            "lifegoals:fitness:notifications",
+            ObjectMapper().writeValueAsString(event)
+        )
+
+        return saved
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">GraphQL Subscription в DGS</span><span class="lang-en">GraphQL Subscription in DGS</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Клиент подписывается через GraphQL WebSocket. DGS получает сообщения от Redis
+                        и отправляет их клиенту через WebSocket.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Client subscribes via GraphQL WebSocket. DGS receives messages from Redis
+                        and sends them to the client via WebSocket.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+@DgsSubscription
+class NotificationSubscription(
+    private val notificationService: NotificationService
+) {
+    @DgsData(parentType = "Subscription", field = "myNotifications")
+    fun myNotifications(dfe: DgsDataFetchingEnvironment): Publisher&lt;Notification&gt; {
+        val userId = dfe.getContext&lt;ViewerContext&gt;().userId
+
+        // Вернуть Publisher, который emits события из Redis
+        return notificationService.subscribeToUserNotifications(userId)
+    }
+}
+                </code></pre>
+            </section>
+
+            <section id="spring-boot">
+                <h2><span class="lang-ru">Redis в Spring Boot</span><span class="lang-en">Redis in Spring Boot</span></h2>
+
+                <h3><span class="lang-ru">Зависимости</span><span class="lang-en">Dependencies</span></h3>
+                <pre><code class="language-bash">
+// build.gradle.kts
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("io.lettuce:lettuce-core")  // Async Redis client
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Конфигурация RedisTemplate</span><span class="lang-en">RedisTemplate Configuration</span></h3>
+                <pre><code class="language-kotlin">
+@Configuration
+class RedisConfig {
+    @Bean
+    fun redisTemplate(connectionFactory: LettuceConnectionFactory): RedisTemplate&lt;String, String&gt; {
+        val template = RedisTemplate&lt;String, String&gt;()
+        template.setConnectionFactory(connectionFactory)
+
+        // Serializers для ключей и значений
+        val stringSerializer = StringRedisSerializer()
+        val jsonSerializer = Jackson2JsonRedisSerializer(String::class.java)
+
+        template.keySerializer = stringSerializer
+        template.valueSerializer = jsonSerializer
+        template.hashKeySerializer = stringSerializer
+        template.hashValueSerializer = jsonSerializer
+
+        return template
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">application.yml: Redis конфигурация</span><span class="lang-en">application.yml: Redis Configuration</span></h3>
+                <pre><code class="language-bash">
+spring:
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+      shutdown-timeout: 200ms
+                </code></pre>
+
+                <h3><span class="lang-ru">Использование в сервисе</span><span class="lang-en">Usage in Service</span></h3>
+                <pre><code class="language-kotlin">
+@Service
+class CacheService(
+    private val redisTemplate: RedisTemplate&lt;String, String&gt;
+) {
+    fun cache(key: String, value: String, ttlSeconds: Long) {
+        redisTemplate.opsForValue().set(
+            key,
+            value,
+            Duration.ofSeconds(ttlSeconds)
+        )
+    }
+
+    fun get(key: String): String? {
+        return redisTemplate.opsForValue().get(key)
+    }
+
+    fun delete(key: String) {
+        redisTemplate.delete(key)
+    }
+
+    fun increment(key: String, value: Long = 1): Long {
+        return redisTemplate.opsForValue().increment(key, value) ?: 0
+    }
+}
+                </code></pre>
+            </section>
+
+            <section class="assignments">
+                <h2><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></h2>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 1: Реализовать Cache-Aside для курсов обмена</span><span class="lang-en">Assignment 1: Implement Cache-Aside for Exchange Rates</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте ExchangeRateService с методом getRate(baseCurrency, targetCurrency).
+                            Сервис должен проверять Redis, при кеш-промахе получать курс из mock API,
+                            сохранять в Redis на 1 час и возвращать результат.
+                            Протестируйте с EUR/KRW, USD/EUR, GBP/JPY.
+                        </p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create an ExchangeRateService with a getRate(baseCurrency, targetCurrency) method.
+                            The service should check Redis, on cache miss fetch the rate from a mock API,
+                            save to Redis for 1 hour, and return the result.
+                            Test with EUR/KRW, USD/EUR, GBP/JPY.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 2: Реализовать Write-Through инвалидацию</span><span class="lang-en">Assignment 2: Implement Write-Through Invalidation</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте DashboardWidgetService с методами getWidget(id) и updateWidgetConfig(id, newConfig).
+                            getWidget() читает из кеша (5 мин TTL), updateWidgetConfig() обновляет БД и инвалидирует кеш (DEL).
+                            Следующий getWidget() должен пересчитать данные.
+                        </p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create a DashboardWidgetService with getWidget(id) and updateWidgetConfig(id, newConfig) methods.
+                            getWidget() reads from cache (5 min TTL), updateWidgetConfig() updates DB and invalidates cache (DEL).
+                            Next getWidget() should recalculate data.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 3: Реализовать Pub/Sub для тренировок</span><span class="lang-en">Assignment 3: Implement Pub/Sub for Workouts</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте WorkoutService.logWorkout(), который после сохранения в БД публикует событие
+                            в Redis канал lifegoals:fitness:notifications.
+                            Реализуйте MessageListener, который печатает события. Проверьте, что событие распространяется.
+                        </p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create WorkoutService.logWorkout() that publishes an event to the lifegoals:fitness:notifications
+                            Redis channel after saving to the database.
+                            Implement a MessageListener that prints events. Verify that the event propagates.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="assignments" id="backlog-tasks" style="border-top-color: #f5c2e7;">
+                <h2>🧪 <span class="lang-ru">Задания из Backlog проекта (TDD)</span><span class="lang-en">Backlog Tasks (TDD)</span></h2>
+                <div class="lang-ru">
+                    <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                        Эти задания — реальные задачи из бэклога проекта Life Goals Dashboard.
+                        Для каждого задания предоставлены тесты, которые нужно сделать зелёными, написав реализацию.
+                        <strong>Подход TDD:</strong> сначала изучи тесты → пойми что от тебя ожидается → напиши код → запусти тесты.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                        These tasks are real backlog items from the Life Goals Dashboard project.
+                        Tests are provided for each task—make them pass by writing implementation.
+                        <strong>TDD approach:</strong> study tests first → understand what's expected → write code → run tests.
+                    </p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #18: <span class="lang-ru">Redis caching infrastructure</span><span class="lang-en">Redis caching infrastructure</span> (3 SP) <span class="tdd-badge">TDD</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Реализуй CacheService с методами get/set/evict/evictByPrefix для работы с Redis кешем.
+                            Используй RedisTemplate для типизированного доступа к Redis с настройкой сериализаторов.
+                        </p>
+                        <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Implement CacheService with get/set/evict/evictByPrefix methods for Redis caching.
+                            Use RedisTemplate for typed Redis access with serializer configuration.
+                        </p>
+                        <p><strong>Tests (write code to pass them):</strong></p>
+                    </div>
+                    <pre><code class="language-kotlin">
+// src/test/kotlin/com/mrurec/lifegoals/common/cache/CacheServiceTest.kt
+package com.mrurec.lifegoals.common.cache
+
+import io.mockk.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.ValueOperations
+import java.time.Duration
+
+class CacheServiceTest {
+
+    private val redisTemplate = mockk&lt;RedisTemplate&lt;String, Any&gt;&gt;()
+    private val valueOps = mockk&lt;ValueOperations&lt;String, Any&gt;&gt;()
+    private lateinit var cacheService: CacheService
+
+    @BeforeEach
+    fun setup() {
+        every { redisTemplate.opsForValue() } returns valueOps
+        cacheService = CacheService(redisTemplate)
+    }
+
+    @Test
+    fun `get should return cached value when exists`() {
+        every { valueOps.get("lifegoals:budget:exchange_rate:EUR:KRW") } returns 1450.5
+
+        val result = cacheService.get&lt;Double&gt;("lifegoals:budget:exchange_rate:EUR:KRW")
+
+        assertEquals(1450.5, result)
+    }
+
+    @Test
+    fun `get should return null when key not found`() {
+        every { valueOps.get("lifegoals:fitness:workout:nonexistent") } returns null
+
+        val result = cacheService.get&lt;Any&gt;("lifegoals:fitness:workout:nonexistent")
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `set should store value with TTL`() {
+        every { valueOps.set(any(), any(), any&lt;Duration&gt;()) } just Runs
+
+        cacheService.set("lifegoals:budget:exchange_rate:EUR:KRW", 1450.5, Duration.ofHours(1))
+
+        verify { valueOps.set("lifegoals:budget:exchange_rate:EUR:KRW", 1450.5, Duration.ofHours(1)) }
+    }
+
+    @Test
+    fun `evict should delete specific key`() {
+        every { redisTemplate.delete(any&lt;String&gt;()) } returns true
+
+        cacheService.evict("lifegoals:fitness:workout:123")
+
+        verify { redisTemplate.delete("lifegoals:fitness:workout:123") }
+    }
+
+    @Test
+    fun `evictByPrefix should delete all keys matching prefix`() {
+        val keys = setOf("lifegoals:interviewprep:problem:1", "lifegoals:interviewprep:problem:2")
+        every { redisTemplate.keys("lifegoals:interviewprep:problem:*") } returns keys
+        every { redisTemplate.delete(keys) } returns 2
+
+        cacheService.evictByPrefix("lifegoals:interviewprep:problem")
+
+        verify { redisTemplate.keys("lifegoals:interviewprep:problem:*") }
+        verify { redisTemplate.delete(keys) }
+    }
+
+    @Test
+    fun `key pattern should follow convention lifegoals_module_entity_id`() {
+        val key = CacheService.buildKey("budget", "exchange_rate", "EUR", "KRW")
+        assertEquals("lifegoals:budget:exchange_rate:EUR:KRW", key)
+    }
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/test/kotlin/com/mrurec/lifegoals/common/cache/CacheServiceTest.kt</em></p>
+
+                    <p><strong>Дополнительный тест для RedisConfig:</strong></p>
+                    <pre><code class="language-kotlin">
+// src/test/kotlin/com/mrurec/lifegoals/common/cache/RedisConfigTest.kt
+package com.mrurec.lifegoals.common.cache
+
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
+import org.springframework.data.redis.serializer.StringRedisSerializer
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.containers.GenericContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
+
+@SpringBootTest
+@Testcontainers
+class RedisConfigTest {
+
+    companion object {
+        @Container
+        val redis = GenericContainer("redis:7-alpine").withExposedPorts(6379)
+
+        @DynamicPropertySource
+        @JvmStatic
+        fun configureProperties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.data.redis.host") { redis.host }
+            registry.add("spring.data.redis.port") { redis.getMappedPort(6379) }
+        }
+    }
+
+    @Autowired
+    lateinit var redisTemplate: RedisTemplate&lt;String, Any&gt;
+
+    @Test
+    fun `RedisTemplate should use String key serializer`() {
+        assertTrue(redisTemplate.keySerializer is StringRedisSerializer)
+    }
+
+    @Test
+    fun `RedisTemplate should use Jackson JSON value serializer`() {
+        assertTrue(redisTemplate.valueSerializer is GenericJackson2JsonRedisSerializer)
+    }
+
+    @Test
+    fun `should be able to set and get a value`() {
+        redisTemplate.opsForValue().set("test:key", "hello")
+        val result = redisTemplate.opsForValue().get("test:key")
+        assertEquals("hello", result)
+    }
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/test/kotlin/com/mrurec/lifegoals/common/cache/RedisConfigTest.kt</em></p>
+                </div>
+            </section>
+
+            <section class="resources">
+                <h2><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></h2>
+                <a href="https://redis.io/" class="resource-link">Redis Official</a>
+                <a href="https://university.redis.com/" class="resource-link">Redis University</a>
+                <a href="https://spring.io/projects/spring-data-redis" class="resource-link">Spring Data Redis</a>
+                <a href="https://github.com/lettuce-io/lettuce-core" class="resource-link">Lettuce (Java Redis Client)</a>
+                <a href="https://redis.io/docs/interact/pubsub/" class="resource-link">Redis Pub/Sub Documentation</a>
+            </section>
+
+            <div class="nav-footer">
+                <a href="04-postgresql.html" class="nav-link prev">← <span class="lang-ru">Предыдущий модуль</span><span class="lang-en">Previous Module</span></a>
+                <a href="06-spring-boot.html" class="nav-link next"><span class="lang-ru">Следующий модуль</span><span class="lang-en">Next Module</span> →</a>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+
+    <script>
+        function setLang(lang) {
+            document.body.classList.toggle('show-en', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('study-lang', lang); } catch(e) {}
+        }
+        try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+    </script>
+</body>
+</html>

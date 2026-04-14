@@ -1,0 +1,2004 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 6: Spring Boot 4 - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 37.5%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .language-bash::before,
+        .language-kotlin::before,
+        .language-yaml::before {
+            content: attr(data-lang);
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details/Collapse */
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        /* Assignments */
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .assignment .tdd-badge {
+            display: inline-block;
+            background: #f5c2e7;
+            color: #1e1e2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Resources */
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        /* Navigation */
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Prism Customization */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+
+        /* Language switcher */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button {
+            padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px;
+            cursor: pointer; font-size: 0.85rem; background: transparent;
+            color: var(--text-secondary); transition: all 0.2s;
+        }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="module-number"><span class="lang-ru">МОДУЛЬ 6 / 16</span><span class="lang-en">MODULE 6 / 16</span></div>
+            <h1>Spring Boot 4</h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3><span class="lang-ru">Содержание</span><span class="lang-en">Contents</span></h3>
+            <ul>
+                <li><a href="#intro"><span class="lang-ru">Введение</span><span class="lang-en">Introduction</span></a></li>
+                <li><a href="#whats-new"><span class="lang-ru">Новое в SB4</span><span class="lang-en">What's new SB4</span></a></li>
+                <li><a href="#di-ioc"><span class="lang-ru">DI и IoC контейнер</span><span class="lang-en">DI & IoC Container</span></a></li>
+                <li><a href="#configuration"><span class="lang-ru">Конфигурация</span><span class="lang-en">Configuration</span></a></li>
+                <li><a href="#rest-client">REST Client</a></li>
+                <li><a href="#error-handling"><span class="lang-ru">Обработка ошибок</span><span class="lang-en">Error Handling</span></a></li>
+                <li><a href="#security"><span class="lang-ru">Security & OAuth2</span><span class="lang-en">Security & OAuth2</span></a></li>
+                <li><a href="#scheduled"><span class="lang-ru">Scheduled Tasks</span><span class="lang-en">Scheduled Tasks</span></a></li>
+                <li><a href="#modulith"><span class="lang-ru">Spring Modulith</span><span class="lang-en">Spring Modulith</span></a></li>
+                <li><a href="#assignments"><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></a></li>
+                <li><a href="#backlog-tasks">🧪 <span class="lang-ru">Задания из Backlog (TDD)</span><span class="lang-en">Backlog Tasks (TDD)</span></a></li>
+                <li><a href="#resources"><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <h2><span class="lang-ru">Введение: Spring Boot 4 для Life Goals Dashboard</span><span class="lang-en">Introduction: Spring Boot 4 for Life Goals Dashboard</span></h2>
+                <div class="lang-ru">
+                    <p>
+                        <strong>Spring Boot 4.0.5</strong> (на JDK 25 LTS, Spring Framework 7, Jakarta EE 11) — это фреймворк для быстрого создания production-ready приложений на Java/Kotlin.
+                        Он автоматизирует конфигурацию, предоставляет встроенные стартеры для БД, кеша, безопасности и ещё многого. Jackson 3 и JSpecify null-safety встроены по умолчанию.
+                    </p>
+                    <p>
+                        За 4 дня вы освоите dependency injection, конфигурацию через YAML и аннотации,
+                        интеграцию с внешними API (REST Client), обработку ошибок через Payload pattern,
+                        OAuth2 + JWT для аутентификации и асинхронные scheduled tasks.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Совет:</strong> Spring Boot следует "convention over configuration" — большинство стандартных
+                        параметров уже настроены. Вам нужны только специфичные для проекта конфиги.
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        <strong>Spring Boot 4.0.5</strong> (on JDK 25 LTS, Spring Framework 7, Jakarta EE 11) is a framework for rapidly building production-ready Java/Kotlin applications.
+                        It automates configuration and provides built-in starters for databases, caching, security, and much more. Jackson 3 and JSpecify null-safety annotations are built-in by default.
+                    </p>
+                    <p>
+                        Over 4 days you will master dependency injection, YAML and annotation-based configuration,
+                        external API integration (REST Client), error handling via the Payload pattern,
+                        OAuth2 + JWT authentication, and asynchronous scheduled tasks.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Tip:</strong> Spring Boot follows "convention over configuration"—most standard
+                        settings are already configured. You only need project-specific configs.
+                    </div>
+                </div>
+            </section>
+
+            <section id="whats-new">
+                <h2><span class="lang-ru">Что нового в Spring Boot 4</span><span class="lang-en">What's new in Spring Boot 4</span></h2>
+
+                <h3><span class="lang-ru">API Versioning</span><span class="lang-en">API Versioning</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Spring Boot 4 добавляет встроенную поддержку API версионирования. Четыре основные стратегии:
+                        URL path (<code>/v1/users</code>), Header (<code>API-Version: 1</code>), Media-Type (<code>application/vnd.app+json;version=1</code>), Query param (<code>?version=1</code>).
+                        Конфигурируется через <code>spring.mvc.apiversion.*</code> или аннотация <code>@RequestMapping(version="1.0")</code>.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Spring Boot 4 adds built-in API versioning support. Four main strategies:
+                        URL path (<code>/v1/users</code>), Header (<code>API-Version: 1</code>), Media-Type (<code>application/vnd.app+json;version=1</code>), Query param (<code>?version=1</code>).
+                        Configure via <code>spring.mvc.apiversion.*</code> or <code>@RequestMapping(version="1.0")</code> annotation.
+                    </p>
+                </div>
+
+                <h3><span class="lang-ru">@HttpExchange Клиенты</span><span class="lang-en">@HttpExchange Clients</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Объявительные интерфейсы с <code>@HttpExchange</code> автоматически регистрируются как бины и используются для интеграции с внешними API.
+                        Это проще и безопаснее, чем RestClient или WebClient.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Declarative interfaces with <code>@HttpExchange</code> are automatically registered as beans for external API integration.
+                        This is simpler and safer than using RestClient or WebClient directly.
+                    </p>
+                </div>
+                <pre><code class="language-kotlin">
+@HttpExchange(url = "https://api.exchangeratesapi.io")
+interface ExchangeRateClient {
+    @GetExchange("/v1/latest?base={base}&symbols={symbols}")
+    fun getRate(
+        @PathVariable base: String,
+        @PathVariable symbols: String
+    ): CompletableFuture&lt;ExchangeRateResponse&gt;
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Built-in Resilience</span><span class="lang-en">Built-in Resilience</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Spring Boot 4 встраивает retry и rate limiting без Resilience4j.
+                        Используйте <code>@Retry</code> и <code>@RateLimiter</code> прямо на методах сервиса.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Spring Boot 4 bakes in retry and rate limiting without Resilience4j.
+                        Use <code>@Retry</code> and <code>@RateLimiter</code> directly on service methods.
+                    </p>
+                </div>
+
+                <h3><span class="lang-ru">Spring Security 7 Улучшения</span><span class="lang-en">Spring Security 7 Improvements</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        OAuth2 Resource Server получил лучшую JWT валидацию, встроенную поддержку jwks_uri discovery и улучшенный error handling для Authorization Code flow.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        OAuth2 Resource Server gains better JWT validation, built-in jwks_uri discovery, and improved error handling for Authorization Code flow.
+                    </p>
+                </div>
+
+                <h3><span class="lang-ru">JSpecify Null-Safety</span><span class="lang-en">JSpecify Null-Safety</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        <code>@Nullable</code> и <code>@NonNull</code> аннотации из JSpecify встроены в Spring Boot 4.
+                        Используйте их для обозначения nullable полей и параметров — улучшает type safety и помогает IDE.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        <code>@Nullable</code> and <code>@NonNull</code> from JSpecify are built into Spring Boot 4.
+                        Use them to mark nullable fields and parameters—improves type safety and IDE support.
+                    </p>
+                </div>
+                <pre><code class="language-kotlin">
+import org.jspecify.annotations.Nullable
+
+@Service
+class BudgetService(
+    @Nullable private val exchangeRateClient: ExchangeRateClient?
+) {
+    fun convertCurrency(amount: Double, from: String, to: String): Double {
+        // exchangeRateClient может быть null если сервис недоступен
+        return exchangeRateClient?.getRate(from, to)?.rate ?: amount
+    }
+}
+                </code></pre>
+            </section>
+
+            <section id="di-ioc">
+                <h2><span class="lang-ru">Dependency Injection и IoC контейнер</span><span class="lang-en">Dependency Injection & IoC Container</span></h2>
+
+                <h3><span class="lang-ru">Что такое DI?</span><span class="lang-en">What is DI?</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Dependency Injection — это паттерн, при котором объект получает свои зависимости извне, а не создаёт их сам.
+                        Spring IoC контейнер управляет созданием и инъекцией объектов.
+                    </p>
+
+                    <p><strong>Без DI (плохо):</strong></p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Dependency Injection is a pattern where an object receives its dependencies from outside rather than creating them itself.
+                        Spring IoC container manages object creation and injection.
+                    </p>
+
+                    <p><strong>Without DI (bad):</strong></p>
+                </div>
+                <pre><code class="language-kotlin">
+class WorkoutService {
+    private val repository = WorkoutRepository()  // Жёсткая привязка
+    private val cache = RedisTemplate()          // Жёсткая привязка
+
+    fun logWorkout(workout: Workout) {
+        repository.save(workout)
+        cache.invalidate("workouts")
+    }
+}
+                </code></pre>
+
+                <p><strong><span class="lang-ru">С DI (хорошо):</span><span class="lang-en">With DI (good):</span></strong></p>
+                <pre><code class="language-kotlin">
+// Spring автоматически создаёт WorkoutRepository и RedisTemplate
+class WorkoutService(
+    private val repository: WorkoutRepository,
+    private val cache: RedisTemplate&lt;String, String&gt;
+) {
+    fun logWorkout(workout: Workout) {
+        repository.save(workout)
+        cache.invalidate("workouts")
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Аннотации для регистрации бинов</span><span class="lang-en">Annotations for Bean Registration</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Spring сканирует классы и автоматически регистрирует их как "бины" (управляемые объекты).
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Spring scans classes and automatically registers them as "beans" (managed objects).
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+// @Service — для бизнес-логики
+@Service
+class WorkoutService(
+    private val repository: WorkoutRepository
+) {
+    fun logWorkout(workout: Workout) {
+        repository.save(workout)
+    }
+}
+
+// @Repository — для доступа к БД
+@Repository
+interface WorkoutRepository : JpaRepository&lt;Workout, UUID&gt;
+
+// @Component — для общего назначения
+@Component
+class MetricsCollector
+
+// @Configuration — для конфигурационных классов
+@Configuration
+class RedisConfig {
+    @Bean
+    fun redisTemplate(factory: LettuceConnectionFactory): RedisTemplate&lt;String, String&gt; {
+        return RedisTemplate()
+    }
+}
+
+// @Controller / @RestController — для web endpoints
+@RestController
+class WorkoutController(
+    private val service: WorkoutService
+) {
+    @PostMapping("/workouts")
+    fun logWorkout(@RequestBody input: WorkoutInput): Workout {
+        return service.logWorkout(input)
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Constructor Injection ТОЛЬКО</span><span class="lang-en">Constructor Injection ONLY</span></h3>
+                <div class="warning">
+                    <strong><span class="lang-ru">Правило проекта:</span><span class="lang-en">Project rule:</span></strong> <span class="lang-ru">Используйте только constructor injection. Никогда не используйте @Autowired на fields.
+                    Constructor injection делает зависимости явными и позволяет использовать `val` (immutable).</span><span class="lang-en">Use only constructor injection. Never use @Autowired on fields.
+                    Constructor injection makes dependencies explicit and allows using `val` (immutable).</span>
+                </div>
+
+                <pre><code class="language-kotlin">
+// ✅ ПРАВИЛЬНО
+@Service
+class FitnessService(
+    private val workoutRepository: WorkoutRepository,
+    private val nutritionCalculator: NutritionCalculator,
+    private val cacheService: CacheService
+) {
+    // ...
+}
+
+// ❌ НЕПРАВИЛЬНО — Field injection
+@Service
+class FitnessService {
+    @Autowired
+    private lateinit var workoutRepository: WorkoutRepository
+
+    @Autowired
+    private lateinit var cacheService: CacheService
+}
+                </code></pre>
+            </section>
+
+            <section id="configuration">
+                <h2><span class="lang-ru">Конфигурация</span><span class="lang-en">Configuration</span></h2>
+
+                <h3><span class="lang-ru">application.yml с профилями</span><span class="lang-en">application.yml with Profiles</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Основной конфиг файл (YAML формат — читаемнее чем Properties).
+                        Используются переменные окружения для sensitive данных.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Main config file (YAML format—more readable than Properties).
+                        Environment variables are used for sensitive data.
+                    </p>
+                </div>
+
+                <pre><code class="language-yaml">
+spring:
+  application:
+    name: life-goals-api
+  profiles:
+    active: ${SPRING_PROFILE:dev}
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/lifegoals}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:secret}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL15Dialect
+        format_sql: true
+
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+
+  graphql:
+    graphiql:
+      enabled: true
+    schema-locations: classpath:schema/
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: 86400000  # 24 часа
+  exchange-rate-api:
+    url: https://api.exchangeratesapi.io/v1/latest
+    key: ${EXCHANGE_RATE_API_KEY}
+                </code></pre>
+
+                <h3><span class="lang-ru">@ConfigurationProperties для типобезопасной конфигурации</span><span class="lang-en">@ConfigurationProperties for Type-Safe Configuration</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Вместо прямого доступа к properties, создаём POJO класс с типобезопасностью.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Instead of direct property access, create a type-safe POJO class.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+@Configuration
+@ConfigurationProperties(prefix = "app.exchange-rate-api")
+data class ExchangeRateProperties(
+    var url: String = "",
+    var key: String = "",
+    var cacheTtlSeconds: Long = 3600L
+)
+
+// Использование в сервисе
+@Service
+class ExchangeRateService(
+    private val properties: ExchangeRateProperties
+) {
+    fun fetchRate(base: String, target: String): BigDecimal {
+        val url = "${properties.url}?access_key=${properties.key}&base=$base&symbols=$target"
+        // ...
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Профили (dev, prod)</span><span class="lang-en">Profiles (dev, prod)</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Разные конфиги для локальной разработки и production.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Different configs for local development and production.
+                    </p>
+                </div>
+
+                <pre><code class="language-yaml">
+# application-dev.yml
+spring:
+  jpa:
+    show-sql: true  # Логировать SQL в консоль при dev
+  graphql:
+    graphiql:
+      enabled: true  # GraphiQL доступен в dev
+
+app:
+  exchange-rate-api:
+    cache-ttl-seconds: 60  # 1 минута для быстрого тестирования
+
+---
+# application-prod.yml
+spring:
+  jpa:
+    show-sql: false
+  graphql:
+    graphiql:
+      enabled: false  # GraphiQL отключен в production
+
+app:
+  exchange-rate-api:
+    cache-ttl-seconds: 3600  # 1 час в production
+                </code></pre>
+            </section>
+
+            <section id="rest-client">
+                <h2><span class="lang-ru">REST Client для внешних API</span><span class="lang-en">REST Client for External APIs</span></h2>
+
+                <h3><span class="lang-ru">RestClient и HttpExchange в Spring Boot 4</span><span class="lang-en">RestClient and HttpExchange in Spring Boot 4</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Spring Boot 4 имеет встроенный RestClient и декларативные @HttpExchange интерфейсы для экстерн API интеграции.
+                        Это современные альтернативы RestTemplate и WebClient, с автоматической регистрацией как бин.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Spring Boot 4 has a built-in RestClient and declarative @HttpExchange interfaces for external API integration.
+                        These are modern alternatives to RestTemplate and WebClient, with automatic bean registration.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+// Конфигурация
+@Configuration
+class HttpClientConfig {
+    @Bean
+    fun restClient(): RestClient {
+        return RestClient.builder()
+            .requestFactory(SimpleClientHttpRequestFactory())
+            .messageConverters { converters ->
+                converters.add(MappingJackson2HttpMessageConverter())
+            }
+            .build()
+    }
+}
+
+// Использование в сервисе
+@Service
+class ExchangeRateApi(
+    private val restClient: RestClient,
+    private val properties: ExchangeRateProperties
+) {
+    data class RateResponse(
+        val rates: Map&lt;String, BigDecimal&gt;
+    )
+
+    fun fetchRate(base: String, target: String): BigDecimal {
+        val response = restClient.get()
+            .uri("${properties.url}?access_key=${properties.key}&base=$base&symbols=$target")
+            .retrieve()
+            .body(RateResponse::class.java)
+
+        return response?.rates?.get(target) ?: throw RuntimeException("Rate not found")
+    }
+}
+                </code></pre>
+            </section>
+
+            <section id="error-handling">
+                <h2><span class="lang-ru">Обработка ошибок: Payload + UserError Pattern</span><span class="lang-en">Error Handling: Payload + UserError Pattern</span></h2>
+
+                <h3><span class="lang-ru">Enum для кодов ошибок</span><span class="lang-en">Enum for Error Codes</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Стандартный набор кодов ошибок, которые клиент может обработать программно.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        A standard set of error codes that the client can handle programmatically.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+enum class ErrorCode {
+    VALIDATION_ERROR,
+    UNAUTHORIZED,
+    FORBIDDEN,
+    NOT_FOUND,
+    CONFLICT,
+    INTERNAL_ERROR
+}
+
+data class UserError(
+    val field: String? = null,  // Для валидации: какое поле?
+    val message: String,
+    val code: ErrorCode
+)
+                </code></pre>
+
+                <h3><span class="lang-ru">Payload типы</span><span class="lang-en">Payload Types</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Каждая мутация возвращает Payload с результатом И ошибками. Никогда не кидаем исключения для бизнес-ошибок.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Each mutation returns a Payload with result AND errors. Never throw exceptions for business errors.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+// GraphQL Schema: mutations.graphqls
+type CreateRecipePayload {
+  recipe: Recipe
+  errors: [UserError!]!
+}
+
+type UserError {
+  field: String
+  message: String!
+  code: ErrorCode!
+}
+
+enum ErrorCode {
+  VALIDATION_ERROR
+  NOT_FOUND
+  INTERNAL_ERROR
+}
+                </code></pre>
+
+                <p><strong><span class="lang-ru">Реализация в Kotlin:</span><span class="lang-en">Implementation in Kotlin:</span></strong></p>
+                <pre><code class="language-kotlin">
+@Service
+class RecipeService(
+    private val repository: RecipeRepository,
+    private val productService: FoodProductService
+) {
+    fun createRecipe(input: CreateRecipeInput): CreateRecipePayload {
+        val errors = mutableListOf&lt;UserError&gt;()
+
+        // Валидация имени
+        if (input.name.isBlank()) {
+            errors.add(UserError(
+                field = "name",
+                message = "Имя рецепта не может быть пустым",
+                code = ErrorCode.VALIDATION_ERROR
+            ))
+        }
+
+        // Валидация ингредиентов
+        if (input.ingredients.isEmpty()) {
+            errors.add(UserError(
+                field = "ingredients",
+                message = "Рецепт должен содержать хотя бы один ингредиент",
+                code = ErrorCode.VALIDATION_ERROR
+            ))
+        }
+
+        // Если ошибки валидации — вернуть их в Payload
+        if (errors.isNotEmpty()) {
+            return CreateRecipePayload(recipe = null, errors = errors)
+        }
+
+        // Проверить существование продуктов
+        val products = input.ingredients.mapNotNull { ingredient ->
+            val product = repository.findById(ingredient.productId)
+            if (product.isEmpty) {
+                errors.add(UserError(
+                    field = "ingredients[${ingredient.productId}]",
+                    message = "Продукт не найден",
+                    code = ErrorCode.NOT_FOUND
+                ))
+                null
+            } else {
+                product.get()
+            }
+        }
+
+        if (errors.isNotEmpty()) {
+            return CreateRecipePayload(recipe = null, errors = errors)
+        }
+
+        // Создать рецепт
+        val recipe = Recipe(
+            name = input.name,
+            ingredients = products,
+            servings = input.servings
+        )
+        val saved = repository.save(recipe)
+
+        return CreateRecipePayload(recipe = saved, errors = emptyList())
+    }
+}
+
+data class CreateRecipePayload(
+    val recipe: Recipe?,
+    val errors: List&lt;UserError&gt;
+)
+                </code></pre>
+
+                <h3><span class="lang-ru">GraphQLExceptionHandler для система ошибок</span><span class="lang-en">GraphQLExceptionHandler for Error System</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        System ошибки (auth, незловленные исключения) кидаются как GraphQL ошибки.
+                        Бизнес ошибки возвращаются в Payload.errors.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        System errors (auth, uncaught exceptions) are thrown as GraphQL errors.
+                        Business errors are returned in Payload.errors.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+@ControllerAdvice
+class GraphQLExceptionHandler {
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnauthorized(e: UnauthorizedException): GraphQLError {
+        return GraphQLError(e.message ?: "Unauthorized", emptyList(), null, null, listOf("UNAUTHENTICATED"))
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleGeneric(e: Exception): GraphQLError {
+        logger.error("Unexpected error", e)
+        return GraphQLError("Internal server error", emptyList(), null, null, listOf("INTERNAL_ERROR"))
+    }
+}
+                </code></pre>
+            </section>
+
+            <section id="security">
+                <h2><span class="lang-ru">Security: OAuth2 + JWT + ViewerContext</span><span class="lang-en">Security: OAuth2 + JWT + ViewerContext</span></h2>
+
+                <h3><span class="lang-ru">ViewerContext — кто запрашивает?</span><span class="lang-en">ViewerContext — Who's requesting?</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        Каждый GraphQL запрос имеет контекст, который содержит текущего пользователя (viewer).
+                        <strong>Правило:</strong> КАЖДЫЙ service метод получает ViewerContext и проверяет permissions.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Each GraphQL request has a context that contains the current user (viewer).
+                        <strong>Rule:</strong> EVERY service method receives ViewerContext and checks permissions.
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+data class ViewerContext(
+    val userId: UUID,
+    val email: String,
+    val roles: List&lt;String&gt;
+)
+
+// Middleware в DGS
+@Component
+class ViewerContextInstrumentation : Instrumentation {
+    override fun instrumentField(
+        fieldInstrumentation: InstrumentFieldParameters
+    ): CompletableFuture&lt;*&gt;? {
+        val request = fieldInstrumentation.executionInput.getContext&lt;GraphQLRequest&gt;()
+        val token = extractJwtFromHeader(request)
+        val viewer = parseJwt(token) // Извлечь userId и роли из JWT
+
+        fieldInstrumentation.executionInput.context = viewer
+        return null
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Проверка прав в сервис-методах</span><span class="lang-en">Permission Checks in Service Methods</span></h3>
+                <pre><code class="language-kotlin">
+@Service
+class WorkoutService(
+    private val repository: WorkoutRepository
+) {
+    fun getMyWorkouts(viewer: ViewerContext): List&lt;Workout&gt; {
+        // Получить только тренировки ТЕКУЩЕГО пользователя
+        return repository.findByUserId(viewer.userId)
+    }
+
+    fun deleteWorkout(viewer: ViewerContext, workoutId: UUID) {
+        val workout = repository.findById(workoutId)
+            .orElseThrow { NotFoundException("Workout not found") }
+
+        // Проверка: может ли viewer удалить эту тренировку?
+        if (workout.userId != viewer.userId) {
+            throw ForbiddenException("You can only delete your own workouts")
+        }
+
+        repository.delete(workout)
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">JWT токены в Spring Security</span><span class="lang-en">JWT Tokens in Spring Security</span></h3>
+                <pre><code class="language-kotlin">
+@Configuration
+@EnableWebSecurity
+class SecurityConfig {
+    @Bean
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        return http
+            .csrf { it.disable() }
+            .authorizeHttpRequests {
+                it.requestMatchers("/graphql").authenticated()
+                it.anyRequest().permitAll()
+            }
+            .oauth2ResourceServer {
+                it.jwt { }
+            }
+            .build()
+    }
+
+    @Bean
+    fun jwtDecoder(): JwtDecoder {
+        val secretKey = SecretKeySpec(JWT_SECRET.toByteArray(), "HmacSHA256")
+        return NimbusJwtDecoder.withSecretKey(secretKey).build()
+    }
+}
+                </code></pre>
+            </section>
+
+            <section id="scheduled">
+                <h2><span class="lang-ru">Scheduled Tasks</span><span class="lang-en">Scheduled Tasks</span></h2>
+
+                <div class="lang-ru">
+                    <p>
+                        Асинхронные задачи, которые выполняются по расписанию (например, обновление курсов обмена).
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        Asynchronous tasks that run on a schedule (e.g., updating exchange rates).
+                    </p>
+                </div>
+
+                <pre><code class="language-kotlin">
+@Configuration
+@EnableScheduling
+class SchedulingConfig
+
+@Service
+class ExchangeRateScheduler(
+    private val exchangeRateService: ExchangeRateService
+) {
+    // Каждый час обновить курсы активных пар
+    @Scheduled(fixedRateString = "3600000", initialDelayString = "60000")
+    fun refreshExchangeRates() {
+        logger.info("Refreshing exchange rates...")
+        exchangeRateService.refreshAllActivePairs()
+        logger.info("Exchange rates refreshed")
+    }
+
+    // Каждый день в 2 часа ночи
+    @Scheduled(cron = "0 2 * * *", zone = "UTC")
+    fun dailyCleanup() {
+        logger.info("Running daily cleanup...")
+        // Удалить старые записи, заархивировать данные и т.д.
+    }
+}
+                </code></pre>
+            </section>
+
+            <section id="modulith">
+                <h2><span class="lang-ru">Spring Modulith: энфорсмент границ модульного монолита</span><span class="lang-en">Spring Modulith: Enforcing Modular Monolith Boundaries</span></h2>
+
+                <div class="lang-ru">
+                    <p>
+                        Проект — это <strong>widget-first modular monolith</strong> (см. <code>CLAUDE.md</code> → <em>Architecture</em>).
+                        Каждый пакет верхнего уровня (<code>interviewprep</code>, <code>fitness</code>, <code>budget</code>,
+                        <code>dashboard</code>, <code>notification</code>, <code>common</code>) — модуль со строгими границами.
+                        Виджеты могут зависеть только от <code>common</code> — никогда напрямую от
+                        <code>repository/</code> или <code>model/</code> друг друга.
+                    </p>
+                    <p>
+                        <strong>Spring Modulith</strong> — инструмент, который энфорсит это правило в CI, а не в code review.
+                        Полное обоснование выбора (и почему не ArchUnit) — в
+                        <a href="../adr/ADR-004-module-boundary-enforcement.md"><code>docs/adr/ADR-004-module-boundary-enforcement.md</code></a>.
+                    </p>
+
+                    <h3>Почему нельзя просто договориться?</h3>
+                    <ul>
+                        <li><strong>Code review не масштабируется.</strong> Даже на проекте из 1 человека уставший пятничный merge рано или поздно пересечёт границу. CI ловит это в 100% случаев.</li>
+                        <li><strong>Нет drift документации.</strong> Modulith генерирует PlantUML-диаграммы из самого кода — диаграмма физически не может разойтись с реальностью.</li>
+                        <li><strong>События заменяют скрытые связи.</strong> Без формальной event-шины cross-module фичи (например, <code>notification</code> реагирует на <code>fitness.WorkoutLogged</code>) молча превращаются в прямые вызовы.</li>
+                    </ul>
+                </div>
+
+                <div class="lang-en">
+                    <p>
+                        The project is a <strong>widget-first modular monolith</strong> (see <code>CLAUDE.md</code> → <em>Architecture</em>).
+                        Every top-level package (<code>interviewprep</code>, <code>fitness</code>, <code>budget</code>,
+                        <code>dashboard</code>, <code>notification</code>, <code>common</code>) is a module with explicit boundaries.
+                        Widgets may depend only on <code>common</code> — never on each other's <code>repository/</code> or <code>model/</code>.
+                    </p>
+                    <p>
+                        <strong>Spring Modulith</strong> is the tool that enforces this in CI, not by code review.
+                        The full decision (and why not ArchUnit) is in
+                        <a href="../adr/ADR-004-module-boundary-enforcement.md"><code>docs/adr/ADR-004-module-boundary-enforcement.md</code></a>.
+                    </p>
+
+                    <h3>Why not just discipline?</h3>
+                    <ul>
+                        <li><strong>Code review doesn't scale.</strong> Even on a 1-person project, a tired Friday merge will cross a boundary. CI catches it 100% of the time.</li>
+                        <li><strong>No documentation drift.</strong> Modulith generates PlantUML diagrams from the code itself — the diagram can never diverge from reality.</li>
+                        <li><strong>Events replace hidden coupling.</strong> Without a formal event bus, cross-module features (e.g., <code>notification</code> reacting to <code>fitness.WorkoutLogged</code>) silently become direct calls.</li>
+                    </ul>
+                </div>
+
+                <h3><span class="lang-ru">Объявление модуля</span><span class="lang-en">Module Declaration</span></h3>
+<p><span class="lang-ru">Пишем на Java — Kotlin не поддерживает package-level аннотации в форме, которую читает сканер Spring Modulith; <code>build.gradle.kts</code> добавляет <code>src/main/kotlin</code> в Java source set, чтобы javac подхватил эти файлы.</span><span class="lang-en">Written in Java because Kotlin has no equivalent of Java's package-level annotations that Spring Modulith's scanner can read; <code>build.gradle.kts</code> adds <code>src/main/kotlin</code> to the Java source set so javac picks these files up.</span></p>
+<pre><code class="language-java">// com/mrurec/lifegoals/fitness/package-info.java
+@org.springframework.modulith.ApplicationModule(
+    displayName = "Fitness Widget",
+    allowedDependencies = {"common"}
+)
+package com.mrurec.lifegoals.fitness;
+</code></pre>
+
+                <h3><span class="lang-ru">Один тест проверяет всё</span><span class="lang-en">One Test Enforces Everything</span></h3>
+<pre><code class="language-kotlin">class ModularityTests {
+    private val modules = ApplicationModules.of(LifeGoalsApplication::class.java)
+
+    @Test fun `verifies module boundaries`() = modules.verify()
+    // Fails the build on: illegal cross-module imports, cycles,
+    // or if a module exposes internals not declared public.
+
+    @Test fun `writes documentation`() {
+        Documenter(modules)
+            .writeModulesAsPlantUml()              // ./build/spring-modulith-docs/
+            .writeIndividualModulesAsPlantUml()
+    }
+}
+</code></pre>
+
+                <h3><span class="lang-ru">Cross-module события</span><span class="lang-en">Cross-Module Events</span></h3>
+                <div class="lang-ru">
+                    <p>Никаких прямых зависимостей между модулями — только через события:</p>
+                </div>
+                <div class="lang-en">
+                    <p>No direct dependencies between modules — only events:</p>
+                </div>
+<pre><code class="language-kotlin">// fitness публикует — ничего не знает о слушателях
+data class WorkoutLogged(val userId: UUID, val workoutId: UUID, val at: Instant)
+
+@Service
+class WorkoutService(private val events: ApplicationEventPublisher) {
+    @Transactional
+    fun logWorkout(/* ... */) {
+        // ... persist workout ...
+        events.publishEvent(WorkoutLogged(viewer.userId, workout.id, Instant.now()))
+    }
+}
+
+// notification реагирует — нулевая compile-time зависимость от fitness
+@Component
+class WorkoutAchievementListener(
+    private val notifications: NotificationService,
+    private val achievements: AchievementChecker
+) {
+    @ApplicationModuleListener    // = @TransactionalEventListener + @Async + persistence
+    fun on(event: WorkoutLogged) {
+        val earned = achievements.check(event.userId)
+        earned.forEach { notifications.publish(event.userId, it) }
+    }
+}
+</code></pre>
+
+                <div class="lang-ru">
+                    <p>
+                        <code>@ApplicationModuleListener</code> — ключевая штука: событие сохраняется в таблице
+                        <code>event_publication</code> внутри той же транзакции, что записала workout.
+                        Если слушатель упал или приложение крашнулось — Modulith ретраит при рестарте.
+                        Это <strong>transactional outbox pattern</strong> — тот же подход, что Meta/LinkedIn используют
+                        для надёжных cross-service записей, только без Kafka посередине.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        <code>@ApplicationModuleListener</code> is key: the event is persisted in the
+                        <code>event_publication</code> table inside the same transaction that wrote the workout.
+                        If the listener fails or the app crashes, Modulith retries on restart.
+                        This is the <strong>transactional outbox pattern</strong> — the same approach Meta/LinkedIn use
+                        for reliable cross-service writes, but without Kafka in the way.
+                    </p>
+                </div>
+
+                <h3><span class="lang-ru">Per-module тесты</span><span class="lang-en">Per-Module Tests</span></h3>
+<pre><code class="language-kotlin">@ApplicationModuleTest    // loads only the `fitness` module context
+class FitnessServiceTest {
+    @Autowired lateinit var workoutService: WorkoutService
+
+    @Test fun `logWorkout publishes WorkoutLogged event`(events: PublishedEvents) {
+        workoutService.logWorkout(/* ... */)
+        assertThat(events.ofType(WorkoutLogged::class.java)).hasSize(1)
+    }
+}
+</code></pre>
+                <div class="lang-ru">
+                    <p>
+                        Это в ~10× быстрее полноценного <code>@SpringBootTest</code> и доказывает, что модуль работает
+                        изолированно — контракт и события, которые он публикует, — единственное, что важно для его клиентов.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        This runs ~10× faster than full <code>@SpringBootTest</code> and proves the module works in isolation —
+                        the contract it exposes and the events it publishes are all that matter for its callers.
+                    </p>
+                </div>
+
+                <h3><span class="lang-ru">Trade-off vs ArchUnit</span><span class="lang-en">Trade-off vs ArchUnit</span></h3>
+                <div class="lang-ru">
+                    <p>
+                        <strong>ArchUnit</strong> — library-agnostic и максимально гибкий, любое правило выразимо в DSL.
+                        <strong>Modulith</strong> приходит с готовой моделью модульного монолита: знает, что такое модуль,
+                        цикл, и public API. Для нашего набора правил Modulith покрывает всё и даёт per-module тесты,
+                        события и авто-документацию сверху. ArchUnit оставлен в резерве для редких правил,
+                        которые Modulith не выражает. Полное обоснование — в
+                        <a href="../adr/ADR-004-module-boundary-enforcement.md">ADR-004</a>.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p>
+                        <strong>ArchUnit</strong> is library-agnostic and maximally flexible — any rule expressible in DSL.
+                        <strong>Modulith</strong> ships with the modular-monolith model built in: it knows what a module is,
+                        what a cycle is, and what public API means. For our rule set Modulith covers everything and adds
+                        per-module tests, events, and auto-docs on top. ArchUnit is kept in reserve for rare rules Modulith
+                        cannot express. Full decision in
+                        <a href="../adr/ADR-004-module-boundary-enforcement.md">ADR-004</a>.
+                    </p>
+                </div>
+
+                <h3><span class="lang-ru">FAANG-interview framing</span><span class="lang-en">FAANG-Interview Framing</span></h3>
+                <div class="lang-ru">
+                    <p>На вопрос «Why this architecture?» — структурированный ответ:</p>
+                    <ul>
+                        <li><strong>Enforcement поверх convention</strong> — senior-level judgment.</li>
+                        <li><strong>Transactional event publication</strong> — то же семейство, что Meta TAO write pipeline и LinkedIn outbox pattern.</li>
+                        <li><strong>Per-module тесты</strong> — аналог service-level изоляции в микросервисной организации.</li>
+                        <li><strong>Документация-как-код</strong> — никакого Confluence drift.</li>
+                        <li><strong>Явный путь извлечения</strong> — граница каждого модуля уже соответствует будущему service-контракту; локальные listener'ы становятся Kafka consumer'ами без изменения API.</li>
+                    </ul>
+                </div>
+                <div class="lang-en">
+                    <p>When asked «Why this architecture?» — a structured answer:</p>
+                    <ul>
+                        <li><strong>Enforcement over convention</strong> — senior-level judgment.</li>
+                        <li><strong>Transactional event publication</strong> — same family as Meta's TAO write pipeline and LinkedIn's outbox pattern.</li>
+                        <li><strong>Per-module tests</strong> — analogous to service-level isolation in a microservice org.</li>
+                        <li><strong>Documentation as code</strong> — no Confluence drift.</li>
+                        <li><strong>Clear extraction path</strong> — each module's boundary already matches a future service contract; local listeners become Kafka consumers with zero API change.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="assignments">
+                <h2><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></h2>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 1: Создать Service с Constructor Injection</span><span class="lang-en">Assignment 1: Create Service with Constructor Injection</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте FitnessService с @Service аннотацией, которая получает в конструкторе
+                            WorkoutRepository и NutritionCalculator. Реализуйте метод logWorkout(viewer, workout)
+                            который проверяет, что workout принадлежит текущему пользователю.
+                        </p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create FitnessService with @Service annotation that receives
+                            WorkoutRepository and NutritionCalculator in its constructor. Implement logWorkout(viewer, workout) method
+                            that checks the workout belongs to the current user.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 2: Конфигурационные Properties</span><span class="lang-en">Assignment 2: Configuration Properties</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте @ConfigurationProperties класс BudgetWidgetProperties с полями:
+                            - maxTransactionsPerMonth: Int
+                            - defaultCurrency: String
+                            - enableNotifications: Boolean
+                            Прочитайте значения из application.yml и используйте в BudgetService.
+                        </p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create @ConfigurationProperties class BudgetWidgetProperties with fields:
+                            - maxTransactionsPerMonth: Int
+                            - defaultCurrency: String
+                            - enableNotifications: Boolean
+                            Read values from application.yml and use them in BudgetService.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 3: REST Client для External API</span><span class="lang-en">Assignment 3: REST Client for External API</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Используя RestClient, создайте GeocodingService который делает запрос к
+                            https://nominatim.openstreetmap.org/reverse с параметрами lat/lon
+                            и возвращает название города. Добавьте error handling.
+                        </p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Using RestClient, create GeocodingService that makes a request to
+                            https://nominatim.openstreetmap.org/reverse with lat/lon parameters
+                            and returns the city name. Add error handling.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 4: Payload + UserError для Mutations</span><span class="lang-en">Assignment 4: Payload + UserError for Mutations</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создайте GraphQL мутацию createBudgetTransaction с CreateTransactionPayload.
+                            Payload должна содержать transaction и errors (List&lt;UserError&gt;).
+                            Валидируйте: сумма > 0, категория существует, дата не в будущем.
+                            Все ошибки возвращайте в errors, не кидайте исключения.
+                        </p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create GraphQL mutation createBudgetTransaction with CreateTransactionPayload.
+                            Payload should contain transaction and errors (List&lt;UserError&gt;).
+                            Validate: amount > 0, category exists, date not in future.
+                            Return all errors in errors field, don't throw exceptions.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="assignments" id="backlog-tasks" style="border-top-color: #f5c2e7;">
+                <h2>🧪 <span class="lang-ru">Задания из Backlog проекта (TDD)</span><span class="lang-en">Backlog Tasks (TDD)</span></h2>
+                <div class="lang-ru">
+                    <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                        Эти задания — реальные задачи из бэклога проекта Life Goals Dashboard.
+                        Для каждого задания предоставлены тесты, которые нужно сделать зелёными, написав реализацию.
+                        <strong>Подход TDD:</strong> сначала изучи тесты → пойми что от тебя ожидается → напиши код → запусти тесты.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                        These tasks are real backlog items from the Life Goals Dashboard project.
+                        Tests are provided for each task—make them pass by writing implementation.
+                        <strong>TDD approach:</strong> study tests first → understand what's expected → write code → run tests.
+                    </p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #11: OAuth2 + JWT Authentication (8 SP) <span class="tdd-badge">TDD</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Реализуй JwtTokenService для генерации и валидации JWT токенов. Токены должны содержать userId и email,
+                            с поддержкой настраиваемого TTL и валидацией подписи.
+                        </p>
+                        <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Implement JwtTokenService for JWT token generation and validation. Tokens should contain userId and email,
+                            with configurable TTL support and signature validation.
+                        </p>
+                        <p><strong>Tests (write code to pass them):</strong></p>
+                    </div>
+                    <pre><code class="language-kotlin">
+// src/test/kotlin/com/mrurec/lifegoals/common/auth/JwtTokenServiceTest.kt
+package com.mrurec.lifegoals.common.auth
+
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeEach
+import java.util.UUID
+
+class JwtTokenServiceTest {
+
+    private lateinit var jwtService: JwtTokenService
+
+    @BeforeEach
+    fun setup() {
+        jwtService = JwtTokenService(
+            secret = "test-secret-key-that-is-at-least-256-bits-long-for-hs256",
+            expirationMs = 3600000 // 1 hour
+        )
+    }
+
+    @Test
+    fun `should generate valid JWT token`() {
+        val userId = UUID.randomUUID()
+        val token = jwtService.generateToken(userId, "user@example.com")
+
+        assertNotNull(token)
+        assertTrue(token.split(".").size == 3, "JWT should have 3 parts")
+    }
+
+    @Test
+    fun `should extract userId from token`() {
+        val userId = UUID.randomUUID()
+        val token = jwtService.generateToken(userId, "user@example.com")
+
+        val extractedId = jwtService.extractUserId(token)
+        assertEquals(userId, extractedId)
+    }
+
+    @Test
+    fun `should extract email from token`() {
+        val userId = UUID.randomUUID()
+        val email = "user@example.com"
+        val token = jwtService.generateToken(userId, email)
+
+        val extractedEmail = jwtService.extractEmail(token)
+        assertEquals(email, extractedEmail)
+    }
+
+    @Test
+    fun `should validate non-expired token`() {
+        val token = jwtService.generateToken(UUID.randomUUID(), "user@example.com")
+        assertTrue(jwtService.isTokenValid(token))
+    }
+
+    @Test
+    fun `should reject expired token`() {
+        val shortLivedService = JwtTokenService(
+            secret = "test-secret-key-that-is-at-least-256-bits-long-for-hs256",
+            expirationMs = -1000 // Already expired
+        )
+        val token = shortLivedService.generateToken(UUID.randomUUID(), "user@example.com")
+        assertFalse(shortLivedService.isTokenValid(token))
+    }
+
+    @Test
+    fun `should reject tampered token`() {
+        val token = jwtService.generateToken(UUID.randomUUID(), "user@example.com")
+        val tampered = token + "tampered"
+        assertFalse(jwtService.isTokenValid(tampered))
+    }
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><span class="lang-ru"><em>Файл: src/test/kotlin/com/mrurec/lifegoals/common/auth/JwtTokenServiceTest.kt</em></span><span class="lang-en"><em>File: src/test/kotlin/com/mrurec/lifegoals/common/auth/JwtTokenServiceTest.kt</em></span></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #12: ViewerContext Provider (3 SP) <span class="tdd-badge">TDD</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Реализуй ViewerContextProvider для извлечения информации о текущем пользователя из Spring Security контекста.
+                            Должна выбрасывать UnauthenticatedException если пользователь не авторизирован.
+                        </p>
+                        <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Implement ViewerContextProvider to extract current user information from Spring Security context.
+                            Should throw UnauthenticatedException if user is not authenticated.
+                        </p>
+                        <p><strong>Tests (write code to pass them):</strong></p>
+                    </div>
+                    <pre><code class="language-kotlin">
+// src/test/kotlin/com/mrurec/lifegoals/common/auth/ViewerContextProviderTest.kt
+package com.mrurec.lifegoals.common.auth
+
+import io.mockk.*
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
+import java.util.UUID
+
+class ViewerContextProviderTest {
+
+    private val provider = ViewerContextProvider()
+
+    @Test
+    fun `should extract ViewerContext from SecurityContext`() {
+        val userId = UUID.randomUUID()
+        val auth = mockk&lt;Authentication&gt;()
+        val securityContext = mockk&lt;SecurityContext&gt;()
+
+        every { securityContext.authentication } returns auth
+        every { auth.isAuthenticated } returns true
+        every { auth.principal } returns JwtUserPrincipal(userId, "user@test.com")
+
+        SecurityContextHolder.setContext(securityContext)
+
+        val viewer = provider.getViewerContext()
+
+        assertEquals(userId, viewer.userId)
+        assertEquals("user@test.com", viewer.email)
+
+        SecurityContextHolder.clearContext()
+    }
+
+    @Test
+    fun `should throw when no authentication present`() {
+        SecurityContextHolder.clearContext()
+
+        assertThrows(UnauthenticatedException::class.java) {
+            provider.getViewerContext()
+        }
+    }
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><span class="lang-ru"><em>Файл: src/test/kotlin/com/mrurec/lifegoals/common/auth/ViewerContextProviderTest.kt</em></span><span class="lang-en"><em>File: src/test/kotlin/com/mrurec/lifegoals/common/auth/ViewerContextProviderTest.kt</em></span></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #17: Feature Flags System (3 SP) <span class="tdd-badge">TDD</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Реализуй FeatureFlags сервис для управления флагами функций с поддержкой process-based roll-out.
+                            Флаги загружаются из JSON конфига и позволяют постепенное включение функций для определённого процента пользователей.
+                        </p>
+                        <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Implement FeatureFlags service for managing feature flags with process-based roll-out support.
+                            Flags are loaded from JSON config and allow gradual feature enablement for a specific percentage of users.
+                        </p>
+                        <p><strong>Tests (write code to pass them):</strong></p>
+                    </div>
+                    <pre><code class="language-kotlin">
+// src/test/kotlin/com/mrurec/lifegoals/common/config/FeatureFlagsTest.kt
+package com.mrurec.lifegoals.common.config
+
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import java.util.UUID
+
+class FeatureFlagsTest {
+
+    @Test
+    fun `isEnabled should return true for fully enabled flag`() {
+        val flags = FeatureFlags(mapOf(
+            "spaced_repetition" to FeatureFlagConfig(enabled = true, rolloutPercentage = 100)
+        ))
+
+        assertTrue(flags.isEnabled("spaced_repetition", UUID.randomUUID()))
+    }
+
+    @Test
+    fun `isEnabled should return false for disabled flag`() {
+        val flags = FeatureFlags(mapOf(
+            "recipe_builder" to FeatureFlagConfig(enabled = false, rolloutPercentage = 0)
+        ))
+
+        assertFalse(flags.isEnabled("recipe_builder", UUID.randomUUID()))
+    }
+
+    @Test
+    fun `isEnabled should return false for unknown flag`() {
+        val flags = FeatureFlags(emptyMap())
+        assertFalse(flags.isEnabled("nonexistent_flag", UUID.randomUUID()))
+    }
+
+    @Test
+    fun `percentage rollout should be deterministic per userId`() {
+        val flags = FeatureFlags(mapOf(
+            "budget_forecast" to FeatureFlagConfig(enabled = true, rolloutPercentage = 50)
+        ))
+        val userId = UUID.randomUUID()
+
+        // Same userId should always get the same result
+        val result1 = flags.isEnabled("budget_forecast", userId)
+        val result2 = flags.isEnabled("budget_forecast", userId)
+        assertEquals(result1, result2)
+    }
+
+    @Test
+    fun `should load flags from JSON config file`() {
+        val json = """
+        {
+            "spaced_repetition": { "enabled": true, "rolloutPercentage": 100 },
+            "recipe_builder": { "enabled": true, "rolloutPercentage": 50 },
+            "budget_forecast": { "enabled": false, "rolloutPercentage": 0 }
+        }
+        """.trimIndent()
+
+        val flags = FeatureFlags.fromJson(json)
+
+        assertTrue(flags.isEnabled("spaced_repetition", UUID.randomUUID()))
+        assertFalse(flags.isEnabled("budget_forecast", UUID.randomUUID()))
+    }
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><span class="lang-ru"><em>Файл: src/test/kotlin/com/mrurec/lifegoals/common/config/FeatureFlagsTest.kt</em></span><span class="lang-en"><em>File: src/test/kotlin/com/mrurec/lifegoals/common/config/FeatureFlagsTest.kt</em></span></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #42: API Versioning with v1 vs v2 Response Shapes (5 SP) <span class="tdd-badge">TDD</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создай REST контроллер с API версионированием через URL path.
+                            v1 возвращает <code>{ "id": UUID, "name": String }</code>,
+                            v2 возвращает <code>{ "id": UUID, "name": String, "metadata": { "created": DateTime, "tags": [String] } }</code>.
+                            Используй Spring Boot 4 версионирование через <code>@RequestMapping(version="1.0")</code> или <code>spring.mvc.apiversion.*</code> конфиг.
+                        </p>
+                        <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create a REST controller with API versioning via URL path.
+                            v1 returns <code>{ "id": UUID, "name": String }</code>,
+                            v2 returns <code>{ "id": UUID, "name": String, "metadata": { "created": DateTime, "tags": [String] } }</code>.
+                            Use Spring Boot 4 versioning via <code>@RequestMapping(version="1.0")</code> or <code>spring.mvc.apiversion.*</code> config.
+                        </p>
+                        <p><strong>Tests (write code to pass them):</strong></p>
+                    </div>
+                    <pre><code class="language-kotlin">
+// src/test/kotlin/com/mrurec/lifegoals/common/web/ApiVersioningControllerTest.kt
+package com.mrurec.lifegoals.common.web
+
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
+import java.util.UUID
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class ApiVersioningControllerTest {
+
+    @Autowired
+    private lateinit var mockMvc: MockMvc
+
+    private val testId = UUID.randomUUID()
+    private val testName = "Test Widget"
+
+    @Test
+    fun `GET v1 should return id and name only`() {
+        mockMvc.get("/v1/widgets/$testId") {
+            // No version header needed for path-based versioning
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.id") { value(testId.toString()) }
+            jsonPath("$.name") { value(testName) }
+            jsonPath("$.metadata") { doesNotExist() }
+        }
+    }
+
+    @Test
+    fun `GET v2 should return id, name, and metadata`() {
+        mockMvc.get("/v2/widgets/$testId") {
+            // Path-based versioning
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.id") { value(testId.toString()) }
+            jsonPath("$.name") { value(testName) }
+            jsonPath("$.metadata.created") { exists() }
+            jsonPath("$.metadata.tags") { isArray() }
+        }
+    }
+
+    @Test
+    fun `v2 metadata should contain creation timestamp and tags`() {
+        mockMvc.get("/v2/widgets/$testId").andExpect {
+            jsonPath("$.metadata.created") { exists() }
+            jsonPath("$.metadata.tags[0]") { exists() }
+        }
+    }
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><span class="lang-ru"><em>Файл: src/test/kotlin/com/mrurec/lifegoals/common/web/ApiVersioningControllerTest.kt</em></span><span class="lang-en"><em>File: src/test/kotlin/com/mrurec/lifegoals/common/web/ApiVersioningControllerTest.kt</em></span></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #43: @HttpExchange Client for Exchange Rate API (5 SP) <span class="tdd-badge">TDD</span></h4>
+                    <div class="lang-ru">
+                        <p>
+                            Создай declarative @HttpExchange интерфейс ExchangeRateClient для Budget widget'а.
+                            Клиент должен получать currency pair (например EUR to KRW) и возвращать ExchangeRateResponse с rate и timestamp.
+                            Используй Spring Boot 4 встроенную поддержку @HttpExchange для автоматической регистрации как бин.
+                            Добавь кэширование результатов в Redis с 1 часовым TTL.
+                        </p>
+                        <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                    </div>
+                    <div class="lang-en">
+                        <p>
+                            Create a declarative @HttpExchange interface ExchangeRateClient for the Budget widget.
+                            The client should fetch currency pairs (e.g., EUR to KRW) and return ExchangeRateResponse with rate and timestamp.
+                            Use Spring Boot 4's built-in @HttpExchange support for automatic bean registration.
+                            Add Redis caching with 1-hour TTL.
+                        </p>
+                        <p><strong>Tests (write code to pass them):</strong></p>
+                    </div>
+                    <pre><code class="language-kotlin">
+// src/test/kotlin/com/mrurec/lifegoals/budget/ExchangeRateClientTest.kt
+package com.mrurec.lifegoals.budget
+
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.TestPropertySource
+import org.testcontainers.containers.GenericContainer
+import org.testcontainers.junit.jupiter.Container
+import org.testcontainers.junit.jupiter.Testcontainers
+import java.time.LocalDateTime
+import java.util.concurrent.CompletableFuture
+
+@SpringBootTest
+@Testcontainers
+@TestPropertySource(properties = [
+    "app.exchange-rate-api.url=https://api.exchangeratesapi.io",
+    "app.exchange-rate-api.key=test-key"
+])
+class ExchangeRateClientTest {
+
+    @Autowired
+    private lateinit var exchangeRateClient: ExchangeRateClient
+
+    companion object {
+        @Container
+        val redis = GenericContainer("redis:8.6.2").apply {
+            withExposedPorts(6379)
+        }
+    }
+
+    @Test
+    fun `should fetch exchange rate for EUR to KRW`() {
+        val response = exchangeRateClient.getRate("EUR", "KRW").get()
+
+        assertNotNull(response)
+        assertEquals("EUR", response.base)
+        assertEquals("KRW", response.target)
+        assertTrue(response.rate > 0.0)
+        assertNotNull(response.timestamp)
+    }
+
+    @Test
+    fun `should cache result for same currency pair within TTL`() {
+        val first = exchangeRateClient.getRate("USD", "EUR").get()
+        val second = exchangeRateClient.getRate("USD", "EUR").get()
+
+        // Should be the same rate from cache (not a new API call)
+        assertEquals(first.rate, second.rate)
+    }
+
+    @Test
+    fun `should handle invalid currency pair gracefully`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            exchangeRateClient.getRate("INVALID", "PAIR").get()
+        }
+    }
+
+    @Test
+    fun `response should include current timestamp`() {
+        val response = exchangeRateClient.getRate("EUR", "KRW").get()
+        val now = LocalDateTime.now()
+
+        assertTrue(response.timestamp.isBefore(now) || response.timestamp.isEqual(now))
+    }
+}
+
+// Interface definition (your implementation should live in com.mrurec.lifegoals.budget)
+@HttpExchange(url = "https://api.exchangeratesapi.io")
+interface ExchangeRateClient {
+    @GetExchange("/v1/latest?base={base}&symbols={symbols}")
+    fun getRate(
+        @PathVariable base: String,
+        @PathVariable symbols: String
+    ): CompletableFuture&lt;ExchangeRateResponse&gt;
+}
+
+data class ExchangeRateResponse(
+    val base: String,
+    val target: String,
+    val rate: Double,
+    val timestamp: LocalDateTime
+)
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><span class="lang-ru"><em>Файл: src/test/kotlin/com/mrurec/lifegoals/budget/ExchangeRateClientTest.kt</em></span><span class="lang-en"><em>File: src/test/kotlin/com/mrurec/lifegoals/budget/ExchangeRateClientTest.kt</em></span></p>
+                </div>
+            </section>
+
+            <section class="resources">
+                <h2><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></h2>
+                <a href="https://spring.io/projects/spring-boot" class="resource-link">Spring Boot Official</a>
+                <a href="https://spring.io/guides/gs/rest-service/" class="resource-link">Building a RESTful Web Service</a>
+                <a href="https://spring.io/guides/tutorials/spring-boot-kotlin/" class="resource-link">Spring Boot with Kotlin</a>
+                <a href="https://baeldung.com/spring-boot" class="resource-link">Baeldung Spring Boot</a>
+                <a href="https://spring.io/guides/topicals/spring-security-architecture/" class="resource-link">Spring Security Architecture</a>
+                <a href="https://docs.spring.io/spring-security/reference/" class="resource-link">Spring Security Reference</a>
+            </section>
+
+            <div class="nav-footer">
+                <a href="05-redis.html" class="nav-link prev"><span class="lang-ru">← Предыдущий модуль</span><span class="lang-en">← Previous Module</span></a>
+                <a href="07-spring-data-jpa.html" class="nav-link next"><span class="lang-ru">Следующий модуль →</span><span class="lang-en">Next Module →</span></a>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+
+    <script>
+        function setLang(lang) {
+            document.body.classList.toggle('show-en', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('study-lang', lang); } catch(e) {}
+        }
+        try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+    </script>
+</body>
+</html>

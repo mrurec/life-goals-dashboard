@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 10: React 19.2 - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 62.5%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .language-bash::before,
+        .language-kotlin::before,
+        .language-typescript::before,
+        .language-graphql::before {
+            content: attr(data-lang);
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details/Collapse */
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        /* Assignments */
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .assignment .tdd-badge {
+            display: inline-block;
+            background: #f5c2e7;
+            color: #1e1e2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Resources */
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        /* Navigation */
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        /* Language Switcher */
+        .lang-en {
+            display: none;
+        }
+
+        body.show-en .lang-ru {
+            display: none;
+        }
+
+        body.show-en .lang-en {
+            display: block;
+        }
+
+        .lang-switcher {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--text-secondary);
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .lang-btn.active {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .lang-btn:hover {
+            border-color: var(--header);
+            color: var(--header);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .lang-switcher {
+                margin-left: 0;
+            }
+        }
+
+        /* Prism Customization */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="module-number"><span class="lang-ru">МОДУЛЬ 10 / 16</span><span class="lang-en">MODULE 10 / 16</span></div>
+            <h1><span class="lang-ru">React 19.2</span><span class="lang-en">React 19.2</span></h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button class="lang-btn active" onclick="setLang('ru')">РУ</button>
+            <button class="lang-btn" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3><span class="lang-ru">Содержание</span><span class="lang-en">Contents</span></h3>
+            <ul>
+                <li><a href="#intro"><span class="lang-ru">Введение</span><span class="lang-en">Introduction</span></a></li>
+                <li><a href="#components"><span class="lang-ru">Компоненты и JSX</span><span class="lang-en">Components and JSX</span></a></li>
+                <li><a href="#hooks"><span class="lang-ru">Hooks</span><span class="lang-en">Hooks</span></a></li>
+                <li><a href="#suspense"><span class="lang-ru">Suspense и Error Boundaries</span><span class="lang-en">Suspense and Error Boundaries</span></a></li>
+                <li><a href="#patterns"><span class="lang-ru">Composition Patterns</span><span class="lang-en">Composition Patterns</span></a></li>
+                <li><a href="#best-practices"><span class="lang-ru">Best Practices</span><span class="lang-en">Best Practices</span></a></li>
+                <li><a href="#react19"><span class="lang-ru">Что нового в React 19</span><span class="lang-en">What's New in React 19</span></a></li>
+                <li><a href="#assignments"><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></a></li>
+                <li><a href="#backlog-tasks"><span class="lang-ru">🧪 Задания из Backlog (TDD)</span><span class="lang-en">🧪 Backlog Tasks (TDD)</span></a></li>
+                <li><a href="#resources"><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <h2><span class="lang-ru">Введение: React 19.2 для Life Goals Dashboard</span><span class="lang-en">Introduction: React 19.2 for Life Goals Dashboard</span></h2>
+                <p>
+                    <span class="lang-ru"><strong>React 19.2</strong> — современная версия JavaScript фреймворка для построения UI.
+                    В Life Goals Dashboard используем React с TypeScript для типобезопасности, Relay для управления данными,
+                    и CSS Modules для стилизации.</span>
+                    <span class="lang-en"><strong>React 19.2</strong> is a modern JavaScript framework for building UI.
+                    In Life Goals Dashboard we use React with TypeScript for type safety, Relay for data management,
+                    and CSS Modules for styling.</span>
+                </p>
+                <p>
+                    <span class="lang-ru">За 4 дня вы освоите:</span>
+                    <span class="lang-en">Over 4 days you will learn:</span>
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><span class="lang-ru">Функциональные компоненты с JSX, типизированные Props</span><span class="lang-en">Functional components with JSX, typed Props</span></li>
+                    <li><span class="lang-ru">Hooks: useState, useEffect, useCallback, useMemo, useRef, собственные hooks</span><span class="lang-en">Hooks: useState, useEffect, useCallback, useMemo, useRef, custom hooks</span></li>
+                    <li><span class="lang-ru">Suspense + Error Boundaries — ОБЯЗАТЕЛЬНЫЙ паттерн для async компонентов</span><span class="lang-en">Suspense + Error Boundaries — MANDATORY pattern for async components</span></li>
+                    <li><span class="lang-ru">Composition patterns: render props, compound components</span><span class="lang-en">Composition patterns: render props, compound components</span></li>
+                    <li><span class="lang-ru">Оптимизация: React.memo, useCallback, useMemo</span><span class="lang-en">Optimization: React.memo, useCallback, useMemo</span></li>
+                </ul>
+
+                <div class="tip">
+                    <strong><span class="lang-ru">Совет:</span><span class="lang-en">Tip:</span></strong> <span class="lang-ru">React — это про компоненты. Думайте в терминах переиспользуемых,
+                    независимых блоков UI. Каждый компонент отвечает за одно.</span><span class="lang-en">React is about components. Think in terms of reusable, independent UI blocks. Each component is responsible for one thing.</span>
+                </div>
+            </section>
+
+            <section id="components">
+                <h2><span class="lang-ru">Компоненты и JSX</span><span class="lang-en">Components and JSX</span></h2>
+
+                <h3><span class="lang-ru">Функциональные компоненты</span><span class="lang-en">Functional Components</span></h3>
+                <p>
+                    <span class="lang-ru">В современном React используются только <strong>функциональные компоненты</strong>.
+                    Class-компоненты устарели.</span>
+                    <span class="lang-en">Modern React uses only <strong>functional components</strong>.
+                    Class components are outdated.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+import React from 'react';
+
+// Simple component
+const HelloWorld: React.FC = () => {
+    return <h1>Hello, World!</h1>;
+};
+
+// Component with Props (typed input parameters)
+interface WidgetCardProps {
+    title: string;
+    description: string;
+    color?: string;  // Optional prop
+}
+
+const WidgetCard: React.FC<WidgetCardProps> = ({
+    title,
+    description,
+    color = 'blue'  // Default value
+}) => {
+    return (
+        <div style={{ borderColor: color }}>
+            <h2>{title}</h2>
+            <p>{description}</p>
+        </div>
+    );
+};
+
+// Usage
+const App = () => {
+    return (
+        <div>
+            <HelloWorld />
+            <WidgetCard
+                title="My Dashboard"
+                description="Track your goals"
+                color="purple"
+            />
+        </div>
+    );
+};
+
+export default App;
+                </code></pre>
+
+                <h3><span class="lang-ru">JSX синтаксис</span><span class="lang-en">JSX Syntax</span></h3>
+                <p>
+                    <span class="lang-ru">JSX похож на HTML, но это JavaScript. Компилируется в `React.createElement()` вызовы.</span>
+                    <span class="lang-en">JSX looks like HTML, but it's JavaScript. It compiles to `React.createElement()` calls.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+// JSX
+const element = <h1>Hello</h1>;
+
+// Compiles to:
+const element = React.createElement('h1', null, 'Hello');
+
+// Expressions in JSX — use curly braces
+const name = 'mrurec';
+const greeting = <p>Hello, {name}!</p>;
+
+// Conditionals
+const isLoggedIn = true;
+const header = isLoggedIn ? <p>Welcome back!</p> : <p>Please log in</p>;
+
+// Loops (use map)
+const items = ['apple', 'banana', 'cherry'];
+const list = (
+    <ul>
+        {items.map((item, index) => (
+            <li key={index}>{item}</li>
+        ))}
+    </ul>
+);
+
+// Attributes (camelCase, not kebab-case)
+const input = <input className="search" onClick={handleClick} />;
+                </code></pre>
+
+                <div class="warning">
+                    <strong><span class="lang-ru">Важно:</span><span class="lang-en">Important:</span></strong> <span class="lang-ru">Всегда используйте `key` prop в списках. Это помогает React отслеживать элементы.
+                    Избегайте index как key если список может изменяться (добавление/удаление элементов).</span><span class="lang-en">Always use `key` prop in lists. It helps React track elements.
+                    Avoid using index as key if the list can change (adding/removing elements).</span>
+                </div>
+
+                <h3><span class="lang-ru">Интеграция CSS Modules</span><span class="lang-en">CSS Modules Integration</span></h3>
+
+                <pre><code class="language-typescript">
+// WidgetCard.tsx
+import styles from './WidgetCard.module.css';
+
+interface WidgetCardProps {
+    title: string;
+}
+
+const WidgetCard: React.FC<WidgetCardProps> = ({ title }) => {
+    return (
+        <div className={styles.container}>
+            <h2 className={styles.title}>{title}</h2>
+        </div>
+    );
+};
+
+export default WidgetCard;
+                </code></pre>
+
+                <p>
+                    <span class="lang-ru">А `WidgetCard.module.css`:</span>
+                    <span class="lang-en">And `WidgetCard.module.css`:</span>
+                </p>
+
+                <pre><code class="language-typescript">
+/* WidgetCard.module.css */
+.container {
+    border: 1px solid var(--text-secondary);
+    border-radius: 4px;
+    padding: 1.5rem;
+    background: var(--code-bg);
+}
+
+.title {
+    color: var(--header);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+                </code></pre>
+            </section>
+
+            <section id="hooks">
+                <h2><span class="lang-ru">Hooks: useState, useEffect, useCallback, useMemo</span><span class="lang-en">Hooks: useState, useEffect, useCallback, useMemo</span></h2>
+
+                <h3><span class="lang-ru">useState — состояние компонента</span><span class="lang-en">useState — Component State</span></h3>
+                <p>
+                    <span class="lang-ru">`useState` позволяет компоненту иметь "память" (состояние).
+                    Когда состояние изменяется, компонент re-render'ится.</span>
+                    <span class="lang-en">`useState` allows a component to have "memory" (state).
+                    When state changes, the component re-renders.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+import { useState } from 'react';
+
+interface Counter {
+    count: number;
+}
+
+const Counter: React.FC = () => {
+    // Destructuring: [current value, function to change it]
+    const [count, setCount] = useState<number>(0);
+    const [name, setName] = useState<string>('');
+
+    const handleIncrement = () => {
+        setCount(count + 1);
+    };
+
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setName(e.target.value);
+    };
+
+    return (
+        <div>
+            <p>Count: {count}</p>
+            <button onClick={handleIncrement}>Increment</button>
+
+            <input
+                type="text"
+                value={name}
+                onChange={handleNameChange}
+                placeholder="Enter name"
+            />
+            <p>Name: {name}</p>
+        </div>
+    );
+};
+
+export default Counter;
+                </code></pre>
+
+                <h3><span class="lang-ru">useEffect — побочные эффекты</span><span class="lang-en">useEffect — Side Effects</span></h3>
+                <p>
+                    <span class="lang-ru">`useEffect` выполняет код после того, как компонент отрендерился.
+                    Используется для: fetch данных, подписок, таймеров, и т.д.</span>
+                    <span class="lang-en">`useEffect` runs code after the component renders.
+                    Used for: fetching data, subscriptions, timers, etc.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+import { useState, useEffect } from 'react';
+
+const UserProfile: React.FC<{ userId: string }> = ({ userId }) => {
+    const [user, setUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // This code runs after render
+        setLoading(true);
+
+        // Fetch data
+        fetch(`/api/users/${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                setUser(data);
+                setLoading(false);
+            });
+
+        // Cleanup function (called before re-effect or unmount)
+        return () => {
+            // Cancel fetch if component unmounts
+            console.log('Component unmounted');
+        };
+    }, [userId]); // Dependencies: effect runs only if userId changed
+
+    if (loading) return <p>Loading...</p>;
+    return <div><h1>{user.name}</h1></div>;
+};
+
+export default UserProfile;
+                </code></pre>
+
+                <details>
+                    <summary><span class="lang-ru">Зависимости useEffect (dependency array)</span><span class="lang-en">useEffect Dependencies (dependency array)</span></summary>
+                    <ul style="margin-left: 2rem;">
+                        <li><span class="lang-ru"><code>useEffect(() => {...})</code> — запускается при каждом рендере (опасно!)</span><span class="lang-en"><code>useEffect(() => {...})</code> — runs on every render (dangerous!)</span></li>
+                        <li><span class="lang-ru"><code>useEffect(() => {...}, [])</code> — запускается один раз на mount</span><span class="lang-en"><code>useEffect(() => {...}, [])</code> — runs once on mount</span></li>
+                        <li><span class="lang-ru"><code>useEffect(() => {...}, [userId])</code> — запускается если userId изменился</span><span class="lang-en"><code>useEffect(() => {...}, [userId])</code> — runs if userId changed</span></li>
+                    </ul>
+                </details>
+
+                <h3><span class="lang-ru">useCallback — мемоизация функций</span><span class="lang-en">useCallback — Function Memoization</span></h3>
+                <p>
+                    <span class="lang-ru">`useCallback` возвращает мемоизированную функцию. Полезно когда передаёте callback в дочерний компонент,
+                    чтобы избежать ненужного re-render'а.</span>
+                    <span class="lang-en">`useCallback` returns a memoized function. Useful when passing a callback to a child component
+                    to avoid unnecessary re-renders.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+import { useCallback, useState } from 'react';
+
+const SearchList: React.FC = () => {
+    const [query, setQuery] = useState('');
+
+    // Without useCallback: new function created on every render
+    // Child component sees "new" function and re-renders
+    const handleSearch = useCallback((term: string) => {
+        // Perform search
+        console.log('Searching for:', term);
+    }, []); // Empty dependencies, function created once
+
+    return (
+        <div>
+            <input
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search..."
+            />
+            <SearchResults onSearch={handleSearch} query={query} />
+        </div>
+    );
+};
+
+export default SearchList;
+                </code></pre>
+
+                <h3><span class="lang-ru">useMemo — мемоизация значений</span><span class="lang-en">useMemo — Value Memoization</span></h3>
+                <p>
+                    <span class="lang-ru">`useMemo` кэширует результат дорогостоящего вычисления и пересчитывает только если зависимости изменились.</span>
+                    <span class="lang-en">`useMemo` caches the result of expensive computation and recalculates only if dependencies changed.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+import { useMemo, useState } from 'react';
+
+const CalorieCalculator: React.FC = () => {
+    const [meals, setMeals] = useState<any[]>([]);
+
+    // Expensive computation: sum calories
+    // Calculated only if meals changed
+    const totalCalories = useMemo(() => {
+        console.log('Calculating total...');
+        return meals.reduce((sum, meal) => sum + meal.calories, 0);
+    }, [meals]);
+
+    return (
+        <div>
+            <p>Total Calories: {totalCalories}</p>
+        </div>
+    );
+};
+
+export default CalorieCalculator;
+                </code></pre>
+
+                <h3><span class="lang-ru">Собственные Hooks</span><span class="lang-en">Custom Hooks</span></h3>
+                <p>
+                    <span class="lang-ru">Можете написать свой hook, чтобы переиспользовать логику. Это просто функция, которая вызывает другие hooks.</span>
+                    <span class="lang-en">You can write your own hook to reuse logic. It's just a function that calls other hooks.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+// useDebounce.ts — custom hook
+import { useState, useEffect } from 'react';
+
+export function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+
+        return () => clearTimeout(handler);
+    }, [value, delay]);
+
+    return debouncedValue;
+}
+
+// Usage
+const SearchComponent: React.FC = () => {
+    const [input, setInput] = useState('');
+    const debouncedInput = useDebounce(input, 500); // 500ms delay
+
+    useEffect(() => {
+        // This effect runs only when debouncedInput changed
+        console.log('Searching for:', debouncedInput);
+    }, [debouncedInput]);
+
+    return (
+        <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="Search..."
+        />
+    );
+};
+                </code></pre>
+            </section>
+
+            <section id="suspense">
+                <h2><span class="lang-ru">Suspense и Error Boundaries — ОБЯЗАТЕЛЬНЫЙ паттерн</span><span class="lang-en">Suspense and Error Boundaries — MANDATORY Pattern</span></h2>
+
+                <h3><span class="lang-ru">Что такое Error Boundary?</span><span class="lang-en">What is Error Boundary?</span></h3>
+                <p>
+                    <span class="lang-ru">Error Boundary ловит React ошибки и показывает fallback UI вместо краха приложения.
+                    Это class-компонент (не function).</span>
+                    <span class="lang-en">Error Boundary catches React errors and shows fallback UI instead of crashing the app.
+                    It's a class component (not function).</span>
+                </p>
+
+                <pre><code class="language-typescript">
+// ErrorBoundary.tsx
+import React, ReactNode, ReactElement from 'react';
+
+interface ErrorBoundaryProps {
+    children: ReactNode;
+    fallback?: ReactElement;
+}
+
+interface ErrorBoundaryState {
+    hasError: boolean;
+    error?: Error;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+    constructor(props: ErrorBoundaryProps) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+        console.error('Error caught:', error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return this.props.fallback || <div>Something went wrong</div>;
+        }
+        return this.props.children;
+    }
+}
+
+export default ErrorBoundary;
+                </code></pre>
+
+                <h3><span class="lang-ru">Suspense для асинхронных компонентов</span><span class="lang-en">Suspense for Async Components</span></h3>
+                <p>
+                    <span class="lang-ru">`Suspense` показывает fallback UI пока компонент загружает данные. Работает с Relay и другими библиотеками для управления данными.</span>
+                    <span class="lang-en">`Suspense` shows fallback UI while the component is loading data. Works with Relay and other data management libraries.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+import { Suspense } from 'react';
+import ErrorBoundary from './ErrorBoundary';
+
+// Component that can "suspend" (has async operations)
+const WorkoutList: React.FC = () => {
+    // Relay useLazyLoadQuery or similar hook
+    // If data not loaded yet, component "suspends"
+    const data = useWorkoutsQuery();
+    return <div>{/* Render workouts */}</div>;
+};
+
+// MANDATORY pattern: ErrorBoundary > Suspense > Component
+const App = () => {
+    return (
+        <ErrorBoundary fallback={<div>Error loading dashboard</div>}>
+            <Suspense fallback={<div>Loading workouts...</div>}>
+                <WorkoutList />
+            </Suspense>
+        </ErrorBoundary>
+    );
+};
+
+export default App;
+                </code></pre>
+
+                <div class="warning">
+                    <strong><span class="lang-ru">КРИТИЧНО:</span><span class="lang-en">CRITICAL:</span></strong> <span class="lang-ru">Всегда обёртывайте async компоненты в ErrorBoundary > Suspense > Component.
+                    Это стандарт в Life Goals Dashboard.</span><span class="lang-en">Always wrap async components in ErrorBoundary > Suspense > Component.
+                    This is the standard in Life Goals Dashboard.</span>
+                </div>
+
+                <h3><span class="lang-ru">Типичная структура Layout'а</span><span class="lang-en">Typical Layout Structure</span></h3>
+
+                <pre><code class="language-typescript">
+// DashboardPage.tsx
+import { Suspense } from 'react';
+import ErrorBoundary from '../common/ErrorBoundary';
+import WidgetSkeleton from './WidgetSkeleton';
+import FitnessWidget from './widgets/FitnessWidget';
+
+const DashboardPage: React.FC = () => {
+    return (
+        <div>
+            <h1>My Dashboard</h1>
+
+            {/* Fitness Widget */}
+            <ErrorBoundary fallback={<div>Error loading fitness widget</div>}>
+                <Suspense fallback={<WidgetSkeleton />}>
+                    <FitnessWidget />
+                </Suspense>
+            </ErrorBoundary>
+
+            {/* Budget Widget */}
+            <ErrorBoundary fallback={<div>Error loading budget widget</div>}>
+                <Suspense fallback={<WidgetSkeleton />}>
+                    <BudgetWidget />
+                </Suspense>
+            </ErrorBoundary>
+        </div>
+    );
+};
+
+export default DashboardPage;
+                </code></pre>
+            </section>
+
+            <section id="patterns">
+                <h2><span class="lang-ru">Composition Patterns</span><span class="lang-en">Composition Patterns</span></h2>
+
+                <h3><span class="lang-ru">Render Props</span><span class="lang-en">Render Props</span></h3>
+                <p>
+                    <span class="lang-ru">Компонент передаёт другому компоненту функцию, которая возвращает JSX.
+                    Используется для общей логики.</span>
+                    <span class="lang-en">A component passes a function to another component that returns JSX.
+                    Used for shared logic.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+// DataFetcher.tsx — component with logic
+interface DataFetcherProps {
+    url: string;
+    children: (data: any, loading: boolean, error?: Error) => JSX.Element;
+}
+
+const DataFetcher: React.FC<DataFetcherProps> = ({ url, children }) => {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<Error>();
+
+    useEffect(() => {
+        fetch(url)
+            .then(res => res.json())
+            .then(data => setData(data))
+            .catch(err => setError(err))
+            .finally(() => setLoading(false));
+    }, [url]);
+
+    return children(data, loading, error);
+};
+
+// Usage
+const MyComponent = () => {
+    return (
+        <DataFetcher url="/api/workouts">
+            {(data, loading, error) => (
+                <>
+                    {loading && <p>Loading...</p>}
+                    {error && <p>Error: {error.message}</p>}
+                    {data && <div>{/* Render data */}</div>}
+                </>
+            )}
+        </DataFetcher>
+    );
+};
+                </code></pre>
+
+                <h3><span class="lang-ru">Compound Components</span><span class="lang-en">Compound Components</span></h3>
+                <p>
+                    <span class="lang-ru">Компоненты работают вместе, sharing логику через Context.</span>
+                    <span class="lang-en">Components work together, sharing logic through Context.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+import { createContext, useContext } from 'react';
+
+// Context for sharing state between compound components
+const TabsContext = createContext<any>(null);
+
+interface TabsProps {
+    children: React.ReactNode;
+}
+
+const Tabs: React.FC<TabsProps> = ({ children }) => {
+    const [activeTab, setActiveTab] = useState(0);
+    return (
+        <TabsContext.Provider value={{ activeTab, setActiveTab }}>
+            {children}
+        </TabsContext.Provider>
+    );
+};
+
+const TabList: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    return <div className="tab-list">{children}</div>;
+};
+
+const Tab: React.FC<{ index: number; label: string }> = ({ index, label }) => {
+    const { activeTab, setActiveTab } = useContext(TabsContext);
+    return (
+        <button
+            className={activeTab === index ? 'active' : ''}
+            onClick={() => setActiveTab(index)}
+        >
+            {label}
+        </button>
+    );
+};
+
+const TabPanel: React.FC<{ index: number; children: React.ReactNode }> = ({
+    index,
+    children
+}) => {
+    const { activeTab } = useContext(TabsContext);
+    return activeTab === index ? <div>{children}</div> : null;
+};
+
+// Usage
+const App = () => {
+    return (
+        <Tabs>
+            <TabList>
+                <Tab index={0} label="Workouts" />
+                <Tab index={1} label="Nutrition" />
+            </TabList>
+            <TabPanel index={0}>Workout data</TabPanel>
+            <TabPanel index={1}>Nutrition data</TabPanel>
+        </Tabs>
+    );
+};
+                </code></pre>
+
+                <h3><span class="lang-ru">Controlled vs Uncontrolled inputs</span><span class="lang-en">Controlled vs Uncontrolled Inputs</span></h3>
+
+                <pre><code class="language-typescript">
+// Controlled: React manages the value
+const ControlledInput: React.FC = () => {
+    const [value, setValue] = useState('');
+
+    return (
+        <input
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            placeholder="Controlled input"
+        />
+    );
+};
+
+// Uncontrolled: DOM manages the value (use ref)
+const UncontrolledInput: React.FC = () => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleSubmit = () => {
+        const value = inputRef.current?.value;
+        console.log('Form value:', value);
+    };
+
+    return (
+        <>
+            <input
+                ref={inputRef}
+                placeholder="Uncontrolled input"
+                defaultValue="initial value"
+            />
+            <button onClick={handleSubmit}>Submit</button>
+        </>
+    );
+};
+                </code></pre>
+            </section>
+
+            <section id="best-practices">
+                <h2><span class="lang-ru">Best Practices и Оптимизация</span><span class="lang-en">Best Practices and Optimization</span></h2>
+
+                <h3><span class="lang-ru">React.memo — мемоизация компонентов</span><span class="lang-en">React.memo — Component Memoization</span></h3>
+                <p>
+                    <span class="lang-ru">Если компонент получает одинаковые props, не re-render'ить его.</span>
+                    <span class="lang-en">If a component receives the same props, don't re-render it.</span>
+                </p>
+
+                <pre><code class="language-typescript">
+interface WorkoutItemProps {
+    workout: Workout;
+    onDelete: (id: string) => void;
+}
+
+// Without React.memo: component re-renders if parent re-renders
+const WorkoutItem: React.FC<WorkoutItemProps> = ({ workout, onDelete }) => {
+    return (
+        <div>
+            <h3>{workout.name}</h3>
+            <button onClick={() => onDelete(workout.id)}>Delete</button>
+        </div>
+    );
+};
+
+// With React.memo: skips re-render if props haven't changed
+const MemoizedWorkoutItem = React.memo(WorkoutItem);
+
+// Usage
+const WorkoutList = () => {
+    const [workouts, setWorkouts] = useState<Workout[]>([]);
+
+    const handleDelete = useCallback((id: string) => {
+        setWorkouts(w => w.filter(x => x.id !== id));
+    }, []);
+
+    return (
+        <ul>
+            {workouts.map(workout => (
+                <MemoizedWorkoutItem
+                    key={workout.id}
+                    workout={workout}
+                    onDelete={handleDelete}  // useCallback guarantees stability
+                />
+            ))}
+        </ul>
+    );
+};
+                </code></pre>
+
+                <h3><span class="lang-ru">Ключевые правила</span><span class="lang-en">Key Rules</span></h3>
+                <ol style="margin-left: 2rem;">
+                    <li><strong><span class="lang-ru">Один файл = один компонент</span><span class="lang-en">One file = one component</span></strong> <span class="lang-ru">(или очень близко связанные компоненты)</span><span class="lang-en">(or closely related components)</span></li>
+                    <li><strong><span class="lang-ru">Props как входные параметры</span><span class="lang-en">Props as input parameters</span></strong> <span class="lang-ru">— не изменяйте их</span><span class="lang-en">— don't modify them</span></li>
+                    <li><strong><span class="lang-ru">Keys в списках</span><span class="lang-en">Keys in lists</span></strong> <span class="lang-ru">— всегда используйте unique key, не index</span><span class="lang-en">— always use unique key, not index</span></li>
+                    <li><strong><span class="lang-ru">Избегайте inline функций</span><span class="lang-en">Avoid inline functions</span></strong> <span class="lang-ru">в props — используйте useCallback</span><span class="lang-en">in props — use useCallback</span></li>
+                    <li><strong><span class="lang-ru">Большие структуры должны быть в Context</span><span class="lang-en">Large structures should be in Context</span></strong>, <span class="lang-ru">не в props (prop drilling)</span><span class="lang-en">not in props (prop drilling)</span></li>
+                </ol>
+            </section>
+
+            <section id="react19">
+                <h2><span class="lang-ru">Что нового в React 19</span><span class="lang-en">What's New in React 19</span></h2>
+                <p>
+                    <span class="lang-ru">React 19.2 привносит мощные возможности для работы с формами, асинхронными операциями и оптимизацией UI.
+                    Все эти паттерны нативны в React и не требуют дополнительных библиотек.</span>
+                    <span class="lang-en">React 19.2 brings powerful capabilities for forms, async operations, and UI optimization.
+                    All these patterns are native to React and don't require additional libraries.</span>
+                </p>
+
+                <h3><span class="lang-ru">useActionState — Асинхронные формы</span><span class="lang-en">useActionState — Async Forms</span></h3>
+                <p>
+                    <span class="lang-ru">`useActionState` — новый hook для обработки асинхронных операций в формах.
+                    Автоматически управляет pending, error, и data состояниями. Идеально для GraphQL мутаций.</span>
+                    <span class="lang-en">`useActionState` — new hook for handling async operations in forms.
+                    Automatically manages pending, error, and data states. Perfect for GraphQL mutations.</span>
+                </p>
+
+                <h3><span class="lang-ru">useOptimistic — Optimistic UI Updates</span><span class="lang-en">useOptimistic — Optimistic UI Updates</span></h3>
+                <p>
+                    <span class="lang-ru">Обновляет UI мгновенно, пока запрос обрабатывается. Если сервер вернёт ошибку, UI откатится.
+                    Отлично для real-time feel: отметить задачу как решённую, и сразу видно в UI.</span>
+                    <span class="lang-en">Updates UI immediately while request processes. If server returns error, UI rolls back.
+                    Great for real-time feel: mark problem solved and see it immediately in UI.</span>
+                </p>
+
+                <h3><span class="lang-ru">Activity API — Сохранение состояния скрытых компонентов</span><span class="lang-en">Activity API — Preserve Hidden Component State</span></h3>
+                <p>
+                    <span class="lang-ru">`&lt;Activity mode="hidden"&gt;` заменил Offscreen API. Позволяет скрыть компонент, но сохранить его состояние и скролл.
+                    Полезно для tab-like интерфейсов, где нужна мгновенная смена без потери контекста.</span>
+                    <span class="lang-en">`&lt;Activity mode="hidden"&gt;` replaces Offscreen API. Allows hiding a component while preserving its state and scroll.
+                    Useful for tab-like interfaces where you need instant switching without losing context.</span>
+                </p>
+
+                <h3><span class="lang-ru">Server Components (RSC Pattern)</span><span class="lang-en">Server Components (RSC Pattern)</span></h3>
+                <p>
+                    <span class="lang-ru">Server Components выполняются на сервере и отправляют в браузер только отрендеренный HTML + JavaScript для интерактивности.
+                    Основная польза: доступ к БД на сервере, безопасные secrets, меньше JavaScript в браузере.</span>
+                    <span class="lang-en">Server Components run on the server and send only rendered HTML + JavaScript for interactivity to the browser.
+                    Key benefits: database access on server, safe secrets, less JavaScript in browser.</span>
+                </p>
+
+                <h3><span class="lang-ru">ref как prop — без forwardRef</span><span class="lang-en">ref as prop — without forwardRef</span></h3>
+                <p>
+                    <span class="lang-ru">В React 19 ref автоматически передаётся как prop. Больше не нужен `forwardRef()`.</span>
+                    <span class="lang-en">In React 19, ref is automatically passed as a prop. No more need for `forwardRef()`.</span>
+                </p>
+
+                <h3><span class="lang-ru">Document Metadata в JSX</span><span class="lang-en">Document Metadata in JSX</span></h3>
+                <p>
+                    <span class="lang-ru">Теперь можно писать `&lt;title&gt;`, `&lt;meta&gt;` прямо в компоненте. React автоматически поместит их в `&lt;head&gt;`.</span>
+                    <span class="lang-en">Now you can write `&lt;title&gt;`, `&lt;meta&gt;` directly in components. React automatically places them in `&lt;head&gt;`.</span>
+                </p>
+
+                <h3><span class="lang-ru">Batched Suspense Reveal</span><span class="lang-en">Batched Suspense Reveal</span></h3>
+                <p>
+                    <span class="lang-ru">Если несколько компонентов разрешат Suspense примерно в один момент (благодаря @defer в GraphQL),
+                    они отобразятся вместе, не мигая по отдельности.</span>
+                    <span class="lang-en">If multiple components resolve Suspense around the same time (thanks to @defer in GraphQL),
+                    they reveal together without separate flickers.</span>
+                </p>
+            </section>
+
+<section class="assignments">
+                <h2><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></h2>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 1: Типизированный компонент (День 1, 1 час)</span><span class="lang-en">Assignment 1: Typed Component (Day 1, 1 hour)</span></h4>
+                    <p>
+                        <span class="lang-ru">Создайте `WidgetCard.tsx` с полной типизацией:</span>
+                        <span class="lang-en">Create `WidgetCard.tsx` with full typing:</span>
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li><span class="lang-ru">Props: title, description, icon, color (опциональный с default)</span><span class="lang-en">Props: title, description, icon, color (optional with default)</span></li>
+                        <li><span class="lang-ru">Используйте CSS Modules для стилизации</span><span class="lang-en">Use CSS Modules for styling</span></li>
+                        <li><span class="lang-ru">Экспортируйте компонент</span><span class="lang-en">Export the component</span></li>
+                        <li><span class="lang-ru">Создайте тесты (React Testing Library)</span><span class="lang-en">Create tests (React Testing Library)</span></li>
+                    </ul>
+                    <p><strong><span class="lang-ru">Результат:</span><span class="lang-en">Result:</span></strong> <span class="lang-ru">Переиспользуемый, типизированный, протестированный компонент.</span><span class="lang-en">Reusable, typed, tested component.</span></p>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 2: Hooks и состояние (День 2, 1.5 часа)</span><span class="lang-en">Assignment 2: Hooks and State (Day 2, 1.5 hours)</span></h4>
+                    <p>
+                        <span class="lang-ru">Создайте `WorkoutForm.tsx` с:</span>
+                        <span class="lang-en">Create `WorkoutForm.tsx` with:</span>
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li><span class="lang-ru">useState для формы (exerciseName, durationMinutes, caloriesBurned)</span><span class="lang-en">useState for form (exerciseName, durationMinutes, caloriesBurned)</span></li>
+                        <li><span class="lang-ru">useCallback для handleSubmit</span><span class="lang-en">useCallback for handleSubmit</span></li>
+                        <li><span class="lang-ru">Валидация: duration > 0, calories > 0</span><span class="lang-en">Validation: duration > 0, calories > 0</span></li>
+                        <li><span class="lang-ru">Controlled inputs</span><span class="lang-en">Controlled inputs</span></li>
+                        <li><span class="lang-ru">Обработка ошибок в UI</span><span class="lang-en">Error handling in UI</span></li>
+                    </ul>
+                    <p><strong><span class="lang-ru">Результат:</span><span class="lang-en">Result:</span></strong> <span class="lang-ru">Работающая форма с валидацией и обработкой ошибок.</span><span class="lang-en">Working form with validation and error handling.</span></p>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 3: useEffect и data fetching (День 2-3, 1.5 часа)</span><span class="lang-en">Assignment 3: useEffect and Data Fetching (Day 2-3, 1.5 hours)</span></h4>
+                    <p>
+                        <span class="lang-ru">Создайте `WorkoutList.tsx` с:</span>
+                        <span class="lang-en">Create `WorkoutList.tsx` with:</span>
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li><span class="lang-ru">useEffect для загрузки тренировок (fetch или Relay)</span><span class="lang-en">useEffect for loading workouts (fetch or Relay)</span></li>
+                        <li><span class="lang-ru">Loading и error состояния</span><span class="lang-en">Loading and error states</span></li>
+                        <li><span class="lang-ru">Cleanup функция</span><span class="lang-en">Cleanup function</span></li>
+                        <li><span class="lang-ru">ErrorBoundary > Suspense > Component обертка</span><span class="lang-en">ErrorBoundary > Suspense > Component wrapper</span></li>
+                    </ul>
+                    <p><strong><span class="lang-ru">Результат:</span><span class="lang-en">Result:</span></strong> <span class="lang-ru">Компонент со стабильной загрузкой данных и обработкой ошибок.</span><span class="lang-en">Component with stable data loading and error handling.</span></p>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 4: Composition и кастомные hooks (День 3-4, 2 часа)</span><span class="lang-en">Assignment 4: Composition and Custom Hooks (Day 3-4, 2 hours)</span></h4>
+                    <p>
+                        <span class="lang-ru">Напишите кастомный hook `useAsync` и используйте его в компоненте:</span>
+                        <span class="lang-en">Write a custom hook `useAsync` and use it in components:</span>
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li><span class="lang-ru">useAsync(fetchFn, deps) возвращает {data, loading, error}</span><span class="lang-en">useAsync(fetchFn, deps) returns {data, loading, error}</span></li>
+                        <li><span class="lang-ru">Используйте в 2+ компонентах (WorkoutList, MealList)</span><span class="lang-en">Use in 2+ components (WorkoutList, MealList)</span></li>
+                        <li><span class="lang-ru">Реализуйте собственный ErrorBoundary для обеих</span><span class="lang-en">Implement custom ErrorBoundary for both</span></li>
+                        <li><span class="lang-ru">Тестируйте обработку ошибок</span><span class="lang-en">Test error handling</span></li>
+                    </ul>
+                    <p><strong><span class="lang-ru">Результат:</span><span class="lang-en">Result:</span></strong> <span class="lang-ru">Переиспользуемая логика fetching, типизированная и протестированная.</span><span class="lang-en">Reusable fetching logic, typed and tested.</span></p>
+                </div>
+            </section>
+
+            <section class="assignments" id="backlog-tasks" style="border-top-color: #f5c2e7;">
+                <h2><span class="lang-ru">🧪 Задания из Backlog проекта (TDD)</span><span class="lang-en">🧪 Backlog Tasks (TDD)</span></h2>
+                <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                    <span class="lang-ru">Эти задания — реальные задачи из бэклога проекта Life Goals Dashboard.
+                    Для каждого задания предоставлены тесты, которые нужно сделать зелёными, написав реализацию.
+                    <strong>Подход TDD:</strong> сначала изучи тесты → пойми что от тебя ожидается → напиши код → запусти тесты.</span>
+                    <span class="lang-en">These tasks are real tasks from the Life Goals Dashboard project backlog.
+                    Each task provides tests that you need to make pass by writing implementation.
+                    <strong>TDD approach:</strong> first study the tests → understand what's expected → write code → run tests.</span>
+                </p>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4><span class="lang-ru">Backlog #101: AddWidgetForm с useActionState (5 SP)</span><span class="lang-en">Backlog #101: AddWidgetForm with useActionState (5 SP)</span></h4>
+                    <p><span class="lang-ru">Реализуйте форму добавления виджета на Dashboard, используя React 19 useActionState для управления асинхронной мутацией GraphQL.</span><span class="lang-en">Implement widget add form for Dashboard using React 19 useActionState to manage async GraphQL mutation.</span></p>
+                    <p><strong><span class="lang-ru">Тесты (напиши код, чтобы они прошли):</span><span class="lang-en">Tests (write code to make them pass):</span></strong></p>
+                    <pre><code class="language-typescript">
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import AddWidgetForm from '../dashboard/AddWidgetForm';
+
+describe('Backlog #101: AddWidgetForm with useActionState', () => {
+  it('should render form with widget type select', () => {
+    render(<AddWidgetForm />);
+    
+    expect(screen.getByLabelText(/widget type/i)).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /fitness/i })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /interview/i })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /budget/i })).toBeInTheDocument();
+  });
+
+  it('should show pending state while submitting', async () => {
+    const user = userEvent.setup();
+    render(<AddWidgetForm />);
+    
+    const submitButton = screen.getByRole('button', { name: /add widget/i });
+    
+    await user.click(submitButton);
+    
+    // Button should show loading text while pending
+    expect(screen.getByRole('button', { name: /adding/i })).toBeInTheDocument();
+  });
+
+  it('should display error message on mutation failure', async () => {
+    const user = userEvent.setup();
+    render(<AddWidgetForm />);
+    
+    // Mock GraphQL error response
+    const selectWidget = screen.getByLabelText(/widget type/i);
+    await user.selectOption(selectWidget, 'FITNESS');
+    
+    // Note: In real test, mock the GraphQL mutation to return error
+    // This is a simplified example
+    
+    const submitButton = screen.getByRole('button', { name: /add widget/i });
+    await user.click(submitButton);
+    
+    await waitFor(() => {
+      // Should show error message from server
+      expect(screen.queryByText(/error/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should show success message when widget is added', async () => {
+    const user = userEvent.setup();
+    render(<AddWidgetForm />);
+    
+    const selectWidget = screen.getByLabelText(/widget type/i);
+    await user.selectOption(selectWidget, 'FITNESS');
+    
+    const submitButton = screen.getByRole('button', { name: /add widget/i });
+    await user.click(submitButton);
+    
+    await waitFor(() => {
+      expect(screen.getByText(/widget added/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should disable submit button while pending', async () => {
+    const user = userEvent.setup();
+    render(<AddWidgetForm />);
+    
+    const submitButton = screen.getByRole('button', { name: /add widget/i });
+    expect(submitButton).not.toBeDisabled();
+    
+    await user.click(submitButton);
+    
+    // Button should be disabled while pending
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /adding/i })).toBeDisabled();
+    });
+  });
+});
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/features/dashboard/__tests__/AddWidgetForm.test.tsx</em></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4><span class="lang-ru">Backlog #102: ProblemCard с useOptimistic (5 SP)</span><span class="lang-en">Backlog #102: ProblemCard with useOptimistic (5 SP)</span></h4>
+                    <p><span class="lang-ru">Реализуйте карточку LeetCode-проблемы с optimistic update при нажатии "Mark Solved". UI обновляется сразу, мутация отправляется в фоне.</span><span class="lang-en">Implement LeetCode problem card with optimistic update on "Mark Solved" click. UI updates immediately while mutation sends in background.</span></p>
+                    <p><strong><span class="lang-ru">Тесты (напиши код, чтобы они прошли):</span><span class="lang-en">Tests (write code to make them pass):</span></strong></p>
+                    <pre><code class="language-typescript">
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import ProblemCard from '../interview/ProblemCard';
+
+describe('Backlog #102: ProblemCard with useOptimistic', () => {
+  const mockProblem = {
+    id: 'prob-1',
+    title: 'Two Sum',
+    difficulty: 'EASY',
+    solved: false,
+    category: 'ARRAY'
+  };
+
+  it('should render problem with title and difficulty', () => {
+    render(<ProblemCard problem={mockProblem} />);
+    
+    expect(screen.getByText('Two Sum')).toBeInTheDocument();
+    expect(screen.getByText(/easy/i)).toBeInTheDocument();
+  });
+
+  it('should show "Mark Solved" button when problem not solved', () => {
+    render(<ProblemCard problem={mockProblem} />);
+    
+    expect(screen.getByRole('button', { name: /mark solved/i })).toBeInTheDocument();
+  });
+
+  it('should immediately show solved checkmark on button click (optimistic)', async () => {
+    const user = userEvent.setup();
+    render(<ProblemCard problem={mockProblem} />);
+    
+    const button = screen.getByRole('button', { name: /mark solved/i });
+    await user.click(button);
+    
+    // Should immediately show checkmark (optimistic update)
+    expect(screen.getByText(/✓ solved/i)).toBeInTheDocument();
+  });
+
+  it('should disable button while mutation is pending', async () => {
+    const user = userEvent.setup();
+    render(<ProblemCard problem={mockProblem} />);
+    
+    const button = screen.getByRole('button', { name: /mark solved/i });
+    await user.click(button);
+    
+    // Button should be disabled during mutation
+    await waitFor(() => {
+      expect(button).toBeDisabled();
+    });
+  });
+
+  it('should revert optimistic update if mutation fails', async () => {
+    // Mock mutation failure
+    const user = userEvent.setup();
+    render(<ProblemCard problem={mockProblem} />);
+    
+    const button = screen.getByRole('button', { name: /mark solved/i });
+    await user.click(button);
+    
+    // Initially shows optimistic checkmark
+    expect(screen.getByText(/✓ solved/i)).toBeInTheDocument();
+    
+    // After mutation fails, should revert
+    await waitFor(() => {
+      expect(screen.queryByText(/✓ solved/i)).not.toBeInTheDocument();
+      expect(screen.getByText(/error/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should show success after optimistic and server agree', async () => {
+    const user = userEvent.setup();
+    render(<ProblemCard problem={mockProblem} />);
+    
+    const button = screen.getByRole('button', { name: /mark solved/i });
+    await user.click(button);
+    
+    // Optimistic update happens
+    expect(screen.getByText(/✓ solved/i)).toBeInTheDocument();
+    
+    // Wait for server confirmation
+    await waitFor(() => {
+      expect(screen.getByText(/✓ solved/i)).toBeInTheDocument();
+      expect(button).toBeDisabled();
+    });
+  });
+});
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/features/interview/__tests__/ProblemCard.test.tsx</em></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4><span class="lang-ru">Backlog #103: DashboardTabs с Activity API (3 SP)</span><span class="lang-en">Backlog #103: DashboardTabs with Activity API (3 SP)</span></h4>
+                    <p><span class="lang-ru">Реализуйте tab-интерфейс Dashboard, используя React 19 Activity API для сохранения scroll-позиции и состояния скрытых вкладок.</span><span class="lang-en">Implement Dashboard tab interface using React 19 Activity API to preserve scroll position and hidden tab state.</span></p>
+                    <p><strong><span class="lang-ru">Тесты (напиши код, чтобы они прошли):</span><span class="lang-en">Tests (write code to make them pass):</span></strong></p>
+                    <pre><code class="language-typescript">
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import DashboardTabs from '../dashboard/DashboardTabs';
+
+describe('Backlog #103: DashboardTabs with Activity API', () => {
+  it('should render tab buttons for Fitness and Interview Prep', () => {
+    render(<DashboardTabs />);
+    
+    expect(screen.getByRole('button', { name: /fitness/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /interview prep/i })).toBeInTheDocument();
+  });
+
+  it('should show Fitness widget by default', () => {
+    render(<DashboardTabs />);
+    
+    expect(screen.getByText(/fitness widget/i)).toBeInTheDocument();
+  });
+
+  it('should switch to Interview Prep tab on click', async () => {
+    const user = userEvent.setup();
+    render(<DashboardTabs />);
+    
+    const interviewButton = screen.getByRole('button', { name: /interview prep/i });
+    await user.click(interviewButton);
+    
+    expect(screen.getByText(/interview prep widget/i)).toBeInTheDocument();
+  });
+
+  it('should keep scroll position when switching back to Fitness tab', async () => {
+    const user = userEvent.setup();
+    render(<DashboardTabs />);
+    
+    // Simulate scrolling in Fitness widget
+    const fitnessWidget = screen.getByText(/fitness widget/i).closest('div');
+    Object.defineProperty(fitnessWidget, 'scrollTop', {
+      writable: true,
+      value: 500
+    });
+    
+    // Switch to Interview Prep
+    const interviewButton = screen.getByRole('button', { name: /interview prep/i });
+    await user.click(interviewButton);
+    
+    // Switch back to Fitness
+    const fitnessButton = screen.getByRole('button', { name: /fitness/i });
+    await user.click(fitnessButton);
+    
+    // Scroll position should be preserved (Activity API keeps state)
+    await waitFor(() => {
+      expect(fitnessWidget?.scrollTop).toBe(500);
+    });
+  });
+
+  it('should preserve input state in hidden tabs', async () => {
+    const user = userEvent.setup();
+    render(<DashboardTabs />);
+    
+    // Find input in Fitness widget
+    const inputs = screen.getAllByRole('textbox');
+    const fitnessInput = inputs[0]; // Assuming first input is in Fitness
+    
+    // Type something
+    await user.type(fitnessInput, 'test input');
+    
+    // Switch to Interview Prep
+    const interviewButton = screen.getByRole('button', { name: /interview prep/i });
+    await user.click(interviewButton);
+    
+    // Switch back to Fitness
+    const fitnessButton = screen.getByRole('button', { name: /fitness/i });
+    await user.click(fitnessButton);
+    
+    // Input value should still be there (Activity keeps state)
+    expect(fitnessInput).toHaveValue('test input');
+  });
+
+  it('should mark active tab visually', async () => {
+    const user = userEvent.setup();
+    render(<DashboardTabs />);
+    
+    let fitnessButton = screen.getByRole('button', { name: /fitness/i });
+    expect(fitnessButton).toHaveStyle({ fontWeight: 'bold' });
+    
+    const interviewButton = screen.getByRole('button', { name: /interview prep/i });
+    await user.click(interviewButton);
+    
+    fitnessButton = screen.getByRole('button', { name: /fitness/i });
+    expect(fitnessButton).not.toHaveStyle({ fontWeight: 'bold' });
+    expect(interviewButton).toHaveStyle({ fontWeight: 'bold' });
+  });
+});
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/features/dashboard/__tests__/DashboardTabs.test.tsx</em></p>
+                </div>
+            </section>
+
+            <section class="resources">
+                <h2><span class="lang-ru">Дополнительные ресурсы</span><span class="lang-en">Additional Resources</span></h2>
+
+                <a href="https://react.dev" class="resource-link">
+                    React Official Documentation
+                </a>
+
+                <a href="https://react-typescript-cheatsheet.netlify.app/" class="resource-link">
+                    React TypeScript Cheatsheet
+                </a>
+
+                <a href="https://epic-react.dev/" class="resource-link">
+                    Epic React by Kent C. Dodds (video course)
+                </a>
+
+                <a href="https://patterns.dev/posts/compound-component-pattern/" class="resource-link">
+                    Compound Component Pattern
+                </a>
+
+                <a href="https://react-hooks-form.com/" class="resource-link">
+                    React Hook Form (для форм / for forms)
+                </a>
+
+                <a href="https://testing-library.com/docs/react-testing-library/intro/" class="resource-link">
+                    React Testing Library
+                </a>
+            </section>
+
+            <footer class="nav-footer">
+                <a href="09-dgs.html" class="nav-link prev"><span class="lang-ru">← Модуль 9: Netflix DGS</span><span class="lang-en">← Module 9: Netflix DGS</span></a>
+                <a href="11-css-modules-vite.html" class="nav-link next"><span class="lang-ru">Модуль 11: CSS Modules + Vite →</span><span class="lang-en">Module 11: CSS Modules + Vite →</span></a>
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+
+    <script>
+        function setLang(lang) {
+            const body = document.body;
+            const buttons = document.querySelectorAll('.lang-btn');
+
+            if (lang === 'en') {
+                body.classList.add('show-en');
+            } else {
+                body.classList.remove('show-en');
+            }
+
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            event.target.classList.add('active');
+
+            localStorage.setItem('preferredLang', lang);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const preferredLang = localStorage.getItem('preferredLang') || 'ru';
+            const body = document.body;
+            const buttons = document.querySelectorAll('.lang-btn');
+
+            if (preferredLang === 'en') {
+                body.classList.add('show-en');
+                buttons.forEach((btn, idx) => {
+                    if (idx === 1) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+            } else {
+                buttons.forEach((btn, idx) => {
+                    if (idx === 0) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

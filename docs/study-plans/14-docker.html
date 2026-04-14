@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 14: Docker - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 87.5%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .language-bash::before,
+        .language-kotlin::before,
+        .language-typescript::before,
+        .language-graphql::before {
+            content: attr(data-lang);
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details/Collapse */
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        /* Assignments */
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .tdd-badge {
+            display: inline-block;
+            background: var(--success);
+            color: var(--bg);
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Resources */
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        /* Navigation */
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Prism Customization */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+
+        /* Language switcher */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button {
+            padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px;
+            cursor: pointer; font-size: 0.85rem; background: transparent;
+            color: var(--text-secondary); transition: all 0.2s;
+        }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="module-number lang-ru">МОДУЛЬ 14 / 16</div>
+            <div class="module-number lang-en">MODULE 14 / 16</div>
+            <h1>Docker + Docker Compose</h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3 class="lang-ru">Содержание</h3>
+            <h3 class="lang-en">Contents</h3>
+            <ul>
+                <li><a href="#intro" class="lang-ru">Введение</a><a href="#intro" class="lang-en">Introduction</a></li>
+                <li><a href="#docker-basics" class="lang-ru">Docker Основы</a><a href="#docker-basics" class="lang-en">Docker Basics</a></li>
+                <li><a href="#dockerfile" class="lang-ru">Dockerfile для Java</a><a href="#dockerfile" class="lang-en">Dockerfile for Java</a></li>
+                <li><a href="#compose" class="lang-ru">Docker Compose</a><a href="#compose" class="lang-en">Docker Compose</a></li>
+                <li><a href="#volumes-networks" class="lang-ru">Volumes & Networks</a><a href="#volumes-networks" class="lang-en">Volumes & Networks</a></li>
+                <li><a href="#assignments" class="lang-ru">Практические задания</a><a href="#assignments" class="lang-en">Practical Assignments</a></li>
+                <li><a href="#backlog-tasks" class="lang-ru">Backlog задачи</a><a href="#backlog-tasks" class="lang-en">Backlog Tasks</a></li>
+                <li><a href="#resources" class="lang-ru">Ресурсы</a><a href="#resources" class="lang-en">Resources</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <div class="lang-ru">
+                    <h2>Введение: Контейнеризация для Life Goals Dashboard</h2>
+                    <p>
+                        <strong>Docker</strong> позволяет упаковать приложение с его зависимостями в контейнер,
+                        который работает одинаково везде: на вашем ноутбуке, на сервере CI/CD, в продакшене.
+                    </p>
+                    <p>
+                        <strong>Docker Compose</strong> позволяет запустить несколько контейнеров (API, PostgreSQL, Redis)
+                        одной командой, с определением сетей и томов.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Совет:</strong> За 2 дня вы создадите Dockerfile для Spring Boot приложения и docker-compose.yml для полного локального окружения.
+                    </div>
+
+                    <div class="warning">
+                        <strong>JDK 25 LTS:</strong> Мы используем JDK 25 LTS (сентябрь 2025) — минимум Spring Boot 4 требует Java 17, но мы идём на LTS-25 для долгосрочной поддержки.
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <h2>Introduction: Containerization for Life Goals Dashboard</h2>
+                    <p>
+                        <strong>Docker</strong> allows you to package an application with its dependencies in a container,
+                        which works identically everywhere: on your laptop, on CI/CD servers, and in production.
+                    </p>
+                    <p>
+                        <strong>Docker Compose</strong> lets you run multiple containers (API, PostgreSQL, Redis)
+                        with a single command, defining networks and volumes.
+                    </p>
+
+                    <div class="tip">
+                        <strong>Tip:</strong> In 2 days, you will create a Dockerfile for a Spring Boot application and docker-compose.yml for a complete local environment.
+                    </div>
+
+                    <div class="warning">
+                        <strong>JDK 25 LTS:</strong> We use JDK 25 LTS (September 2025) — Spring Boot 4 minimum is Java 17, but we go with LTS-25 for long-term support.
+                    </div>
+                </div>
+            </section>
+
+            <section id="docker-basics">
+                <div class="lang-ru">
+                    <h2>Docker Основы</h2>
+
+                    <h3>Основные концепции</h3>
+                </div>
+                <div class="lang-en">
+                    <h2>Docker Basics</h2>
+
+                    <h3>Core Concepts</h3>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="lang-ru">Концепция</th>
+                            <th class="lang-ru">Описание</th>
+                            <th class="lang-en" style="display: none;">Concept</th>
+                            <th class="lang-en" style="display: none;">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="lang-ru"><strong>Image (Образ)</strong></td>
+                            <td class="lang-ru">Шаблон контейнера. Неизменяемый "снимок" с кодом и зависимостями</td>
+                            <td class="lang-en"><strong>Image</strong></td>
+                            <td class="lang-en">Container template. Immutable "snapshot" with code and dependencies</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><strong>Container (Контейнер)</strong></td>
+                            <td class="lang-ru">Работающий экземпляр image. Может быть запущено несколько контейнеров из одного image</td>
+                            <td class="lang-en"><strong>Container</strong></td>
+                            <td class="lang-en">Running instance of an image. Multiple containers can run from one image</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><strong>Dockerfile</strong></td>
+                            <td class="lang-ru">Файл с инструкциями для создания образа</td>
+                            <td class="lang-en"><strong>Dockerfile</strong></td>
+                            <td class="lang-en">File with instructions for creating an image</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><strong>Registry (Реестр)</strong></td>
+                            <td class="lang-ru">Хранилище образов (Docker Hub, ECR, GCR)</td>
+                            <td class="lang-en"><strong>Registry</strong></td>
+                            <td class="lang-en">Image storage (Docker Hub, ECR, GCR)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="lang-ru">
+                    <h3>Основные команды Docker</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Basic Docker Commands</h3>
+                </div>
+
+                <pre><code class="language-bash">
+# Построение образа из Dockerfile
+docker build -t life-goals-api:latest .
+
+# Список образов
+docker images
+
+# Запуск контейнера
+docker run -p 8080:8080 --name api-container life-goals-api:latest
+
+# Список запущенных контейнеров
+docker ps
+
+# Список всех контейнеров (включая остановленные)
+docker ps -a
+
+# Просмотр логов контейнера
+docker logs api-container
+
+# Логирование в реальном времени
+docker logs -f api-container
+
+# Выполнить команду в контейнере
+docker exec api-container curl http://localhost:8080/health
+
+# Остановить контейнер
+docker stop api-container
+
+# Удалить контейнер
+docker rm api-container
+
+# Удалить образ
+docker rmi life-goals-api:latest
+                </code></pre>
+            </section>
+
+            <section id="dockerfile">
+                <div class="lang-ru">
+                    <h2>Dockerfile для Spring Boot приложения</h2>
+
+                    <h3>Multi-stage Dockerfile (оптимизированный для production)</h3>
+                </div>
+                <div class="lang-en">
+                    <h2>Dockerfile for Spring Boot Application</h2>
+
+                    <h3>Multi-stage Dockerfile (production-optimized)</h3>
+                </div>
+
+                <pre><code class="language-bash">
+# Stage 1: Builder (gradle контейнер)
+FROM gradle:9.4-jdk25-alpine AS builder
+
+WORKDIR /app
+
+# Копируем files для сборки
+COPY . .
+
+# Собираем JAR
+RUN gradle build -x test --no-daemon
+
+# Stage 2: Runtime (минимальный JRE контейнер)
+FROM eclipse-temurin:25-jre-alpine
+
+WORKDIR /app
+
+# Копируем готовый JAR из builder stage
+COPY --from=builder /app/build/libs/life-goals-api-*.jar app.jar
+
+# Expose порт (информационно)
+EXPOSE 8080
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+
+# Запуск приложения
+ENTRYPOINT ["java", "-jar", "app.jar"]
+                </code></pre>
+
+                <div class="lang-ru">
+                    <h3>Расшифровка Dockerfile</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Dockerfile Breakdown</h3>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="lang-ru">Инструкция</th>
+                            <th class="lang-ru">Что она делает</th>
+                            <th class="lang-en" style="display: none;">Instruction</th>
+                            <th class="lang-en" style="display: none;">What it does</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="lang-ru"><code>FROM gradle:9.4-jdk25-alpine AS builder</code></td>
+                            <td class="lang-ru">Выбирает базовый образ с Gradle и JDK 25 LTS. AS builder именует stage</td>
+                            <td class="lang-en"><code>FROM gradle:9.4-jdk25-alpine AS builder</code></td>
+                            <td class="lang-en">Selects base image with Gradle and JDK 25 LTS. AS builder names the stage</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><code>WORKDIR /app</code></td>
+                            <td class="lang-ru">Устанавливает рабочую папку в контейнере</td>
+                            <td class="lang-en"><code>WORKDIR /app</code></td>
+                            <td class="lang-en">Sets working directory in container</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><code>COPY . .</code></td>
+                            <td class="lang-ru">Копирует файлы хоста в контейнер</td>
+                            <td class="lang-en"><code>COPY . .</code></td>
+                            <td class="lang-en">Copies host files into container</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><code>RUN gradle build</code></td>
+                            <td class="lang-ru">Выполняет команду (сборка)</td>
+                            <td class="lang-en"><code>RUN gradle build</code></td>
+                            <td class="lang-en">Executes command (build)</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><code>COPY --from=builder</code></td>
+                            <td class="lang-ru">Копирует файл из предыдущего stage</td>
+                            <td class="lang-en"><code>COPY --from=builder</code></td>
+                            <td class="lang-en">Copies file from previous stage</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><code>EXPOSE 8080</code></td>
+                            <td class="lang-ru">Документирует порт (не публикует автоматически)</td>
+                            <td class="lang-en"><code>EXPOSE 8080</code></td>
+                            <td class="lang-en">Documents port (doesn't auto-publish)</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><code>HEALTHCHECK</code></td>
+                            <td class="lang-ru">Проверяет здоровье контейнера периодически</td>
+                            <td class="lang-en"><code>HEALTHCHECK</code></td>
+                            <td class="lang-en">Periodically checks container health</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><code>ENTRYPOINT</code></td>
+                            <td class="lang-ru">Команда при запуске контейнера</td>
+                            <td class="lang-en"><code>ENTRYPOINT</code></td>
+                            <td class="lang-en">Command on container startup</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="lang-ru">
+                    <h3>.dockerignore файл</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>.dockerignore File</h3>
+                </div>
+
+                <pre><code class="language-bash">
+# .dockerignore (в корне проекта)
+node_modules/
+.git/
+.env
+.DS_Store
+dist/
+build/
+.gradle/
+.idea/
+*.log
+                </code></pre>
+
+                <div class="warning">
+                    <div class="lang-ru">
+                        <strong>Важно:</strong> Multi-stage build уменьшает размер final образа.
+                        Builder stage не включается в production image, остаётся только JAR и минимальный JRE.
+                    </div>
+                    <div class="lang-en">
+                        <strong>Important:</strong> Multi-stage build reduces final image size.
+                        Builder stage is not included in production image — only JAR and minimal JRE remain.
+                    </div>
+                </div>
+            </section>
+
+            <section id="compose">
+                <div class="lang-ru">
+                    <h2>Docker Compose: Полное окружение</h2>
+
+                    <h3>Полный docker-compose.yml для Life Goals Dashboard</h3>
+                </div>
+                <div class="lang-en">
+                    <h2>Docker Compose: Complete Environment</h2>
+
+                    <h3>Complete docker-compose.yml for Life Goals Dashboard</h3>
+                </div>
+
+                <pre><code class="language-bash">
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:18-alpine
+    container_name: lifegoals-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lifegoals
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lifegoals-network
+
+  # Redis Cache
+  redis:
+    image: redis:8.6-alpine
+    container_name: lifegoals-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lifegoals-network
+
+  # Spring Boot API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lifegoals-api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/lifegoals
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-secret-key
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - lifegoals-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  lifegoals-network:
+    driver: bridge
+                </code></pre>
+
+                <div class="lang-ru">
+                    <h3>Основные команды Docker Compose</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Basic Docker Compose Commands</h3>
+                </div>
+
+                <pre><code class="language-bash">
+# Запустить все сервисы в фоновом режиме
+docker-compose up -d
+
+# Просмотр логов
+docker-compose logs
+
+# Логирование конкретного сервиса в реальном времени
+docker-compose logs -f api
+
+# Список запущенных контейнеров (в этом compose файле)
+docker-compose ps
+
+# Остановить все сервисы
+docker-compose down
+
+# Остановить и удалить volumes
+docker-compose down -v
+
+# Пересоздать и перезапустить
+docker-compose up --build
+
+# Выполнить команду в контейнере
+docker-compose exec api bash
+
+# Перестартовать сервис
+docker-compose restart postgres
+                </code></pre>
+
+                <div class="tip">
+                    <div class="lang-ru">
+                        <strong>Совет:</strong> Используйте `depends_on` с `condition: service_healthy` для гарантии,
+                        что API не запустится до PostgreSQL и Redis.
+                    </div>
+                    <div class="lang-en">
+                        <strong>Tip:</strong> Use `depends_on` with `condition: service_healthy` to ensure
+                        API doesn't start until PostgreSQL and Redis are ready.
+                    </div>
+                </div>
+            </section>
+
+            <section id="volumes-networks">
+                <div class="lang-ru">
+                    <h2>Volumes и Networks</h2>
+
+                    <h3>Volumes: Persistent Data</h3>
+
+                    <p>
+                        <strong>Volume</strong> — это место на хосте, где контейнер может хранить данные.
+                        Данные в volume сохраняются, даже если контейнер удалён.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h2>Volumes and Networks</h2>
+
+                    <h3>Volumes: Persistent Data</h3>
+
+                    <p>
+                        <strong>Volume</strong> is a location on the host where a container can store data.
+                        Data in a volume persists even if the container is deleted.
+                    </p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="lang-ru">Тип</th>
+                            <th class="lang-ru">Синтаксис</th>
+                            <th class="lang-ru">Использование</th>
+                            <th class="lang-en" style="display: none;">Type</th>
+                            <th class="lang-en" style="display: none;">Syntax</th>
+                            <th class="lang-en" style="display: none;">Usage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="lang-ru"><strong>Named Volume</strong></td>
+                            <td class="lang-ru"><code>postgres_data:/var/lib/postgresql/data</code></td>
+                            <td class="lang-ru">Database, cache. Docker управляет путём</td>
+                            <td class="lang-en"><strong>Named Volume</strong></td>
+                            <td class="lang-en"><code>postgres_data:/var/lib/postgresql/data</code></td>
+                            <td class="lang-en">Database, cache. Docker manages path</td>
+                        </tr>
+                        <tr>
+                            <td class="lang-ru"><strong>Bind Mount</strong></td>
+                            <td class="lang-ru"><code>./src:/app/src</code></td>
+                            <td class="lang-ru">Разработка. Папка хоста монтируется в контейнер</td>
+                            <td class="lang-en"><strong>Bind Mount</strong></td>
+                            <td class="lang-en"><code>./src:/app/src</code></td>
+                            <td class="lang-en">Development. Host folder mounts into container</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="lang-ru">
+                    <h3>Networks: Связь между контейнерами</h3>
+
+                    <p>
+                        В Compose, контейнеры могут общаться через имена сервисов (service names).
+                        Он автоматически создаёт bridge network.
+                    </p>
+                </div>
+                <div class="lang-en">
+                    <h3>Networks: Communication Between Containers</h3>
+
+                    <p>
+                        In Compose, containers can communicate via service names.
+                        It automatically creates a bridge network.
+                    </p>
+                </div>
+
+                <pre><code class="language-bash">
+# В docker-compose.yml API может подключиться к PostgreSQL через:
+DB_URL: jdbc:postgresql://postgres:5432/lifegoals
+#                         ^^^^^^^
+#                    Имя сервиса (не localhost!)
+                </code></pre>
+
+                <div class="lang-ru">
+                    <h3>Healthcheck: Проверка здоровья</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Healthcheck: Health Verification</h3>
+                </div>
+
+                <pre><code class="language-bash">
+# PostgreSQL healthcheck
+healthcheck:
+  test: ["CMD-SHELL", "pg_isready -U postgres"]
+  interval: 10s         # Проверять каждые 10 секунд
+  timeout: 5s           # Ждать 5 секунд на ответ
+  retries: 5            # Считать unhealthy после 5 неудачных
+  start_period: 10s     # Не проверять первые 10 секунд
+
+# Redis healthcheck
+healthcheck:
+  test: ["CMD", "redis-cli", "ping"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+                </code></pre>
+            </section>
+
+            <section id="local-dev">
+                <div class="lang-ru">
+                    <h2>Локальная разработка с Docker Compose</h2>
+
+                    <h3>Рабочий процесс</h3>
+                </div>
+                <div class="lang-en">
+                    <h2>Local Development with Docker Compose</h2>
+
+                    <h3>Workflow</h3>
+                </div>
+
+                <pre><code class="language-bash">
+# 1. Запустить окружение (первый раз, долго)
+docker-compose up -d
+
+# 2. Проверить, что всё здорово
+docker-compose ps
+docker-compose logs api
+
+# 3. Во время разработки: пересоздать API если Dockerfile изменился
+docker-compose up --build api
+
+# 4. Просмотр логов в реальном времени
+docker-compose logs -f api
+
+# 5. Очистить всё (осторожно! удалит volumes)
+docker-compose down -v
+                </code></pre>
+
+                <div class="lang-ru">
+                    <h3>Development Variant (с bind mounts)</h3>
+                </div>
+                <div class="lang-en">
+                    <h3>Development Variant (with bind mounts)</h3>
+                </div>
+
+                <pre><code class="language-bash">
+# docker-compose.dev.yml (для разработки)
+version: '3.8'
+services:
+  postgres:
+    # ... как выше
+
+  redis:
+    # ... как выше
+
+  api:
+    # Вместо build, используем Gradle во время разработки
+    image: gradle:9.4-jdk25-alpine
+    working_dir: /app
+    command: gradle bootRun
+    volumes:
+      - .:/app               # Весь проект как bind mount
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/lifegoals
+      # ... остальное как выше
+
+# Запуск:
+docker-compose -f docker-compose.dev.yml up -d
+                </code></pre>
+            </section>
+
+            <section class="assignments">
+                <div class="lang-ru">
+                    <h2>Практические задания</h2>
+
+                    <div class="assignment">
+                        <h4>Задание 1: Dockerfile для Spring Boot (День 1, 1.5 часа)</h4>
+                        <p>
+                            Создайте Dockerfile в корне вашего Spring Boot проекта с multi-stage build.
+                            Используйте gradle:9.4-jdk25-alpine для builder и eclipse-temurin:25-jre-alpine для runtime.
+                            Добавьте healthcheck для /actuator/health.
+                        </p>
+                        <ol style="margin-left: 2rem;">
+                            <li>Создайте Dockerfile в корне проекта</li>
+                            <li>Напишите multi-stage build (builder → runtime)</li>
+                            <li>Добавьте HEALTHCHECK инструкцию</li>
+                            <li>Создайте .dockerignore файл</li>
+                            <li>Протестируйте: `docker build -t life-goals-api .`</li>
+                            <li>Запустите: `docker run -p 8080:8080 life-goals-api`</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Задание 2: Docker Compose с тремя сервисами (День 1, 1.5 часа)</h4>
+                        <p>
+                            Создайте docker-compose.yml с PostgreSQL, Redis и API сервисами.
+                        </p>
+                        <ol style="margin-left: 2rem;">
+                            <li>Напишите postgres service (16-alpine) с volume и healthcheck</li>
+                            <li>Напишите redis service (7-alpine) с volume и healthcheck</li>
+                            <li>Напишите api service с build context и environment vars</li>
+                            <li>Настройте depends_on с condition: service_healthy</li>
+                            <li>Тестируйте: `docker-compose up -d`</li>
+                            <li>Проверьте: `docker-compose ps` и `docker-compose logs`</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Задание 3: Development Docker Compose (День 2, 1.5 часа)</h4>
+                        <p>
+                            Создайте docker-compose.dev.yml для локальной разработки с горячей перезагрузкой.
+                        </p>
+                        <ol style="margin-left: 2rem;">
+                            <li>Создайте docker-compose.dev.yml</li>
+                            <li>Используйте gradle:alpine image вместо build</li>
+                            <li>Добавьте bind mount (.) для весь проекта</li>
+                            <li>Используйте command: gradle bootRun для горячей перезагрузки</li>
+                            <li>Запустите: `docker-compose -f docker-compose.dev.yml up`</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <h2>Practical Assignments</h2>
+
+                    <div class="assignment">
+                        <h4>Assignment 1: Dockerfile for Spring Boot (Day 1, 1.5 hours)</h4>
+                        <p>
+                            Create a Dockerfile in the root of your Spring Boot project with multi-stage build.
+                            Use gradle:9.4-jdk25-alpine for builder and eclipse-temurin:25-jre-alpine for runtime.
+                            Add healthcheck for /actuator/health.
+                        </p>
+                        <ol style="margin-left: 2rem;">
+                            <li>Create Dockerfile in project root</li>
+                            <li>Write multi-stage build (builder → runtime)</li>
+                            <li>Add HEALTHCHECK instruction</li>
+                            <li>Create .dockerignore file</li>
+                            <li>Test: `docker build -t life-goals-api .`</li>
+                            <li>Run: `docker run -p 8080:8080 life-goals-api`</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Assignment 2: Docker Compose with Three Services (Day 1, 1.5 hours)</h4>
+                        <p>
+                            Create docker-compose.yml with PostgreSQL, Redis, and API services.
+                        </p>
+                        <ol style="margin-left: 2rem;">
+                            <li>Write postgres service (16-alpine) with volume and healthcheck</li>
+                            <li>Write redis service (7-alpine) with volume and healthcheck</li>
+                            <li>Write api service with build context and environment vars</li>
+                            <li>Configure depends_on with condition: service_healthy</li>
+                            <li>Test: `docker-compose up -d`</li>
+                            <li>Check: `docker-compose ps` and `docker-compose logs`</li>
+                        </ol>
+                    </div>
+
+                    <div class="assignment">
+                        <h4>Assignment 3: Development Docker Compose (Day 2, 1.5 hours)</h4>
+                        <p>
+                            Create docker-compose.dev.yml for local development with hot reload.
+                        </p>
+                        <ol style="margin-left: 2rem;">
+                            <li>Create docker-compose.dev.yml</li>
+                            <li>Use gradle:alpine image instead of build</li>
+                            <li>Add bind mount (.) for entire project</li>
+                            <li>Use command: gradle bootRun for hot reload</li>
+                            <li>Run: `docker-compose -f docker-compose.dev.yml up`</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <section id="backlog-tasks" class="assignments">
+                <div class="lang-ru">
+                    <h2>Backlog задачи (TDD)</h2>
+
+                    <div class="assignment">
+                        <h4>Backlog #3: Docker Compose для локальной разработки <span class="tdd-badge">3 SP</span></h4>
+                        <p><strong>Описание:</strong> Создайте docker-compose.yml с PostgreSQL 16, Redis 7, и локальной версией backend-приложения с mount точкой для горячей перезагрузки при изменении кода.</p>
+                        <p><strong>TDD тест (bash скрипт):</strong></p>
+                        <pre><code class="language-bash">#!/bin/bash
+# tests/docker-compose.sh
+
+set -e
+
+echo "Testing docker-compose setup..."
+
+# Проверка, что docker-compose.yml существует
+if [ ! -f "docker-compose.yml" ]; then
+    echo "ERROR: docker-compose.yml not found"
+    exit 1
+fi
+
+# Проверка структуры сервисов
+echo "Checking docker-compose services..."
+
+HAS_POSTGRES=$(grep -c "postgres:18" docker-compose.yml || true)
+HAS_REDIS=$(grep -c "redis:8.6" docker-compose.yml || true)
+HAS_BACKEND=$(grep -c "gradle bootRun" docker-compose.yml || true)
+
+if [ "$HAS_POSTGRES" -eq 0 ]; then
+    echo "ERROR: PostgreSQL 16 service not found"
+    exit 1
+fi
+
+if [ "$HAS_REDIS" -eq 0 ]; then
+    echo "ERROR: Redis 7 service not found"
+    exit 1
+fi
+
+if [ "$HAS_BACKEND" -eq 0 ]; then
+    echo "ERROR: Backend gradle bootRun service not found"
+    exit 1
+fi
+
+# Проверка наличия mount volume для кода
+echo "Checking for code mount volume..."
+HAS_MOUNT=$(grep -c "\\.:" docker-compose.yml || true)
+if [ "$HAS_MOUNT" -eq 0 ]; then
+    echo "ERROR: Bind mount for source code not configured"
+    exit 1
+fi
+
+# Стартуем сервисы в фоне
+echo "Starting docker-compose services..."
+docker-compose up -d
+
+# Даём время на инициализацию
+sleep 5
+
+# Проверка, что сервисы running
+echo "Verifying services are running..."
+POSTGRES_UP=$(docker-compose ps | grep -c "postgres.*Up" || true)
+REDIS_UP=$(docker-compose ps | grep -c "redis.*Up" || true)
+
+if [ "$POSTGRES_UP" -eq 0 ]; then
+    echo "ERROR: PostgreSQL container not running"
+    docker-compose down
+    exit 1
+fi
+
+if [ "$REDIS_UP" -eq 0 ]; then
+    echo "ERROR: Redis container not running"
+    docker-compose down
+    exit 1
+fi
+
+# Проверка что PostgreSQL отвечает
+echo "Testing PostgreSQL connection..."
+PSQL_CHECK=$(docker-compose exec -T postgres \
+    psql -U postgres -d lifegoals_dev -c "SELECT 1" 2>&1 || true)
+
+if ! echo "$PSQL_CHECK" | grep -q "1"; then
+    echo "ERROR: PostgreSQL not responding"
+    docker-compose down
+    exit 1
+fi
+
+# Проверка что Redis отвечает
+echo "Testing Redis connection..."
+REDIS_CHECK=$(docker-compose exec -T redis \
+    redis-cli ping 2>&1 || true)
+
+if [ "$REDIS_CHECK" != "PONG" ]; then
+    echo "ERROR: Redis not responding"
+    docker-compose down
+    exit 1
+fi
+
+echo "SUCCESS: All docker-compose services verified and running"
+
+# Cleanup
+docker-compose down
+exit 0</code></pre>
+                    </div>
+                </div>
+                <div class="lang-en">
+                    <h2>Backlog Tasks (TDD)</h2>
+
+                    <div class="assignment">
+                        <h4>Backlog #3: Docker Compose for Local Development <span class="tdd-badge">3 SP</span></h4>
+                        <p><strong>Description:</strong> Create docker-compose.yml with PostgreSQL 16, Redis 7, and local backend application with mount point for hot reload on code changes.</p>
+                        <p><strong>TDD test (bash script):</strong></p>
+                        <pre><code class="language-bash">#!/bin/bash
+# tests/docker-compose.sh
+
+set -e
+
+echo "Testing docker-compose setup..."
+
+# Check that docker-compose.yml exists
+if [ ! -f "docker-compose.yml" ]; then
+    echo "ERROR: docker-compose.yml not found"
+    exit 1
+fi
+
+# Check services structure
+echo "Checking docker-compose services..."
+
+HAS_POSTGRES=$(grep -c "postgres:18" docker-compose.yml || true)
+HAS_REDIS=$(grep -c "redis:8.6" docker-compose.yml || true)
+HAS_BACKEND=$(grep -c "gradle bootRun" docker-compose.yml || true)
+
+if [ "$HAS_POSTGRES" -eq 0 ]; then
+    echo "ERROR: PostgreSQL 16 service not found"
+    exit 1
+fi
+
+if [ "$HAS_REDIS" -eq 0 ]; then
+    echo "ERROR: Redis 7 service not found"
+    exit 1
+fi
+
+if [ "$HAS_BACKEND" -eq 0 ]; then
+    echo "ERROR: Backend gradle bootRun service not found"
+    exit 1
+fi
+
+# Check for code mount volume
+echo "Checking for code mount volume..."
+HAS_MOUNT=$(grep -c "\\.:" docker-compose.yml || true)
+if [ "$HAS_MOUNT" -eq 0 ]; then
+    echo "ERROR: Bind mount for source code not configured"
+    exit 1
+fi
+
+# Start services in background
+echo "Starting docker-compose services..."
+docker-compose up -d
+
+# Give time for initialization
+sleep 5
+
+# Check services are running
+echo "Verifying services are running..."
+POSTGRES_UP=$(docker-compose ps | grep -c "postgres.*Up" || true)
+REDIS_UP=$(docker-compose ps | grep -c "redis.*Up" || true)
+
+if [ "$POSTGRES_UP" -eq 0 ]; then
+    echo "ERROR: PostgreSQL container not running"
+    docker-compose down
+    exit 1
+fi
+
+if [ "$REDIS_UP" -eq 0 ]; then
+    echo "ERROR: Redis container not running"
+    docker-compose down
+    exit 1
+fi
+
+# Test PostgreSQL connection
+echo "Testing PostgreSQL connection..."
+PSQL_CHECK=$(docker-compose exec -T postgres \
+    psql -U postgres -d lifegoals_dev -c "SELECT 1" 2>&1 || true)
+
+if ! echo "$PSQL_CHECK" | grep -q "1"; then
+    echo "ERROR: PostgreSQL not responding"
+    docker-compose down
+    exit 1
+fi
+
+# Test Redis connection
+echo "Testing Redis connection..."
+REDIS_CHECK=$(docker-compose exec -T redis \
+    redis-cli ping 2>&1 || true)
+
+if [ "$REDIS_CHECK" != "PONG" ]; then
+    echo "ERROR: Redis not responding"
+    docker-compose down
+    exit 1
+fi
+
+echo "SUCCESS: All docker-compose services verified and running"
+
+# Cleanup
+docker-compose down
+exit 0</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section class="resources">
+                <div class="lang-ru">
+                    <h2>Дополнительные ресурсы</h2>
+                </div>
+                <div class="lang-en">
+                    <h2>Additional Resources</h2>
+                </div>
+
+                <a href="https://docs.docker.com/get-started/" class="resource-link lang-ru">
+                    Docker: Getting Started Official Guide
+                </a>
+                <a href="https://docs.docker.com/get-started/" class="resource-link lang-en">
+                    Docker: Getting Started Official Guide
+                </a>
+
+                <a href="https://docs.docker.com/engine/reference/builder/" class="resource-link lang-ru">
+                    Dockerfile Reference (все инструкции)
+                </a>
+                <a href="https://docs.docker.com/engine/reference/builder/" class="resource-link lang-en">
+                    Dockerfile Reference (all instructions)
+                </a>
+
+                <a href="https://docs.docker.com/compose/compose-file/" class="resource-link lang-ru">
+                    Docker Compose File Reference
+                </a>
+                <a href="https://docs.docker.com/compose/compose-file/" class="resource-link lang-en">
+                    Docker Compose File Reference
+                </a>
+
+                <a href="https://docs.docker.com/storage/volumes/" class="resource-link lang-ru">
+                    Docker Volumes (persistent data)
+                </a>
+                <a href="https://docs.docker.com/storage/volumes/" class="resource-link lang-en">
+                    Docker Volumes (persistent data)
+                </a>
+
+                <a href="https://docs.docker.com/network/" class="resource-link lang-ru">
+                    Docker Networks (container communication)
+                </a>
+                <a href="https://docs.docker.com/network/" class="resource-link lang-en">
+                    Docker Networks (container communication)
+                </a>
+
+                <a href="https://hub.docker.com/" class="resource-link lang-ru">
+                    Docker Hub (registry образов)
+                </a>
+                <a href="https://hub.docker.com/" class="resource-link lang-en">
+                    Docker Hub (image registry)
+                </a>
+            </section>
+
+            <footer class="nav-footer">
+                <a href="13-jotai.html" class="nav-link prev lang-ru">← Модуль 13: Jotai</a>
+                <a href="13-jotai.html" class="nav-link prev lang-en">← Module 13: Jotai</a>
+                <a href="15-github-actions.html" class="nav-link next lang-ru">Модуль 15: GitHub Actions →</a>
+                <a href="15-github-actions.html" class="nav-link next lang-en">Module 15: GitHub Actions →</a>
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script>
+        function setLang(lang) {
+            document.body.classList.toggle('show-en', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('study-lang', lang); } catch(e) {}
+        }
+        try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+    </script>
+</body>
+</html>

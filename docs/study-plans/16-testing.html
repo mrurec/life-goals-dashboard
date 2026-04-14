@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 16: Тестирование - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--accent));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .language-bash::before,
+        .language-kotlin::before,
+        .language-typescript::before,
+        .language-graphql::before {
+            content: attr(data-lang);
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details/Collapse */
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        /* Assignments */
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .tdd-badge {
+            display: inline-block;
+            background: var(--success);
+            color: var(--bg);
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Resources */
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        /* Navigation */
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        /* Language switcher */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button {
+            padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px;
+            cursor: pointer; font-size: 0.85rem; background: transparent;
+            color: var(--text-secondary); transition: all 0.2s;
+        }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Prism Customization */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="module-number"><span class="lang-ru">МОДУЛЬ 16 / 16</span><span class="lang-en">MODULE 16 / 16</span></div>
+            <h1><span class="lang-ru">Тестирование (полный стек)</span><span class="lang-en">Testing (Full Stack)</span></h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3><span class="lang-ru">Содержание</span><span class="lang-en">Contents</span></h3>
+            <ul>
+                <li><a href="#intro"><span class="lang-ru">Введение</span><span class="lang-en">Introduction</span></a></li>
+                <li><a href="#testing-pyramid"><span class="lang-ru">Пирамида тестов</span><span class="lang-en">Testing Pyramid</span></a></li>
+                <li><a href="#unit-tests"><span class="lang-ru">Unit Tests</span><span class="lang-en">Unit Tests</span></a></li>
+                <li><a href="#integration-tests"><span class="lang-ru">Integration Tests</span><span class="lang-en">Integration Tests</span></a></li>
+                <li><a href="#graphql-tests"><span class="lang-ru">GraphQL Tests</span><span class="lang-en">GraphQL Tests</span></a></li>
+                <li><a href="#component-tests"><span class="lang-ru">Component Tests</span><span class="lang-en">Component Tests</span></a></li>
+                <li><a href="#e2e-tests"><span class="lang-ru">E2E Tests</span><span class="lang-en">E2E Tests</span></a></li>
+                <li><a href="#assignments"><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></a></li>
+                <li><a href="#backlog-tasks"><span class="lang-ru">Backlog задачи</span><span class="lang-en">Backlog Tasks</span></a></li>
+                <li><a href="#resources"><span class="lang-ru">Ресурсы</span><span class="lang-en">Resources</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <h2><span class="lang-ru">Введение: Полный стек тестирования</span><span class="lang-en">Introduction: Full-Stack Testing</span></h2>
+                <p>
+                    <span class="lang-ru">Тестирование — это критическая часть качества кода. Для <strong>Life Goals Dashboard</strong> мы используем многоуровневый подход: unit tests, integration tests, GraphQL resolver tests, component tests, и E2E tests.</span>
+                    <span class="lang-en">Testing is critical to code quality. For <strong>Life Goals Dashboard</strong> we use a multi-layered approach: unit tests, integration tests, GraphQL resolver tests, component tests, and E2E tests.</span>
+                </p>
+                <p>
+                    <span class="lang-ru">За 4 дня вы напишете тесты для всех слоёв приложения и научитесь интегрировать тестирование в CI/CD pipeline.</span>
+                    <span class="lang-en">Over 4 days, you'll write tests for all application layers and learn to integrate testing into the CI/CD pipeline.</span>
+                </p>
+
+                <div class="tip">
+                    <strong><span class="lang-ru">Совет:</span><span class="lang-en">Tip:</span></strong> <span class="lang-ru">Целевое покрытие: > 80% для unit тестов, все критические пути для E2E.</span><span class="lang-en">Target coverage: > 80% for unit tests, all critical paths for E2E.</span>
+                </div>
+            </section>
+
+            <section id="testing-pyramid">
+                <h2><span class="lang-ru">Пирамида тестов</span><span class="lang-en">Testing Pyramid</span></h2>
+
+                <p>
+                    <span class="lang-ru">Хороший набор тестов имеет форму пирамиды: много быстрых unit тестов, меньше интеграционных, и несколько E2E.</span>
+                    <span class="lang-en">A good test suite follows a pyramid shape: many fast unit tests, fewer integration tests, and several E2E tests.</span>
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th><span class="lang-ru">Уровень</span><span class="lang-en">Level</span></th>
+                            <th><span class="lang-ru">Инструмент</span><span class="lang-en">Tool</span></th>
+                            <th><span class="lang-ru">Скорость</span><span class="lang-en">Speed</span></th>
+                            <th><span class="lang-ru">Кол-во</span><span class="lang-en">Count</span></th>
+                            <th><span class="lang-ru">Описание</span><span class="lang-en">Description</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Unit</strong></td>
+                            <td>JUnit 5, Jest</td>
+                            <td><span class="lang-ru">Секунды</span><span class="lang-en">Seconds</span></td>
+                            <td>80%+</td>
+                            <td><span class="lang-ru">Изолированные функции и классы</span><span class="lang-en">Isolated functions and classes</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Integration</strong></td>
+                            <td>Testcontainers</td>
+                            <td><span class="lang-ru">Минуты</span><span class="lang-en">Minutes</span></td>
+                            <td>10-15%</td>
+                            <td><span class="lang-ru">Взаимодействие с БД и Redis</span><span class="lang-en">Database and Redis interaction</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>GraphQL</strong></td>
+                            <td>DGS test framework</td>
+                            <td><span class="lang-ru">Секунды</span><span class="lang-en">Seconds</span></td>
+                            <td>5-10%</td>
+                            <td><span class="lang-ru">GraphQL queries и mutations</span><span class="lang-en">GraphQL queries and mutations</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Component</strong></td>
+                            <td>React Testing Library</td>
+                            <td><span class="lang-ru">Секунды</span><span class="lang-en">Seconds</span></td>
+                            <td>10-15%</td>
+                            <td><span class="lang-ru">React компоненты и взаимодействия</span><span class="lang-en">React components and interactions</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>E2E</strong></td>
+                            <td>Playwright</td>
+                            <td><span class="lang-ru">Минуты</span><span class="lang-en">Minutes</span></td>
+                            <td>5-10%</td>
+                            <td><span class="lang-ru">Критические пользовательские сценарии</span><span class="lang-en">Critical user scenarios</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="unit-tests">
+                <h2><span class="lang-ru">Unit Tests: JUnit 5 + MockK (Backend)</span><span class="lang-en">Unit Tests: JUnit 5 + MockK (Backend)</span></h2>
+
+                <h3><span class="lang-ru">Структура: Colocation</span><span class="lang-en">Structure: Colocation</span></h3>
+
+                <pre><code class="language-bash">
+src/
+├── main/kotlin/...
+│   └── com/mrurec/lifegoals/fitness/
+│       ├── NutritionCalculatorService.kt
+│       └── ...
+└── test/kotlin/...
+    └── com/mrurec/lifegoals/fitness/
+        └── NutritionCalculatorServiceTest.kt
+                </code></pre>
+
+                <h3><span class="lang-ru">Пример: NutritionCalculatorServiceTest</span><span class="lang-en">Example: NutritionCalculatorServiceTest</span></h3>
+
+                <pre><code class="language-kotlin">
+import org.junit.jupiter.api.Test
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
+
+class NutritionCalculatorServiceTest {
+
+    private val calculator = NutritionCalculatorService()
+
+    @Test
+    fun `logMeal with valid product should calculate correct nutrition`() {
+        // Arrange (подготовка)
+        val product = FoodProduct(
+            id = UUID.randomUUID(),
+            name = "Chicken Breast",
+            caloriesPer100g = 165,
+            proteinG = 31,
+            carbsG = 0,
+            fatG = 3.6
+        )
+
+        // Act (выполнение)
+        val nutrition = calculator.calculateNutrition(product, portionG = 150)
+
+        // Assert (проверка)
+        assert(nutrition.calories == 247) // 165 * 150 / 100
+        assert(nutrition.protein == 46.5)
+    }
+
+    @Test
+    fun `calculateRecipeNutrition with multiple ingredients should sum all macros`() {
+        val recipe = Recipe(
+            id = UUID.randomUUID(),
+            name = "Pasta Salad",
+            servings = 2,
+            ingredients = listOf(
+                RecipeIngredient(foodProduct = chickenProduct, portionG = 200),
+                RecipeIngredient(foodProduct = pastaProduct, portionG = 100)
+            )
+        )
+
+        val nutrition = calculator.calculateRecipeNutrition(recipe)
+
+        assert(nutrition.calories > 0)
+        assert(nutrition.protein > 0)
+    }
+
+    @Test
+    fun `calculateNutrition with zero portion should return zero nutrition`() {
+        val product = FoodProduct(...)
+
+        val nutrition = calculator.calculateNutrition(product, portionG = 0)
+
+        assert(nutrition.calories == 0)
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Именование тестов</span><span class="lang-en">Test Naming</span></h3>
+
+                <p>
+                    <span class="lang-ru">Используйте <strong>backticks</strong> и описательные имена:</span>
+                    <span class="lang-en">Use <strong>backticks</strong> and descriptive names:</span>
+                </p>
+
+                <pre><code class="language-kotlin">
+// ПРАВИЛЬНО / CORRECT
+fun `logMeal with valid product should calculate correct nutrition`()
+fun `logMeal with null product should throw IllegalArgumentException`()
+fun `calculateNutrition with zero portion should return zero nutrition`()
+
+// НЕПРАВИЛЬНО / WRONG
+fun testLogMeal()
+fun test1()
+fun calculateNutrition()
+                </code></pre>
+
+                <h3><span class="lang-ru">MockK: Мокирование зависимостей</span><span class="lang-en">MockK: Mocking Dependencies</span></h3>
+
+                <pre><code class="language-kotlin">
+class RecipeServiceTest {
+
+    private val foodRepository = mockk&lt;FoodProductRepository&gt;()
+    private val service = RecipeService(foodRepository)
+
+    @Test
+    fun `createRecipe with valid ingredients should save recipe`() {
+        // Setup
+        every { foodRepository.findById(productId) } returns chickenProduct
+
+        // Act
+        val recipe = service.createRecipe(CreateRecipeInput(...))
+
+        // Verify
+        verify { foodRepository.findById(productId) }
+    }
+}
+                </code></pre>
+            </section>
+
+            <section id="integration-tests">
+                <h2><span class="lang-ru">Integration Tests: Testcontainers</span><span class="lang-en">Integration Tests: Testcontainers</span></h2>
+
+                <h3><span class="lang-ru">Структура: PostgreSQL + Redis</span><span class="lang-en">Structure: PostgreSQL + Redis</span></h3>
+
+                <pre><code class="language-kotlin">
+@SpringBootTest
+@Testcontainers
+class RecipeRepositoryIntegrationTest {
+
+    @Container
+    static PostgreSQLContainer&lt;?&gt; postgresContainer =
+        new PostgreSQLContainer&lt;&gt;("postgres:16-alpine")
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test");
+
+    @Container
+    static GenericContainer&lt;?&gt; redisContainer =
+        new GenericContainer&lt;&gt;("redis:7-alpine")
+            .withExposedPorts(6379);
+
+    @DynamicPropertySource
+    static void dynamicProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
+        registry.add("spring.redis.host", redisContainer::getHost);
+        registry.add("spring.redis.port", () -> redisContainer.getMappedPort(6379));
+    }
+
+    @Autowired
+    private RecipeRepository recipeRepository;
+
+    @Test
+    void `findByUserId should return all recipes for user`() {
+        // Arrange
+        val recipe = Recipe(userId = userId, name = "Pasta")
+        recipeRepository.save(recipe)
+
+        // Act
+        val found = recipeRepository.findByUserId(userId)
+
+        // Assert
+        assertThat(found).hasSize(1)
+        assertThat(found[0].name).isEqualTo("Pasta")
+    }
+}
+                </code></pre>
+
+                <h3><span class="lang-ru">Команды для интеграционных тестов</span><span class="lang-en">Integration Testing Commands</span></h3>
+
+                <pre><code class="language-bash">
+# Запустить только интеграционные тесты / Run integration tests only
+./gradlew integrationTest
+
+# С Docker (для Testcontainers) / With Docker (for Testcontainers)
+docker-compose -f docker-compose.test.yml up -d
+./gradlew integrationTest
+                </code></pre>
+            </section>
+
+            <section id="graphql-tests">
+                <h2><span class="lang-ru">GraphQL Tests: DGS Test Framework</span><span class="lang-en">GraphQL Tests: DGS Test Framework</span></h2>
+
+                <h3><span class="lang-ru">Пример: Query resolver test</span><span class="lang-en">Example: Query Resolver Test</span></h3>
+
+                <pre><code class="language-kotlin">
+@SpringBootTest
+@DgsAutoConfiguration
+class FitnessGraphQLTest {
+
+    @Autowired
+    private DgsQueryExecutor queryExecutor;
+
+    @MockkBean
+    private FitnessService fitnessService;
+
+    @Test
+    fun `myWorkouts query should return user workouts`() {
+        // Arrange
+        val userId = UUID.randomUUID()
+        val workouts = listOf(
+            Workout(id = UUID.randomUUID(), exercise = "Push-ups", sets = 3),
+            Workout(id = UUID.randomUUID(), exercise = "Squats", sets = 4)
+        )
+        every { fitnessService.getWorkouts(userId) } returns workouts
+
+        // Act
+        val result = queryExecutor.executeAndExtractJsonPath&lt;List&lt;String&gt;&gt;(
+            """
+            {
+                myWorkouts {
+                    edges {
+                        node {
+                            id
+                            exercise
+                            sets
+                        }
+                    }
+                }
+            }
+            """,
+            "data.myWorkouts.edges[*].node.exercise"
+        )
+
+        // Assert
+        assertThat(result).containsExactly("Push-ups", "Squats")
+    }
+
+    @Test
+    fun `logWorkout mutation should create workout and return payload`() {
+        every { fitnessService.logWorkout(any()) } returns workout
+
+        val result = queryExecutor.execute(
+            """
+            mutation {
+                logWorkout(input: {
+                    exercise: "Bench Press"
+                    sets: 5
+                    reps: 10
+                }) {
+                    workout {
+                        id
+                        exercise
+                    }
+                    errors {
+                        message
+                    }
+                }
+            }
+            """
+        )
+
+        assertThat(result.errors).isEmpty()
+        assertThat(result.getData&lt;Map&lt;String, Any&gt;&gt;()
+            .get("logWorkout")
+            .get("workout")
+            .get("exercise")
+        ).isEqualTo("Bench Press")
+    }
+}
+                </code></pre>
+            </section>
+
+            <section id="component-tests">
+                <h2><span class="lang-ru">Component Tests: React Testing Library</span><span class="lang-en">Component Tests: React Testing Library</span></h2>
+
+                <h3><span class="lang-ru">Пример: WorkoutLogger компонент</span><span class="lang-en">Example: WorkoutLogger Component</span></h3>
+
+                <pre><code class="language-typescript">
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { MockedProvider } from '@apollo/client/testing';
+import { createMockEnvironment, MockPayloadGenerator } from 'relay-test-utils';
+import { WorkoutLogger } from './WorkoutLogger';
+
+describe('WorkoutLogger', () => {
+  let mockEnvironment;
+
+  beforeEach(() => {
+    mockEnvironment = createMockEnvironment();
+  });
+
+  test('should render form with inputs', () => {
+    render(
+      &lt;MockedProvider mocks={[]}&gt;
+        &lt;WorkoutLogger /&gt;
+      &lt;/MockedProvider&gt;
+    );
+
+    expect(screen.getByLabelText(/exercise/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/sets/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /log/i })).toBeInTheDocument();
+  });
+
+  test('should submit form with valid data', async () => {
+    render(
+      &lt;MockedProvider mocks={[]}&gt;
+        &lt;WorkoutLogger /&gt;
+      &lt;/MockedProvider&gt;
+    );
+
+    fireEvent.change(screen.getByLabelText(/exercise/i), { target: { value: 'Squats' } });
+    fireEvent.change(screen.getByLabelText(/sets/i), { target: { value: '4' } });
+    fireEvent.click(screen.getByRole('button', { name: /log/i }));
+
+    // Mock the GraphQL response
+    mockEnvironment.mock.resolveMostRecentOperation(operation => {
+      MockPayloadGenerator.generate(operation, {
+        Workout: () => ({
+          id: 'workout-1',
+          exercise: 'Squats',
+          sets: 4
+        })
+      });
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/workout logged/i)).toBeInTheDocument();
+    });
+  });
+
+  test('should display error on submission failure', async () => {
+    render(
+      &lt;MockedProvider mocks={[]}&gt;
+        &lt;WorkoutLogger /&gt;
+      &lt;/MockedProvider&gt;
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /log/i }));
+
+    mockEnvironment.mock.rejectMostRecentOperation(() => {
+      return new Error('Failed to log workout');
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/error/i)).toBeInTheDocument();
+    });
+  });
+});
+                </code></pre>
+            </section>
+
+            <section id="e2e-tests">
+                <h2><span class="lang-ru">E2E Tests: Playwright</span><span class="lang-en">E2E Tests: Playwright</span></h2>
+
+                <h3><span class="lang-ru">Пример: Log meal E2E test</span><span class="lang-en">Example: Log Meal E2E Test</span></h3>
+
+                <pre><code class="language-typescript">
+import { test, expect } from '@playwright/test';
+
+test.describe('Fitness Widget - Log Meal', () => {
+  test.beforeEach(async ({ page }) => {
+    // Login
+    await page.goto('http://localhost:5173/login');
+    await page.fill('input[name="email"]', 'test@example.com');
+    await page.fill('input[name="password"]', 'password');
+    await page.click('button:has-text("Sign In")');
+    await page.waitForNavigation();
+  });
+
+  test('should log meal and update daily nutrition', async ({ page }) => {
+    // Navigate to dashboard
+    await page.goto('http://localhost:5173/dashboard');
+
+    // Open Fitness widget
+    await page.click('button:has-text("Fitness Tracker")');
+
+    // Click "Log Meal"
+    await page.click('button:has-text("Log Meal")');
+
+    // Fill in form
+    await page.fill('input[placeholder="Search products"]', 'Chicken');
+    await page.waitForSelector('text=Chicken Breast');
+    await page.click('text=Chicken Breast');
+
+    // Enter portion
+    await page.fill('input[name="portion"]', '150');
+
+    // Submit
+    await page.click('button:has-text("Log")');
+
+    // Verify success
+    await expect(page).toHaveURL('**/dashboard');
+    await expect(page.locator('text=Meal logged successfully')).toBeVisible();
+
+    // Verify nutrition updated
+    await expect(page.locator('text=250 cal')).toBeVisible(); // 150g chicken
+  });
+
+  test('should handle invalid portion', async ({ page }) => {
+    await page.goto('http://localhost:5173/dashboard');
+    await page.click('button:has-text("Fitness Tracker")');
+    await page.click('button:has-text("Log Meal")');
+
+    await page.fill('input[name="portion"]', '0');
+    await page.click('button:has-text("Log")');
+
+    await expect(page.locator('text=Portion must be greater than 0')).toBeVisible();
+  });
+});
+                </code></pre>
+
+                <h3><span class="lang-ru">Запуск E2E тестов</span><span class="lang-en">Running E2E Tests</span></h3>
+
+                <pre><code class="language-bash">
+# Запустить все E2E тесты / Run all E2E tests
+npx playwright test
+
+# Запустить тесты в UI mode (интерактивно) / Run tests in UI mode (interactive)
+npx playwright test --ui
+
+# Запустить конкретный тест / Run specific test
+npx playwright test --grep "log meal"
+
+# Запустить с headed браузером (видно что происходит) / Run with headed browser (see what happens)
+npx playwright test --headed
+                </code></pre>
+            </section>
+
+            <section id="coverage">
+                <h2><span class="lang-ru">Измерение покрытия тестами</span><span class="lang-en">Test Coverage Measurement</span></h2>
+
+                <h3><span class="lang-ru">Backend (Kotlin)</span><span class="lang-en">Backend (Kotlin)</span></h3>
+
+                <pre><code class="language-bash">
+# Запустить тесты с отчётом о покрытии / Run tests with coverage report
+./gradlew test jacocoTestReport
+
+# Просмотреть отчёт / View report
+open build/reports/jacoco/test/html/index.html
+                </code></pre>
+
+                <h3><span class="lang-ru">Frontend (TypeScript/React)</span><span class="lang-en">Frontend (TypeScript/React)</span></h3>
+
+                <pre><code class="language-bash">
+# Запустить тесты с покрытием / Run tests with coverage
+npm test -- --coverage
+
+# Отчёт будет в coverage/index.html / Report will be in coverage/index.html
+open coverage/index.html
+                </code></pre>
+
+                <h3><span class="lang-ru">Целевые показатели</span><span class="lang-en">Target Metrics</span></h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th><span class="lang-ru">Метрика</span><span class="lang-en">Metric</span></th>
+                            <th><span class="lang-ru">Цель</span><span class="lang-en">Target</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="lang-ru">Line Coverage (Backend)</span><span class="lang-en">Line Coverage (Backend)</span></td>
+                            <td>> 80%</td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Line Coverage (Frontend)</span><span class="lang-en">Line Coverage (Frontend)</span></td>
+                            <td>> 75%</td>
+                        </tr>
+                        <tr>
+                            <td><span class="lang-ru">Branch Coverage</span><span class="lang-en">Branch Coverage</span></td>
+                            <td>> 70%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="assignments">
+                <h2><span class="lang-ru">Практические задания</span><span class="lang-en">Practical Assignments</span></h2>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 1: Unit Tests для сервиса (День 1, 1.5 часа)</span><span class="lang-en">Assignment 1: Unit Tests for Service (Day 1, 1.5 hours)</span></h4>
+                    <p>
+                        <span class="lang-ru">Напишите минимум 5 unit тестов для сервиса (например, NutritionCalculatorService или RecipeService).</span>
+                        <span class="lang-en">Write at least 5 unit tests for a service (e.g., NutritionCalculatorService or RecipeService).</span>
+                    </p>
+                    <ol style="margin-left: 2rem;">
+                        <li><span class="lang-ru">Выберите сервис</span><span class="lang-en">Select a service</span></li>
+                        <li><span class="lang-ru">Создайте *Test.kt файл в mirror структуре</span><span class="lang-en">Create a *Test.kt file in mirror structure</span></li>
+                        <li><span class="lang-ru">Напишите 5 тестов: happy path, edge cases, errors</span><span class="lang-en">Write 5 tests: happy path, edge cases, errors</span></li>
+                        <li><span class="lang-ru">Используйте MockK для зависимостей</span><span class="lang-en">Use MockK for dependencies</span></li>
+                        <li><span class="lang-ru">Запустите: `./gradlew test --tests "*ServiceTest"`</span><span class="lang-en">Run: `./gradlew test --tests "*ServiceTest"`</span></li>
+                    </ol>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 2: Integration Tests с Testcontainers (День 2, 1.5 часа)</span><span class="lang-en">Assignment 2: Integration Tests with Testcontainers (Day 2, 1.5 hours)</span></h4>
+                    <p>
+                        <span class="lang-ru">Напишите 2-3 integration теста для repository.</span>
+                        <span class="lang-en">Write 2-3 integration tests for a repository.</span>
+                    </p>
+                    <ol style="margin-left: 2rem;">
+                        <li><span class="lang-ru">Создайте *IntegrationTest.kt класс</span><span class="lang-en">Create a *IntegrationTest.kt class</span></li>
+                        <li><span class="lang-ru">Используйте @Testcontainers с PostgreSQL</span><span class="lang-en">Use @Testcontainers with PostgreSQL</span></li>
+                        <li><span class="lang-ru">Напишите тесты для save и findBy операций</span><span class="lang-en">Write tests for save and findBy operations</span></li>
+                        <li><span class="lang-ru">Запустите: `./gradlew integrationTest`</span><span class="lang-en">Run: `./gradlew integrationTest`</span></li>
+                    </ol>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 3: GraphQL Resolver Tests (День 3, 1.5 часа)</span><span class="lang-en">Assignment 3: GraphQL Resolver Tests (Day 3, 1.5 hours)</span></h4>
+                    <p>
+                        <span class="lang-ru">Напишите 2 теста для GraphQL query и mutation.</span>
+                        <span class="lang-en">Write 2 tests for GraphQL query and mutation.</span>
+                    </p>
+                    <ol style="margin-left: 2rem;">
+                        <li><span class="lang-ru">Создайте *GraphQLTest.kt класс</span><span class="lang-en">Create a *GraphQLTest.kt class</span></li>
+                        <li><span class="lang-ru">Используйте @DgsAutoConfiguration и DgsQueryExecutor</span><span class="lang-en">Use @DgsAutoConfiguration and DgsQueryExecutor</span></li>
+                        <li><span class="lang-ru">Напишите тесты для Query и Mutation</span><span class="lang-en">Write tests for Query and Mutation</span></li>
+                        <li><span class="lang-ru">Запустите: `./gradlew test --tests "*GraphQLTest"`</span><span class="lang-en">Run: `./gradlew test --tests "*GraphQLTest"`</span></li>
+                    </ol>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Задание 4: E2E Test с Playwright (День 4, 2 часа)</span><span class="lang-en">Assignment 4: E2E Test with Playwright (Day 4, 2 hours)</span></h4>
+                    <p>
+                        <span class="lang-ru">Напишите 2 E2E теста для критического пути (например, логирование тренировки).</span>
+                        <span class="lang-en">Write 2 E2E tests for critical path (e.g., workout logging).</span>
+                    </p>
+                    <ol style="margin-left: 2rem;">
+                        <li><span class="lang-ru">Создайте *.spec.ts тест файл</span><span class="lang-en">Create a *.spec.ts test file</span></li>
+                        <li><span class="lang-ru">Напишите тест для успешного пути</span><span class="lang-en">Write test for successful path</span></li>
+                        <li><span class="lang-ru">Напишите тест для error handling</span><span class="lang-en">Write test for error handling</span></li>
+                        <li><span class="lang-ru">Запустите: `npx playwright test`</span><span class="lang-en">Run: `npx playwright test`</span></li>
+                    </ol>
+                </div>
+            </section>
+
+            <section id="backlog-tasks" class="assignments">
+                <h2><span class="lang-ru">Backlog задачи (TDD)</span><span class="lang-en">Backlog Tasks (TDD)</span></h2>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Backlog #51: Test infrastructure (BaseIntegrationTest pattern)</span><span class="lang-en">Backlog #51: Test Infrastructure (BaseIntegrationTest Pattern)</span> <span class="tdd-badge">5 SP</span></h4>
+                    <p><strong><span class="lang-ru">Описание:</span><span class="lang-en">Description:</span></strong> <span class="lang-ru">Создайте абстрактный BaseIntegrationTest класс с Testcontainers для PostgreSQL и Redis. Все интеграционные тесты наследуют базовый класс и получают готовые инстансы БД и кэша.</span><span class="lang-en">Create an abstract BaseIntegrationTest class with Testcontainers for PostgreSQL and Redis. All integration tests inherit the base class and receive ready database and cache instances.</span></p>
+                    <p><strong><span class="lang-ru">TDD тест (Kotlin):</span><span class="lang-en">TDD Test (Kotlin):</span></strong></p>
+                    <pre><code class="language-kotlin">// src/test/kotlin/com/mrurec/lifegoals/BaseIntegrationTest.kt
+@SpringBootTest
+@Testcontainers
+abstract class BaseIntegrationTest {
+
+    companion object {
+        @Container
+        val postgres = PostgreSQLContainer&lt;Nothing&gt;("postgres:16-alpine")
+            .withDatabaseName("lifegoals_test")
+            .withUsername("postgres")
+            .withPassword("test")
+
+        @Container
+        val redis = GenericContainer&lt;Nothing&gt;("redis:7-alpine")
+            .withExposedPorts(6379)
+
+        @DynamicPropertySource
+        @JvmStatic
+        fun overrideProps(registry: DynamicPropertyRegistry) {
+            registry.add("spring.datasource.url") { postgres.jdbcUrl }
+            registry.add("spring.datasource.username") { postgres.username }
+            registry.add("spring.datasource.password") { postgres.password }
+            registry.add("spring.redis.host") { redis.host }
+            registry.add("spring.redis.port") { redis.firstMappedPort }
+        }
+    }
+
+    @Autowired protected lateinit var bookRepository: BookRepository
+    @Autowired protected lateinit var redisTemplate: StringRedisTemplate
+
+    @BeforeEach
+    fun clearData() {
+        bookRepository.deleteAll()
+        redisTemplate.keys("*").forEach { key ->
+            redisTemplate.delete(key)
+        }
+    }
+}
+
+// Конкретный тест наследует BaseIntegrationTest
+class BookRepositoryIntegrationTest : BaseIntegrationTest() {
+
+    @Test
+    fun `should persist and retrieve book`() {
+        val book = Book(
+            userId = UUID.randomUUID(),
+            title = "Clean Code",
+            author = "Robert Martin",
+            totalPages = 464
+        )
+
+        val saved = bookRepository.save(book)
+        val retrieved = bookRepository.findById(saved.id).get()
+
+        assertThat(retrieved.title).isEqualTo("Clean Code")
+        assertThat(retrieved.currentPage).isEqualTo(0)
+    }
+
+    @Test
+    fun `should enforce user_id scoping`() {
+        val userId1 = UUID.randomUUID()
+        val userId2 = UUID.randomUUID()
+
+        val book1 = bookRepository.save(
+            Book(userId = userId1, title = "Book 1", author = "A", totalPages = 100)
+        )
+        val book2 = bookRepository.save(
+            Book(userId = userId2, title = "Book 2", author = "B", totalPages = 200)
+        )
+
+        val user1Books = bookRepository.findByUserId(userId1)
+        assertThat(user1Books).hasSize(1)
+        assertThat(user1Books[0].title).isEqualTo("Book 1")
+    }
+
+    @Test
+    fun `should batch load books by IDs with viewer scoping`() {
+        val userId = UUID.randomUUID()
+        val books = (1..5).map { i ->
+            bookRepository.save(
+                Book(userId = userId, title = "Book $i", author = "A", totalPages = 100 * i)
+            )
+        }
+
+        val idsToLoad = books.take(3).map { it.id }
+        val loaded = bookRepository.findByUserIdAndIdIn(userId, idsToLoad)
+
+        assertThat(loaded).hasSize(3)
+        assertThat(loaded.map { it.title }).containsExactly("Book 1", "Book 2", "Book 3")
+    }
+}</code></pre>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Backlog #67: ViewerContext privacy tests</span><span class="lang-en">Backlog #67: ViewerContext Privacy Tests</span> <span class="tdd-badge">3 SP</span></h4>
+                    <p><strong><span class="lang-ru">Описание:</span><span class="lang-en">Description:</span></strong> <span class="lang-ru">Напишите тесты, проверяющие что ViewerContext всегда скопирован в каждый сервис-метод и что попытка загрузить чужие данные возвращает NOT_FOUND (не Permission Denied).</span><span class="lang-en">Write tests verifying that ViewerContext is always passed to each service method and that accessing other users' data returns NOT_FOUND (not Permission Denied).</span></p>
+                    <p><strong><span class="lang-ru">TDD тест (Kotlin):</span><span class="lang-en">TDD Test (Kotlin):</span></strong></p>
+                    <pre><code class="language-kotlin">// src/test/kotlin/com/mrurec/lifegoals/common/auth/ViewerContextSecurityTest.kt
+@SpringBootTest
+class ViewerContextSecurityTest {
+
+    @MockkBean lateinit var bookRepository: BookRepository
+    @Autowired lateinit var bookService: BookService
+    @Autowired lateinit var viewerContextProvider: ViewerContextProvider
+
+    @Test
+    fun `service should not load other user's book`() {
+        val ownerViewer = ViewerContext(userId = UUID.randomUUID(), email = "owner@test.com")
+        val hackerViewer = ViewerContext(userId = UUID.randomUUID(), email = "hacker@test.com")
+
+        val ownerBook = Book(
+            userId = ownerViewer.userId,
+            title = "Secret Book",
+            author = "Author",
+            totalPages = 100
+        )
+
+        every { bookRepository.findById(any()) } returns Optional.of(ownerBook)
+
+        // Hacker tries to load owner's book
+        val result = bookService.getBook(ownerBook.id, hackerViewer)
+
+        // Should return NOT_FOUND (not PERMISSION_DENIED to avoid info leakage)
+        assertThat(result).isNull()
+
+        // Should NOT throw exception that exposes owner existence
+    }
+
+    @Test
+    fun `repository query includes viewer user_id`() {
+        val viewer = ViewerContext(userId = UUID.randomUUID(), email = "user@test.com")
+
+        // Create a slot to capture the SQL query
+        val queryCaptor = slot&lt;Any&gt;()
+        every { bookRepository.findByUserId(capture(queryCaptor)) } returns emptyList()
+
+        bookService.getUserBooks(viewer)
+
+        // Verify the repository was called with viewer's ID
+        verify { bookRepository.findByUserId(viewer.userId) }
+    }
+
+    @Test
+    fun `DataLoader includes viewer user_id in batch query`() {
+        val viewer = ViewerContext(userId = UUID.randomUUID(), email = "user@test.com")
+
+        every { bookRepository.findByUserIdAndIdIn(any(), any()) } returns emptyList()
+
+        // Simulate batch loading of 5 books
+        val bookIds = (1..5).map { UUID.randomUUID() }
+        bookService.loadBooksBatch(viewer, bookIds)
+
+        // Verify batch query always includes viewer's userId
+        verify {
+            bookRepository.findByUserIdAndIdIn(
+                viewer.userId,
+                match { ids -&gt; ids.size == 5 }
+            )
+        }
+    }
+}</code></pre>
+                </div>
+
+                <div class="assignment">
+                    <h4><span class="lang-ru">Backlog #68: Config validation tests</span><span class="lang-en">Backlog #68: Config Validation Tests</span> <span class="tdd-badge">2 SP</span></h4>
+                    <p><strong><span class="lang-ru">Описание:</span><span class="lang-en">Description:</span></strong> <span class="lang-ru">Тесты для WidgetProvider.validateConfig() — проверка что невалидные конфиги возвращают ошибки с правильным error code и field.</span><span class="lang-en">Tests for WidgetProvider.validateConfig() — verify that invalid configs return errors with correct error code and field.</span></p>
+                    <p><strong><span class="lang-ru">TDD тест (Kotlin):</span><span class="lang-en">TDD Test (Kotlin):</span></strong></p>
+                    <pre><code class="language-kotlin">// src/test/kotlin/com/mrurec/lifegoals/common/widget/WidgetConfigValidationTest.kt
+class WidgetConfigValidationTest {
+
+    private val mapper = ObjectMapper()
+
+    @Test
+    fun `should reject budget config with invalid currency`() {
+        val badConfig = mapper.readTree("""
+            {
+                "goalName": "Trip",
+                "baseCurrency": "INVALID",
+                "targetCurrency": "EUR",
+                "deadline": "2026-12"
+            }
+        """.trimIndent())
+
+        val errors = BudgetWidgetProvider.validateConfig(badConfig)
+
+        assertThat(errors).hasSize(1)
+        assertThat(errors[0].field).isEqualTo("baseCurrency")
+        assertThat(errors[0].code).isEqualTo(ErrorCode.VALIDATION_ERROR)
+    }
+
+    @Test
+    fun `should reject fitness config with negative target weight`() {
+        val badConfig = mapper.readTree("""
+            {
+                "targetWeightKg": -80,
+                "dailyCalorieTarget": 2000
+            }
+        """.trimIndent())
+
+        val errors = FitnessWidgetProvider.validateConfig(badConfig)
+
+        assertThat(errors).hasSize(1)
+        assertThat(errors[0].field).isEqualTo("targetWeightKg")
+    }
+
+    @Test
+    fun `should accept valid interview prep config`() {
+        val validConfig = mapper.readTree("""
+            {
+                "targetCompany": "Meta",
+                "targetLevel": "E5",
+                "weeklyProblemGoal": 15,
+                "focusCategories": ["GRAPH", "DYNAMIC_PROGRAMMING"],
+                "reviewIntervalDays": 3
+            }
+        """.trimIndent())
+
+        val errors = InterviewPrepWidgetProvider.validateConfig(validConfig)
+
+        assertThat(errors).isEmpty()
+    }
+}</code></pre>
+                </div>
+            </section>
+
+            <section class="resources">
+                <h2><span class="lang-ru">Дополнительные ресурсы</span><span class="lang-en">Additional Resources</span></h2>
+
+                <a href="https://junit.org/junit5/" class="resource-link">
+                    JUnit 5 Documentation
+                </a>
+
+                <a href="https://mockk.io/" class="resource-link">
+                    MockK Documentation
+                </a>
+
+                <a href="https://www.testcontainers.org/" class="resource-link">
+                    <span class="lang-ru">Testcontainers (Docker для тестов)</span><span class="lang-en">Testcontainers (Docker for Tests)</span>
+                </a>
+
+                <a href="https://netflix.github.io/dgs/testing/" class="resource-link">
+                    DGS Testing Guide
+                </a>
+
+                <a href="https://testing-library.com/docs/react-testing-library/intro/" class="resource-link">
+                    React Testing Library Documentation
+                </a>
+
+                <a href="https://relay.dev/docs/guides/testing-relay-components/" class="resource-link">
+                    Testing Relay Components
+                </a>
+
+                <a href="https://playwright.dev/" class="resource-link">
+                    Playwright Documentation
+                </a>
+
+                <a href="https://www.jacoco.org/" class="resource-link">
+                    <span class="lang-ru">JaCoCo (Code Coverage for Java)</span><span class="lang-en">JaCoCo (Code Coverage for Java)</span>
+                </a>
+            </section>
+
+            <footer class="nav-footer">
+                <a href="15-github-actions.html" class="nav-link prev"><span class="lang-ru">← Модуль 15: GitHub Actions</span><span class="lang-en">← Module 15: GitHub Actions</span></a>
+                <a href="#" class="nav-link next" style="opacity: 0.5; cursor: not-allowed;"><span class="lang-ru">Поздравляем! →</span><span class="lang-en">Congratulations! →</span></a>
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+
+    <script>
+        function setLang(lang) {
+            document.body.classList.toggle('show-en', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('study-lang', lang); } catch(e) {}
+        }
+        try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+    </script>
+</body>
+</html>

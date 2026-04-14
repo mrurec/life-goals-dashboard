@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><span class="lang-ru">Модуль 17: Полная интеграция технологий</span><span class="lang-en">Module 17: Full Technology Integration</span></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc8;
+            --header: #45475a;
+            --border: #313244;
+            --accent: #89b4fa;
+            --success: #a6e3a1;
+            --warning: #f38ba8;
+            --info: #89dceb;
+            --code-bg: #313244;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Language switcher styles */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+
+        .lang-switcher {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            margin-left: 1rem;
+        }
+
+        .lang-switcher button {
+            padding: 4px 12px;
+            border: 1px solid var(--header);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .lang-switcher button.active {
+            background: var(--header);
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .lang-switcher button:hover {
+            color: var(--text);
+        }
+
+        header {
+            border-bottom: 2px solid var(--border);
+            padding: 30px 0 20px 0;
+            margin-bottom: 30px;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .header-left h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .progress-bar {
+            width: 100%;
+            max-width: 400px;
+            height: 8px;
+            background: var(--header);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--info));
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--success);
+            color: var(--bg);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 40px;
+            margin: 40px 0;
+        }
+
+        .sidebar {
+            background: var(--header);
+            padding: 20px;
+            border-radius: 8px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 15px;
+            font-size: 1rem;
+            text-transform: uppercase;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav li {
+            margin: 8px 0;
+        }
+
+        .sidebar nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+            display: block;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .sidebar nav a:hover {
+            color: var(--accent);
+            background: rgba(137, 180, 250, 0.1);
+        }
+
+        main {
+            background: var(--header);
+            padding: 40px;
+            border-radius: 8px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin: 40px 0 20px 0;
+            color: var(--accent);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin: 25px 0 15px 0;
+            color: var(--info);
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            margin: 20px 0 10px 0;
+            color: var(--text);
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+
+        .step-counter {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: var(--accent);
+            color: var(--bg);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: 600;
+        }
+
+        code {
+            background: var(--code-bg);
+            color: var(--accent);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 15px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        pre code {
+            background: none;
+            color: var(--text);
+            padding: 0;
+        }
+
+        .tip, .critical, .meta-interview, .warning {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid;
+        }
+
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-color: var(--success);
+        }
+
+        .critical {
+            background: rgba(243, 139, 168, 0.1);
+            border-color: var(--warning);
+        }
+
+        .meta-interview {
+            background: rgba(137, 180, 250, 0.1);
+            border-color: var(--accent);
+        }
+
+        .warning {
+            background: rgba(249, 226, 175, 0.1);
+            border-color: #f9e2af;
+        }
+
+        .flow-diagram {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent);
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: var(--border);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        tbody tr:hover {
+            background: rgba(137, 180, 250, 0.05);
+        }
+
+        .file-tree {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .file-tree .dir {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .file-tree .file {
+            color: var(--text);
+        }
+
+        .file-tree .new {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        details {
+            background: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border-left: 4px solid var(--accent);
+        }
+
+        summary {
+            cursor: pointer;
+            user-select: none;
+            color: var(--accent);
+        }
+
+        summary:hover {
+            text-decoration: underline;
+        }
+
+        .details-content {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent);
+            margin: 20px 0;
+        }
+
+        .tdd-badge {
+            background: var(--success);
+            color: var(--bg);
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 60px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border);
+        }
+
+        .nav-footer a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-footer a:hover {
+            color: var(--info);
+        }
+
+        @media (max-width: 768px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            .header-content {
+                flex-direction: column;
+            }
+
+            .lang-switcher {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <h1>
+                    <span class="lang-ru">Модуль 17: Полная интеграция технологий</span>
+                    <span class="lang-en">Module 17: Full Technology Integration</span>
+                </h1>
+                <p>
+                    <span class="lang-ru">Постройте реальный виджет от БД до UI: Database → Entity → GraphQL → Resolvers → Relay → React</span>
+                    <span class="lang-en">Build a real widget from database to UI: Database → Entity → GraphQL → Resolvers → Relay → React</span>
+                </p>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <span class="badge">
+                    <span class="lang-ru">17/17</span>
+                    <span class="lang-en">17/17</span>
+                </span>
+                <div class="lang-switcher">
+                    <button id="btn-ru" class="active">РУ</button>
+                    <button id="btn-en">EN</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <h3>
+                <span class="lang-ru">Содержание</span>
+                <span class="lang-en">Contents</span>
+            </h3>
+            <nav>
+                <ul>
+                    <li><a href="#intro"><span class="lang-ru">Зачем этот модуль</span><span class="lang-en">Why This Module</span></a></li>
+                    <li><a href="#architecture-decisions"><span class="lang-ru">Решения архитектуры</span><span class="lang-en">Architecture Decisions</span></a></li>
+                    <li><a href="#step1"><span class="lang-ru">Шаг 1: База данных</span><span class="lang-en">Step 1: Database</span></a></li>
+                    <li><a href="#step2"><span class="lang-ru">Шаг 2: Entity</span><span class="lang-en">Step 2: Entity</span></a></li>
+                    <li><a href="#step3"><span class="lang-ru">Шаг 3: GraphQL Schema</span><span class="lang-en">Step 3: GraphQL Schema</span></a></li>
+                    <li><a href="#step4"><span class="lang-ru">Шаг 4: DGS-резолверы</span><span class="lang-en">Step 4: DGS Resolvers</span></a></li>
+                    <li><a href="#step5"><span class="lang-ru">Шаг 5: DataLoaders</span><span class="lang-en">Step 5: DataLoaders</span></a></li>
+                    <li><a href="#step6"><span class="lang-ru">Шаг 6: Сервис + кэш</span><span class="lang-en">Step 6: Service + Cache</span></a></li>
+                    <li><a href="#step7"><span class="lang-ru">Шаг 7: Тесты backend</span><span class="lang-en">Step 7: Backend Tests</span></a></li>
+                    <li><a href="#step8"><span class="lang-ru">Шаг 8: Relay-компоненты</span><span class="lang-en">Step 8: Relay Components</span></a></li>
+                    <li><a href="#step9"><span class="lang-ru">Шаг 9: Mutations + ошибки</span><span class="lang-en">Step 9: Mutations + Error Handling</span></a></li>
+                    <li><a href="#step10"><span class="lang-ru">Шаг 10: Тесты frontend</span><span class="lang-en">Step 10: Frontend Tests</span></a></li>
+                    <li><a href="#viewercontext-flow"><span class="lang-ru">ViewerContext flow</span><span class="lang-en">ViewerContext Flow</span></a></li>
+                    <li><a href="#error-handling-layers"><span class="lang-ru">Обработка ошибок</span><span class="lang-en">Error Handling</span></a></li>
+                    <li><a href="#cursor-pagination"><span class="lang-ru">Курсоры</span><span class="lang-en">Cursors</span></a></li>
+                    <li><a href="#meta-patterns"><span class="lang-ru">Паттерны Meta</span><span class="lang-en">Meta Patterns</span></a></li>
+                    <li><a href="#meta-interview-qa"><span class="lang-ru">Вопросы интервью</span><span class="lang-en">Interview Q&A</span></a></li>
+                    <li><a href="#tradeoffs"><span class="lang-ru">Trade-off анализ</span><span class="lang-en">Trade-off Analysis</span></a></li>
+                    <li><a href="#assignments"><span class="lang-ru">Задания</span><span class="lang-en">Assignments</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main>
+
+<!-- ===== INTRO ===== -->
+<h2 id="intro">
+    <span class="lang-ru">Зачем этот модуль: интеграция всех технологий</span>
+    <span class="lang-en">Why This Module: Integration of All Technologies</span>
+</h2>
+
+<p>
+    <span class="lang-ru">Вы прошли 16 модулей: Kotlin, Spring Boot, GraphQL, React, Relay. Теперь создадим РЕАЛЬНЫЙ виджет, который объединяет все. Возьмём простой пример — Reading Tracker (отслеживание чтения книг) — и пройдём весь путь от схемы БД до интерактивного React-компонента.</span>
+    <span class="lang-en">You've completed 16 modules: Kotlin, Spring Boot, GraphQL, React, Relay. Now build a REAL widget that integrates everything. Let's use a simple example — Reading Tracker (book reading progress tracking) — and walk through the entire path from database schema to interactive React component.</span>
+</p>
+
+<p>
+    <span class="lang-ru">Reading Tracker: пользователь добавляет книги, логирует reading sessions (сколько страниц прочитал), видит прогресс (%), стоимость его времени. Это меньше, чем Fitness Tracker, но содержит ВСЕ паттерны Meta Engineering: Entity ↔ GraphQL ↔ Relay, N+1 prevention через DataLoaders, mutation error handling, cursor pagination, cache invalidation, ViewerContext on every layer.</span>
+    <span class="lang-en">Reading Tracker: users add books, log reading sessions (pages read), view progress (%), and see reading streaks. It's simpler than the Fitness Tracker but contains ALL Meta Engineering patterns: Entity ↔ GraphQL ↔ Relay, N+1 prevention via DataLoaders, mutation error handling, cursor pagination, cache invalidation, ViewerContext on every layer.</span>
+</p>
+
+<!-- ===== ARCHITECTURE DECISIONS ===== -->
+<h2 id="architecture-decisions">
+    <span class="lang-ru">Архитектурные решения</span>
+    <span class="lang-en">Architecture Decisions</span>
+</h2>
+
+<p>
+    <span class="lang-ru">Для каждого решения — почему именно так, что даст интервьюеру Meta:</span>
+    <span class="lang-en">For each decision — why this approach, what impresses Meta interviewers:</span>
+</p>
+
+<table>
+<thead>
+<tr>
+    <th><span class="lang-ru">Решение</span><span class="lang-en">Decision</span></th>
+    <th><span class="lang-ru">Вариант A</span><span class="lang-en">Option A</span></th>
+    <th><span class="lang-ru">Вариант B (выбран)</span><span class="lang-en">Option B (Chosen)</span></th>
+    <th><span class="lang-ru">Почему B</span><span class="lang-en">Why B</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td><span class="lang-ru">API</span><span class="lang-en">API</span></td>
+    <td>REST</td>
+    <td>GraphQL</td>
+    <td><span class="lang-ru">Точное получение данных, Single request вместо N requests, Relay-powered</span><span class="lang-en">Precise data fetching, single request instead of N requests, Relay-powered</span></td>
+</tr>
+<tr>
+    <td><span class="lang-ru">Фетчинг на frontend</span><span class="lang-en">Frontend data fetching</span></td>
+    <td>useState + fetch</td>
+    <td>Relay</td>
+    <td><span class="lang-ru">Data masking, type safety, automatic normalization cache, subscriptions</span><span class="lang-en">Data masking, type safety, automatic normalization cache, subscriptions</span></td>
+</tr>
+<tr>
+    <td><span class="lang-ru">Pagination</span><span class="lang-en">Pagination</span></td>
+    <td>Offset (page, size)</td>
+    <td>Cursor (after)</td>
+    <td><span class="lang-ru">O(1) seek вместо O(n), stable при вставках, Relay-native</span><span class="lang-en">O(1) seek instead of O(n), stable across inserts, Relay-native</span></td>
+</tr>
+<tr>
+    <td><span class="lang-ru">Обработка ошибок</span><span class="lang-en">Error handling</span></td>
+    <td>Throw exceptions</td>
+    <td>Payload + errors array</td>
+    <td><span class="lang-ru">Type-safe, separates business errors from infra, forced handling in TS</span><span class="lang-en">Type-safe, separates business errors from infra, forced handling in TS</span></td>
+</tr>
+<tr>
+    <td><span class="lang-ru">Запрос child entities</span><span class="lang-en">Fetching child entities</span></td>
+    <td>Join в БД, fetch all</td>
+    <td>DataLoader batch</td>
+    <td><span class="lang-ru">Гибкость (запросим только нужные поля), N+1 prevention, Meta's TAO pattern</span><span class="lang-en">Flexibility (fetch only needed fields), N+1 prevention, Meta's TAO pattern</span></td>
+</tr>
+<tr>
+    <td><span class="lang-ru">Кэш</span><span class="lang-en">Cache</span></td>
+    <td>Нет</td>
+    <td>Redis (write-through)</td>
+    <td><span class="lang-ru">Dashboard load время: 100ms vs 500ms. Exchange rates API часто вызывается</span><span class="lang-en">Dashboard load: 100ms vs 500ms. Exchange rate API called frequently</span></td>
+</tr>
+<tr>
+    <td><span class="lang-ru">Authorization</span><span class="lang-en">Authorization</span></td>
+    <td>Optional check in service</td>
+    <td>ViewerContext on every layer</td>
+    <td><span class="lang-ru">Defense in depth. Даже если resolver забудет проверку, repository не выдаст чужие данные</span><span class="lang-en">Defense in depth. Even if resolver forgets check, repository won't return foreign data</span></td>
+</tr>
+</tbody>
+</table>
+
+<!-- ===== STEP 1: DATABASE ===== -->
+<h3 id="step1"><span class="step-counter">1</span><span class="lang-ru">Шаг 1: Миграция базы данных</span><span class="lang-en">Step 1: Database Migration</span></h3>
+
+<pre><code class="language-sql">-- V17__create_reading_tables.sql
+CREATE TABLE book (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    author VARCHAR(255),
+    total_pages INT NOT NULL CHECK (total_pages > 0),
+    current_page INT NOT NULL DEFAULT 0 CHECK (current_page >= 0 AND current_page <= total_pages),
+    status VARCHAR(20) NOT NULL DEFAULT 'WANT_TO_READ',
+    cover_url TEXT,
+    rating INT CHECK (rating >= 0 AND rating <= 5),
+    started_at DATE,
+    finished_at DATE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT unique_user_book UNIQUE(user_id, title, author)
+);
+
+CREATE INDEX idx_book_user_id ON book(user_id);
+CREATE INDEX idx_book_status ON book(user_id, status);
+CREATE INDEX idx_book_created_at ON book(user_id, created_at DESC);
+
+CREATE TABLE reading_session (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    book_id UUID NOT NULL REFERENCES book(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    pages_read INT NOT NULL CHECK (pages_read > 0),
+    duration_minutes INT,
+    session_date DATE NOT NULL,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_reading_session_book_id ON reading_session(book_id);
+CREATE INDEX idx_reading_session_user_id ON reading_session(user_id, session_date DESC);
+</code></pre>
+
+<div class="tip">
+    <span class="lang-ru">ВАЖНО: индексы на (user_id, ...) потому что ВСЕГДА фильтруем по пользователю. Это ключ к быстрым запросам в multi-user системе.</span>
+    <span class="lang-en">IMPORTANT: indexes on (user_id, ...) because we ALWAYS filter by user. This is the key to fast queries in multi-user systems.</span>
+</div>
+
+<!-- ===== STEP 2: ENTITY ===== -->
+<h3 id="step2"><span class="step-counter">2</span><span class="lang-ru">Шаг 2: Kotlin Entity</span><span class="lang-en">Step 2: Kotlin Entity</span></h3>
+
+<pre><code class="language-kotlin">// com/mrurec/lifegoals/reading/model/Book.kt
+package com.mrurec.lifegoals.reading.model
+
+import jakarta.persistence.*
+import java.time.LocalDate
+import java.time.Instant
+import java.util.UUID
+
+enum class BookStatus {
+    READING,
+    COMPLETED,
+    DROPPED,
+    WANT_TO_READ
+}
+
+@Entity
+@Table(name = "book", indexes = [
+    Index(columnList = "user_id"),
+    Index(columnList = "user_id,status"),
+    Index(columnList = "user_id,created_at DESC")
+])
+data class Book(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+
+    val userId: UUID,
+    val title: String,
+    val author: String? = null,
+    val totalPages: Int,
+
+    @Column(name = "current_page")
+    var currentPage: Int = 0,
+
+    @Enumerated(EnumType.STRING)
+    var status: BookStatus = BookStatus.WANT_TO_READ,
+
+    val coverUrl: String? = null,
+    var rating: Int? = null,
+
+    var startedAt: LocalDate? = null,
+    var finishedAt: LocalDate? = null,
+
+    val createdAt: Instant = Instant.now(),
+
+    @Version
+    var updatedAt: Instant = Instant.now()
+) {
+    // Вычисляемое поле: прогресс как %
+    val progressPercent: Int
+        get() = if (totalPages == 0) 0 else (currentPage * 100) / totalPages
+}
+
+@Entity
+@Table(name = "reading_session")
+data class ReadingSession(
+    @Id
+    val id: UUID = UUID.randomUUID(),
+
+    val bookId: UUID,
+    val userId: UUID,
+    val pagesRead: Int,
+    val durationMinutes: Int? = null,
+    val sessionDate: LocalDate,
+    val notes: String? = null,
+
+    val createdAt: Instant = Instant.now()
+)
+</code></pre>
+
+<!-- ===== STEP 3: GRAPHQL SCHEMA ===== -->
+<h3 id="step3"><span class="step-counter">3</span><span class="lang-ru">Шаг 3: GraphQL-схема</span><span class="lang-en">Step 3: GraphQL Schema</span></h3>
+
+<pre><code class="language-graphql"># src/main/resources/schema/reading.graphqls
+enum BookStatus {
+    READING
+    COMPLETED
+    DROPPED
+    WANT_TO_READ
+}
+
+type Book implements Node {
+    id: ID!
+    title: String!
+    author: String
+    totalPages: Int!
+    currentPage: Int!
+    progressPercent: Int!
+    status: BookStatus!
+    rating: Int
+    coverUrl: String
+    startedAt: Date
+    finishedAt: Date
+    readingSessions(first: Int, after: String): ReadingSessionConnection!
+    createdAt: DateTime!
+}
+
+type ReadingSession implements Node {
+    id: ID!
+    pagesRead: Int!
+    durationMinutes: Int
+    sessionDate: Date!
+    notes: String
+    createdAt: DateTime!
+}
+
+type BookConnection {
+    edges: [BookEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type BookEdge {
+    node: Book!
+    cursor: String!
+}
+
+type ReadingSessionConnection {
+    edges: [ReadingSessionEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type ReadingSessionEdge {
+    node: ReadingSession!
+    cursor: String!
+}
+
+input BookFilter {
+    status: BookStatus
+    author: String
+}
+
+input AddBookInput {
+    title: String!
+    author: String
+    totalPages: Int!
+    status: BookStatus
+    coverUrl: String
+}
+
+type AddBookPayload {
+    book: Book
+    errors: [UserError!]!
+}
+
+input LogReadingSessionInput {
+    bookId: ID!
+    pagesRead: Int!
+    durationMinutes: Int
+    sessionDate: Date
+    notes: String
+}
+
+type LogReadingSessionPayload {
+    session: ReadingSession
+    book: Book
+    errors: [UserError!]!
+}
+
+input UpdateBookStatusInput {
+    bookId: ID!
+    status: BookStatus!
+    rating: Int
+}
+
+type UpdateBookStatusPayload {
+    book: Book
+    errors: [UserError!]!
+}
+</code></pre>
+
+<div class="tip">
+    <strong><span class="lang-ru">Payload всегда возвращает обновлённый объект + errors.</span><span class="lang-en">Payload always returns the updated object + errors.</span></strong> <span class="lang-ru">LogReadingSessionPayload возвращает и session, и book — потому что mutation обновляет currentPage книги. Relay автоматически обновит все компоненты, отображающие эту книгу.</span><span class="lang-en">LogReadingSessionPayload returns both session and book — because the mutation updates the book's currentPage. Relay automatically updates all components displaying this book.</span></div>
+
+<!-- ===== STEP 4: DGS RESOLVERS ===== -->
+<h3 id="step4"><span class="step-counter">4</span><span class="lang-ru">Шаг 4: DGS-резолверы</span><span class="lang-en">Step 4: DGS Resolvers</span></h3>
+
+<pre><code class="language-kotlin">// com/mrurec/lifegoals/reading/resolver/BookQueryResolver.kt
+package com.mrurec.lifegoals.reading.resolver
+
+import com.mrurec.lifegoals.common.auth.ViewerContext
+import com.mrurec.lifegoals.common.auth.ViewerContextProvider
+import com.mrurec.lifegoals.common.relay.Connection
+import com.mrurec.lifegoals.reading.model.Book
+import com.mrurec.lifegoals.reading.service.BookService
+import com.netflix.graphql.dgs.DgsComponent
+import com.netflix.graphql.dgs.DgsQuery
+import com.netflix.graphql.dgs.InputArgument
+
+@DgsComponent
+class BookQueryResolver(
+    private val bookService: BookService,
+    private val viewerContextProvider: ViewerContextProvider
+) {
+    @DgsQuery
+    fun books(
+        @InputArgument first: Int?,
+        @InputArgument after: String?,
+        @InputArgument filter: BookFilter?
+    ): Connection&lt;Book&gt; {
+        val viewer = viewerContextProvider.get()
+        return bookService.getBooks(
+            viewer = viewer,
+            first = first ?: 20,
+            after = after,
+            filter = filter
+        )
+    }
+}
+
+@DgsComponent
+class BookMutationResolver(
+    private val bookService: BookService,
+    private val viewerContextProvider: ViewerContextProvider
+) {
+    @DgsMutation
+    fun addBook(@InputArgument input: AddBookInput): AddBookPayload {
+        val viewer = viewerContextProvider.get()
+        return bookService.addBook(input, viewer)
+    }
+
+    @DgsMutation
+    fun logReadingSession(@InputArgument input: LogReadingSessionInput): LogReadingSessionPayload {
+        val viewer = viewerContextProvider.get()
+        return bookService.logReadingSession(input, viewer)
+    }
+
+    @DgsMutation
+    fun updateBookStatus(@InputArgument input: UpdateBookStatusInput): UpdateBookStatusPayload {
+        val viewer = viewerContextProvider.get()
+        return bookService.updateBookStatus(input, viewer)
+    }
+}
+
+@DgsComponent
+class BookFieldResolver {
+    @DgsData(parentType = "Book", field = "readingSessions")
+    fun readingSessions(dfe: DgsDataFetchingEnvironment): CompletableFuture&lt;Connection&lt;ReadingSession&gt;&gt; {
+        val book = dfe.getSource&lt;Book&gt;()
+        val first = dfe.getArgument&lt;Int&gt;("first") ?: 10
+        val after = dfe.getArgument&lt;String&gt;("after")
+
+        val loader = dfe.getDataLoader&lt;UUID, List&lt;ReadingSession&gt;&gt;("readingSessionsByBookLoader")
+        return loader.load(book.id).thenApply { sessions ->
+            ConnectionBuilder.build(sessions, first, after)
+        }
+    }
+
+    @DgsData(parentType = "Book", field = "progressPercent")
+    fun progressPercent(dfe: DgsDataFetchingEnvironment): Int {
+        val book = dfe.getSource&lt;Book&gt;()
+        return book.progressPercent
+    }
+}
+</code></pre>
+
+<!-- ===== STEP 5: DATALOADERS ===== -->
+<h3 id="step5"><span class="step-counter">5</span><span class="lang-ru">Шаг 5: DataLoaders (N+1 prevention)</span><span class="lang-en">Step 5: DataLoaders (N+1 Prevention)</span></h3>
+
+<pre><code class="language-kotlin">// com/mrurec/lifegoals/reading/dataloader/ReadingDataLoaders.kt
+package com.mrurec.lifegoals.reading.dataloader
+
+import com.mrurec.lifegoals.reading.model.ReadingSession
+import com.mrurec.lifegoals.reading.repository.ReadingSessionRepository
+import com.netflix.graphql.dgs.DgsComponent
+import com.netflix.graphql.dgs.DgsDataLoader
+import org.dataloader.MappedBatchLoader
+import java.util.UUID
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionStage
+
+@DgsComponent
+class ReadingDataLoaders {
+    @DgsDataLoader(name = "readingSessionsByBookLoader")
+    class ReadingSessionsByBookLoader(
+        private val readingSessionRepository: ReadingSessionRepository
+    ) : MappedBatchLoader&lt;UUID, List&lt;ReadingSession&gt;&gt; {
+
+        override fun load(bookIds: Set&lt;UUID&gt;): CompletionStage&lt;Map&lt;UUID, List&lt;ReadingSession&gt;&gt;&gt; {
+            return CompletableFuture.supplyAsync {
+                val sessions = readingSessionRepository.findByBookIdIn(bookIds.toList())
+                val grouped = sessions.groupBy { it.bookId }
+                bookIds.associateWith { bookId -&gt;
+                    grouped[bookId] ?: emptyList()
+                }
+            }
+        }
+    }
+}
+</code></pre>
+
+<div class="meta-interview"><strong><span class="lang-ru">"Как ваша система предотвращает N+1 запросы?"</span><span class="lang-en">"How does your system prevent N+1 queries?"</span></strong> — <span class="lang-ru">"Мы используем DataLoader паттерн из Meta's TAO. Каждый child field resolver использует DataLoader, который батчит parent IDs. Когда GraphQL разрешает 20 книг с readingSessions, DataLoader собирает все 20 book IDs и выполняет один SQL запрос с WHERE book_id IN (...). Это превращает O(N) запросов в O(1) per level."</span><span class="lang-en">"We use the DataLoader pattern from Meta's TAO. Every child field resolver uses a DataLoader that batches parent IDs. When GraphQL resolves 20 books with readingSessions, the DataLoader collects all 20 book IDs and issues one SQL query with WHERE book_id IN (...). This turns O(N) queries into O(1) per level."</span></div>
+
+<!-- ===== STEP 6: SERVICE + CACHE ===== -->
+<h3 id="step6"><span class="step-counter">6</span><span class="lang-ru">Шаг 6: Сервис + кэширование</span><span class="lang-en">Step 6: Service + Caching</span></h3>
+
+<pre><code class="language-kotlin">// com/mrurec/lifegoals/reading/service/BookService.kt
+@Service
+class BookService(
+    private val bookRepository: BookRepository,
+    private val readingSessionRepository: ReadingSessionRepository,
+    private val cacheService: ReadingCacheService,
+    private val notificationService: NotificationService
+) {
+    @Transactional(readOnly = true)
+    fun getBooks(
+        viewer: ViewerContext,
+        first: Int,
+        after: String?,
+        filter: BookFilter?
+    ): Connection&lt;Book&gt; {
+        val cursor = after?.let { CursorCodec.decode(it) }
+        val pageable = PageRequest.ofSize(first + 1)
+
+        val books = if (cursor != null) {
+            bookRepository.findAfterCursor(
+                userId = viewer.userId,
+                cursorTime = cursor.createdAt,
+                cursorId = cursor.id,
+                pageable = pageable
+            )
+        } else {
+            bookRepository.findFirstPage(viewer.userId, pageable)
+        }
+
+        val totalCount = bookRepository.countByUserId(viewer.userId)
+        return ConnectionBuilder.build(
+            items = books,
+            first = first,
+            totalCount = totalCount,
+            cursorExtractor = { book -&gt; CursorCodec.encode(book.createdAt, book.id) }
+        )
+    }
+
+    @Transactional
+    fun addBook(input: AddBookInput, viewer: ViewerContext): AddBookPayload {
+        val errors = mutableListOf&lt;UserError&gt;()
+
+        if (input.title.isBlank()) {
+            errors.add(UserError("title", "Title cannot be empty", ErrorCode.VALIDATION_ERROR))
+        }
+        if (input.totalPages &lt;= 0) {
+            errors.add(UserError("totalPages", "Total pages must be positive", ErrorCode.VALIDATION_ERROR))
+        }
+        if (errors.isNotEmpty()) {
+            return AddBookPayload(book = null, errors = errors)
+        }
+
+        val book = Book(
+            userId = viewer.userId,
+            title = input.title.trim(),
+            author = input.author?.trim(),
+            totalPages = input.totalPages,
+            status = input.status ?: BookStatus.WANT_TO_READ,
+            coverUrl = input.coverUrl,
+            startedAt = if (input.status == BookStatus.READING) LocalDate.now() else null
+        )
+
+        val saved = bookRepository.save(book)
+        cacheService.invalidateWidgetData(viewer.userId)
+        return AddBookPayload(book = saved, errors = emptyList())
+    }
+
+    @Transactional
+    fun logReadingSession(input: LogReadingSessionInput, viewer: ViewerContext): LogReadingSessionPayload {
+        val book = bookRepository.findById(input.bookId).orElse(null)
+
+        if (book == null) {
+            return LogReadingSessionPayload(
+                session = null, book = null,
+                errors = listOf(UserError("bookId", "Book not found", ErrorCode.NOT_FOUND))
+            )
+        }
+
+        if (book.userId != viewer.userId) {
+            return LogReadingSessionPayload(
+                session = null, book = null,
+                errors = listOf(UserError("bookId", "Book not found", ErrorCode.NOT_FOUND))
+            )
+        }
+
+        if (input.pagesRead &lt;= 0) {
+            return LogReadingSessionPayload(
+                session = null, book = null,
+                errors = listOf(UserError("pagesRead", "Pages must be positive", ErrorCode.VALIDATION_ERROR))
+            )
+        }
+
+        val session = ReadingSession(
+            bookId = book.id,
+            userId = viewer.userId,
+            pagesRead = input.pagesRead,
+            durationMinutes = input.durationMinutes,
+            sessionDate = input.sessionDate ?: LocalDate.now(),
+            notes = input.notes
+        )
+        readingSessionRepository.save(session)
+
+        val newPage = minOf(book.currentPage + input.pagesRead, book.totalPages)
+        book.currentPage = newPage
+
+        if (newPage &gt;= book.totalPages && book.status == BookStatus.READING) {
+            book.status = BookStatus.COMPLETED
+            book.finishedAt = LocalDate.now()
+
+            notificationService.publishAchievement(
+                userId = viewer.userId,
+                widget = "READING",
+                message = "Finished reading \"${book.title}\"! 📚"
+            )
+        }
+
+        bookRepository.save(book)
+        cacheService.invalidateWidgetData(viewer.userId)
+
+        return LogReadingSessionPayload(
+            session = session,
+            book = book,
+            errors = emptyList()
+        )
+    }
+}
+
+@Service
+class ReadingCacheService(
+    private val redisTemplate: RedisTemplate&lt;String, String&gt;,
+    private val objectMapper: ObjectMapper
+) {
+    companion object {
+        private const val WIDGET_DATA_TTL = 300L
+        private const val STATS_TTL = 600L
+    }
+
+    fun getWidgetData(userId: UUID): ReadingWidgetData? {
+        val key = "lifegoals:reading:widget_data:$userId"
+        return redisTemplate.opsForValue().get(key)?.let {
+            objectMapper.readValue(it, ReadingWidgetData::class.java)
+        }
+    }
+
+    fun setWidgetData(userId: UUID, data: ReadingWidgetData) {
+        val key = "lifegoals:reading:widget_data:$userId"
+        redisTemplate.opsForValue().set(
+            key,
+            objectMapper.writeValueAsString(data),
+            Duration.ofSeconds(WIDGET_DATA_TTL)
+        )
+    }
+
+    fun invalidateWidgetData(userId: UUID) {
+        val keys = listOf(
+            "lifegoals:reading:widget_data:$userId",
+            "lifegoals:reading:stats:$userId"
+        )
+        redisTemplate.delete(keys)
+    }
+}
+</code></pre>
+
+<!-- ===== STEP 7: BACKEND TESTS ===== -->
+<h3 id="step7"><span class="step-counter">7</span><span class="lang-ru">Шаг 7: Тесты backend</span><span class="lang-en">Step 7: Backend Tests</span></h3>
+
+<pre><code class="language-kotlin">// Unit test: BookService
+class BookServiceTest {
+    private val bookRepository = mockk&lt;BookRepository&gt;()
+    private val readingSessionRepository = mockk&lt;ReadingSessionRepository&gt;()
+    private val cacheService = mockk&lt;ReadingCacheService&gt;(relaxed = true)
+    private val notificationService = mockk&lt;NotificationService&gt;(relaxed = true)
+
+    private val service = BookService(
+        bookRepository, readingSessionRepository, cacheService, notificationService
+    )
+
+    private val viewer = ViewerContext(
+        userId = UUID.randomUUID(),
+        email = "test@example.com",
+        permissions = emptySet()
+    )
+
+    @Test
+    fun `addBook with valid input returns book and empty errors`() {
+        val input = AddBookInput(title = "Clean Code", author = "Robert Martin", totalPages = 464)
+        every { bookRepository.save(any()) } answers { firstArg() }
+
+        val result = service.addBook(input, viewer)
+
+        assertThat(result.errors).isEmpty()
+        assertThat(result.book).isNotNull()
+        assertThat(result.book!!.title).isEqualTo("Clean Code")
+        verify { cacheService.invalidateWidgetData(viewer.userId) }
+    }
+
+    @Test
+    fun `addBook with blank title returns validation error`() {
+        val input = AddBookInput(title = "  ", author = "Author", totalPages = 100)
+
+        val result = service.addBook(input, viewer)
+
+        assertThat(result.book).isNull()
+        assertThat(result.errors).hasSize(1)
+        assertThat(result.errors[0].field).isEqualTo("title")
+        verify(exactly = 0) { bookRepository.save(any()) }
+    }
+
+    @Test
+    fun `logReadingSession completing book triggers achievement`() {
+        val book = Book(userId = viewer.userId, title = "Short Book", author = "A", totalPages = 50, currentPage = 45)
+        book.status = BookStatus.READING
+        every { bookRepository.findById(any()) } returns Optional.of(book)
+        every { bookRepository.save(any()) } answers { firstArg() }
+        every { readingSessionRepository.save(any()) } answers { firstArg() }
+
+        val input = LogReadingSessionInput(bookId = book.id, pagesRead = 10)
+        val result = service.logReadingSession(input, viewer)
+
+        assertThat(result.book!!.status).isEqualTo(BookStatus.COMPLETED)
+        verify { notificationService.publishAchievement(viewer.userId, "READING", any()) }
+    }
+}
+
+// Integration test
+@SpringBootTest
+@Testcontainers
+class BookRepositoryIntegrationTest {
+    companion object {
+        @Container
+        val postgres = PostgreSQLContainer("postgres:16-alpine")
+            .withDatabaseName("lifegoals_test")
+    }
+
+    @Autowired lateinit var bookRepository: BookRepository
+
+    @Test
+    fun `cursor pagination returns correct pages`() {
+        val userId = UUID.randomUUID()
+        val books = (1..5).map { i -&gt;
+            bookRepository.save(Book(userId = userId, title = "Book $i", author = "A", totalPages = 100))
+        }
+
+        val page1 = bookRepository.findFirstPage(userId, PageRequest.ofSize(3))
+        assertThat(page1).hasSize(3)
+
+        val lastOfPage1 = page1[1]
+        val page2 = bookRepository.findAfterCursor(
+            userId, lastOfPage1.createdAt, lastOfPage1.id, PageRequest.ofSize(3)
+        )
+        assertThat(page2).hasSize(3)
+
+        val page1Ids = page1.take(2).map { it.id }.toSet()
+        val page2Ids = page2.take(2).map { it.id }.toSet()
+        assertThat(page1Ids.intersect(page2Ids)).isEmpty()
+    }
+}
+
+// DGS GraphQL test
+@DgsAutoConfiguration
+@SpringBootTest
+class BookQueryResolverTest {
+    @Autowired lateinit var dgsQueryExecutor: DgsQueryExecutor
+    @MockkBean lateinit var bookService: BookService
+
+    @Test
+    fun `books query returns connection structure`() {
+        every { bookService.getBooks(any(), any(), any(), any()) } returns
+            Connection(
+                edges = listOf(BookEdge(node = testBook, cursor = "abc")),
+                pageInfo = PageInfo(hasNextPage = true, endCursor = "abc"),
+                totalCount = 42
+            )
+
+        val result = dgsQueryExecutor.executeAndExtractJsonPath&lt;Int&gt;(
+            """{ books(first: 10) { totalCount } }""",
+            "data.books.totalCount"
+        )
+
+        assertThat(result).isEqualTo(42)
+    }
+}
+</code></pre>
+
+<!-- ===== STEP 8: RELAY ===== -->
+<h3 id="step8"><span class="step-counter">8</span><span class="lang-ru">Шаг 8: Relay-компоненты (Frontend)</span><span class="lang-en">Step 8: Relay Components (Frontend)</span></h3>
+
+<pre><code class="language-typescript">// src/features/reading/components/BookCard.tsx
+import { graphql, useFragment } from 'react-relay';
+import type { BookCard_book$key } from './__generated__/BookCard_book.graphql';
+import styles from './BookCard.module.css';
+
+const fragment = graphql`
+  fragment BookCard_book on Book {
+    id
+    title
+    author
+    totalPages
+    currentPage
+    progressPercent
+    status
+    coverUrl
+    rating
+  }
+`;
+
+interface BookCardProps {
+  book: BookCard_book$key;
+  onSelect: (bookId: string) => void;
+}
+
+const BookCard: React.FC&lt;BookCardProps&gt; = ({ book, onSelect }) => {
+  const data = useFragment(fragment, book);
+
+  return (
+    &lt;div className={styles.card} onClick={() =&gt; onSelect(data.id)}&gt;
+      {data.coverUrl && &lt;img src={data.coverUrl} alt={data.title} className={styles.cover} /&gt;}
+      &lt;div className={styles.info}&gt;
+        &lt;h3 className={styles.title}&gt;{data.title}&lt;/h3&gt;
+        &lt;span className={styles.author}&gt;{data.author}&lt;/span&gt;
+        &lt;div className={styles.progress}&gt;
+          &lt;div className={styles.progressBar}&gt;
+            &lt;div
+              className={styles.progressFill}
+              style={{ width: `${data.progressPercent}%` }}
+            /&gt;
+          &lt;/div&gt;
+          &lt;span&gt;{data.currentPage}/{data.totalPages} pages ({data.progressPercent}%)&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+
+export default BookCard;
+</code></pre>
+
+<pre><code class="language-typescript">// src/features/reading/components/BookList.tsx
+import { graphql, usePaginationFragment } from 'react-relay';
+import type { BookList_viewer$key } from './__generated__/BookList_viewer.graphql';
+import BookCard from './BookCard';
+
+const fragment = graphql`
+  fragment BookList_viewer on User
+  @refetchable(queryName: "BookListPaginationQuery")
+  @argumentDefinitions(
+    first: { type: "Int", defaultValue: 20 }
+    after: { type: "String" }
+  ) {
+    books(first: $first, after: $after)
+    @connection(key: "BookList_books") {
+      edges {
+        node {
+          id
+          ...BookCard_book
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      totalCount
+    }
+  }
+`;
+
+interface BookListProps {
+  viewer: BookList_viewer$key;
+}
+
+const BookList: React.FC&lt;BookListProps&gt; = ({ viewer }) => {
+  const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment(
+    fragment,
+    viewer
+  );
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;{data.books.totalCount} books&lt;/p&gt;
+      &lt;div className={styles.grid}&gt;
+        {data.books.edges.map(edge =&gt; (
+          &lt;BookCard
+            key={edge.node.id}
+            book={edge.node}
+            onSelect={handleSelect}
+          /&gt;
+        ))}
+      &lt;/div&gt;
+      {hasNext && (
+        &lt;button onClick={() =&gt; loadNext(20)} disabled={isLoadingNext}&gt;
+          {isLoadingNext ? 'Loading...' : 'Load More'}
+        &lt;/button&gt;
+      )}
+    &lt;/div&gt;
+  );
+};
+</code></pre>
+
+<!-- ===== STEP 9: MUTATIONS ===== -->
+<h3 id="step9"><span class="step-counter">9</span><span class="lang-ru">Шаг 9: Mutations + полный Error Handling</span><span class="lang-en">Step 9: Mutations + Full Error Handling</span></h3>
+
+<pre><code class="language-typescript">// src/features/reading/components/LogReadingSessionForm.tsx
+import { graphql, useMutation } from 'react-relay';
+import type { LogReadingSessionFormMutation } from './__generated__/LogReadingSessionFormMutation.graphql';
+import { useCallback, useState } from 'react';
+
+const mutation = graphql`
+  mutation LogReadingSessionFormMutation($input: LogReadingSessionInput!) {
+    logReadingSession(input: $input) {
+      session {
+        id
+        pagesRead
+        durationMinutes
+        sessionDate
+      }
+      book {
+        id
+        currentPage
+        progressPercent
+        status
+        finishedAt
+      }
+      errors {
+        field
+        message
+        code
+      }
+    }
+  }
+`;
+
+interface Props {
+  bookId: string;
+  onSuccess: () => void;
+}
+
+const LogReadingSessionForm: React.FC&lt;Props&gt; = ({ bookId, onSuccess }) => {
+  const [commit, isInFlight] = useMutation&lt;LogReadingSessionFormMutation&gt;(mutation);
+  const [pagesRead, setPagesRead] = useState('');
+  const [fieldErrors, setFieldErrors] = useState&lt;Record&lt;string, string&gt;&gt;({});
+
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    setFieldErrors({});
+
+    commit({
+      variables: {
+        input: {
+          bookId,
+          pagesRead: parseInt(pagesRead, 10),
+        },
+      },
+      onCompleted: (response) => {
+        const { errors } = response.logReadingSession;
+
+        if (errors.length > 0) {
+          const errorMap: Record&lt;string, string&gt; = {};
+          errors.forEach(err => {
+            if (err.field) {
+              errorMap[err.field] = err.message;
+            }
+          });
+          setFieldErrors(errorMap);
+          return;
+        }
+
+        onSuccess();
+      },
+      onError: (error) => {
+        console.error('Network error:', error);
+        setFieldErrors({ _network: 'Connection error. Please try again.' });
+      },
+    });
+  }, [bookId, pagesRead, commit, onSuccess]);
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;div&gt;
+        &lt;label&gt;<span class="lang-ru">Страницы прочитаны</span><span class="lang-en">Pages read</span>&lt;/label&gt;
+        &lt;input
+          type="number"
+          value={pagesRead}
+          onChange={e =&gt; setPagesRead(e.target.value)}
+          min="1"
+          required
+        /&gt;
+        {fieldErrors.pagesRead && (
+          &lt;span className={styles.error}&gt;{fieldErrors.pagesRead}&lt;/span&gt;
+        )}
+      &lt;/div&gt;
+      {fieldErrors._network && (
+        &lt;div className={styles.networkError}&gt;{fieldErrors._network}&lt;/div&gt;
+      )}
+      &lt;button type="submit" disabled={isInFlight}&gt;
+        {isInFlight ? <span class="lang-ru">'Сохранение...'</span><span class="lang-en">'Saving...'</span> : <span class="lang-ru">'Логировать сессию'</span><span class="lang-en">'Log Session'</span>}
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+};
+</code></pre>
+
+<div class="critical">
+    <strong><span class="lang-ru">Три уровня ошибок:</span><span class="lang-en">Three error levels:</span></strong><br>
+    1. <strong><span class="lang-ru">Validation errors</span><span class="lang-en">Validation errors</span></strong> (field-level) → <code>payload.errors</code> → <span class="lang-ru">подсвечиваем конкретное поле</span><span class="lang-en">highlight specific field</span><br>
+    2. <strong><span class="lang-ru">Business errors</span><span class="lang-en">Business errors</span></strong> (NOT_FOUND) → <code>payload.errors</code> → <span class="lang-ru">показываем toast/banner</span><span class="lang-en">show toast/banner</span><br>
+    3. <strong><span class="lang-ru">Network errors</span><span class="lang-en">Network errors</span></strong> → <code>onError</code> → <span class="lang-ru">показываем "Connection error"</span><span class="lang-en">show "Connection error"</span>
+</div>
+
+<!-- ===== STEP 10: FRONTEND TESTS ===== -->
+<h3 id="step10"><span class="step-counter">10</span><span class="lang-ru">Шаг 10: Тесты frontend</span><span class="lang-en">Step 10: Frontend Tests</span></h3>
+
+<pre><code class="language-typescript">// src/features/reading/components/__tests__/BookCard.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { createMockEnvironment, MockPayloadGenerator } from 'relay-test-utils';
+import { RelayEnvironmentProvider } from 'react-relay';
+import BookCard from '../BookCard';
+
+describe('BookCard', () => {
+  let environment: ReturnType&lt;typeof createMockEnvironment&gt;;
+
+  beforeEach(() => {
+    environment = createMockEnvironment();
+  });
+
+  it('renders book title, author, and progress', () => {
+    const mockBook = {
+      id: 'book-1',
+      title: 'Clean Code',
+      author: 'Robert Martin',
+      totalPages: 464,
+      currentPage: 232,
+      progressPercent: 50,
+      status: 'READING',
+      coverUrl: null,
+      rating: null,
+    };
+
+    render(
+      &lt;RelayEnvironmentProvider environment={environment}&gt;
+        &lt;BookCard book={mockBook} onSelect={jest.fn()} /&gt;
+      &lt;/RelayEnvironmentProvider&gt;
+    );
+
+    expect(screen.getByText('Clean Code')).toBeInTheDocument();
+    expect(screen.getByText('Robert Martin')).toBeInTheDocument();
+    expect(screen.getByText(/232\/464 pages/)).toBeInTheDocument();
+    expect(screen.getByText(/50%/)).toBeInTheDocument();
+  });
+
+  it('calls onSelect with book id when clicked', () => {
+    const onSelect = jest.fn();
+
+    render(
+      &lt;RelayEnvironmentProvider environment={environment}&gt;
+        &lt;BookCard book={mockBook} onSelect={onSelect} /&gt;
+      &lt;/RelayEnvironmentProvider&gt;
+    );
+
+    fireEvent.click(screen.getByRole('article'));
+    expect(onSelect).toHaveBeenCalledWith('book-1');
+  });
+});
+</code></pre>
+
+<!-- ===== CROSS-CUTTING TOPICS ===== -->
+<h2 id="viewercontext-flow">
+    <span class="lang-ru">ViewerContext: полный flow через все слои</span>
+    <span class="lang-en">ViewerContext: Full Flow Through All Layers</span>
+</h2>
+
+<div class="flow-diagram">JWT Token (в Authorization header)
+    ↓
+Spring Security Filter (SecurityConfig.kt)
+    ↓ извлекает claims из JWT, создаёт Authentication
+SecurityContextHolder.getContext().authentication
+    ↓
+ViewerContextProvider.get() — @Component, Injectable
+    ↓ извлекает userId, email, permissions из Authentication
+ViewerContext(userId, email, permissions)
+    ↓
+Resolver: val viewer = viewerContextProvider.get()
+    ↓ передаёт viewer в каждый метод сервиса
+Service: fun getBooks(viewer: ViewerContext, ...)
+    ↓ использует viewer.userId для scope'инга данных
+Repository: WHERE user_id = :viewer.userId
+    ↓
+DataLoader: findByUserIdAndIdIn(viewer.userId, ids)
+    → НИКОГДА не загружаем данные без проверки userId</div>
+
+<pre><code class="language-kotlin">// com/mrurec/lifegoals/common/auth/ViewerContextProvider.kt
+@Component
+class ViewerContextProvider {
+    fun get(): ViewerContext {
+        val auth = SecurityContextHolder.getContext().authentication
+            ?: throw AuthenticationException("Not authenticated")
+
+        val jwt = auth.principal as? Jwt
+            ?: throw AuthenticationException("Invalid token")
+
+        return ViewerContext(
+            userId = UUID.fromString(jwt.getClaimAsString("sub")),
+            email = jwt.getClaimAsString("email"),
+            permissions = jwt.getClaimAsStringList("permissions")?.toSet() ?: emptySet()
+        )
+    }
+}
+</code></pre>
+
+<h2 id="error-handling-layers">
+    <span class="lang-ru">Обработка ошибок: все слои</span>
+    <span class="lang-en">Error Handling: All Layers</span>
+</h2>
+
+<table>
+<thead>
+<tr><th><span class="lang-ru">Слой</span><span class="lang-en">Layer</span></th><th><span class="lang-ru">Тип ошибки</span><span class="lang-en">Error Type</span></th><th><span class="lang-ru">Как обрабатывается</span><span class="lang-en">Handling</span></th><th><span class="lang-ru">Что видит клиент</span><span class="lang-en">Client Sees</span></th></tr>
+</thead>
+<tbody>
+<tr><td>Frontend (form)</td><td><span class="lang-ru">Клиентская валидация</span><span class="lang-en">Client validation</span></td><td>useState</td><td><span class="lang-ru">Подсветка поля</span><span class="lang-en">Field highlight</span></td></tr>
+<tr><td>Relay mutation</td><td>Network error</td><td>onError callback</td><td><span class="lang-ru">"Connection error" toast</span><span class="lang-en">"Connection error" toast</span></td></tr>
+<tr><td>Relay mutation</td><td>payload.errors</td><td>onCompleted → map</td><td><span class="lang-ru">Field errors or banner</span><span class="lang-en">Field errors or banner</span></td></tr>
+<tr><td>DGS resolver</td><td>Auth error</td><td>GraphQLExceptionHandler</td><td>Redirect to login</td></tr>
+<tr><td>Service</td><td>Validation</td><td>Return UserError</td><td>payload.errors</td></tr>
+<tr><td>Service</td><td>Not found</td><td>Return UserError (NOT_FOUND)</td><td>payload.errors</td></tr>
+<tr><td>Repository</td><td>DB constraint</td><td>Caught → UserError</td><td>payload.errors</td></tr>
+<tr><td>Redis</td><td>Connection failure</td><td>try/catch → fallback to DB</td><td><span class="lang-ru">Медленнее но работает</span><span class="lang-en">Slower but works</span></td></tr>
+</tbody>
+</table>
+
+<h2 id="cursor-pagination">
+    <span class="lang-ru">Курсоры: encode/decode</span>
+    <span class="lang-en">Cursors: Encode/Decode</span>
+</h2>
+
+<pre><code class="language-kotlin">// com/mrurec/lifegoals/common/relay/CursorCodec.kt
+object CursorCodec {
+    fun encode(createdAt: Instant, id: UUID): String {
+        val raw = "${createdAt.toEpochMilli()}|$id"
+        return Base64.getEncoder().encodeToString(raw.toByteArray())
+    }
+
+    fun decode(cursor: String): CursorData {
+        val raw = String(Base64.getDecoder().decode(cursor))
+        val parts = raw.split("|")
+        require(parts.size == 2) { "Invalid cursor format" }
+        return CursorData(
+            createdAt = Instant.ofEpochMilli(parts[0].toLong()),
+            id = UUID.fromString(parts[1])
+        )
+    }
+
+    data class CursorData(val createdAt: Instant, val id: UUID)
+}
+
+object ConnectionBuilder {
+    fun &lt;T&gt; build(
+        items: List&lt;T&gt;,
+        first: Int,
+        totalCount: Long,
+        cursorExtractor: (T) -> String
+    ): Connection&lt;T&gt; {
+        val hasNextPage = items.size &gt; first
+        val pageItems = items.take(first)
+
+        val edges = pageItems.map { item ->
+            Edge(node = item, cursor = cursorExtractor(item))
+        }
+
+        return Connection(
+            edges = edges,
+            pageInfo = PageInfo(
+                hasNextPage = hasNextPage,
+                hasPreviousPage = false,
+                startCursor = edges.firstOrNull()?.cursor,
+                endCursor = edges.lastOrNull()?.cursor
+            ),
+            totalCount = totalCount
+        )
+    }
+}
+</code></pre>
+
+<h2 id="enum-mapping">
+    <span class="lang-ru">Enum: маппинг GraphQL ↔ Kotlin ↔ TypeScript</span>
+    <span class="lang-en">Enum: GraphQL ↔ Kotlin ↔ TypeScript Mapping</span>
+</h2>
+
+<pre><code class="language-graphql"># reading.graphqls
+enum BookStatus {
+    READING
+    COMPLETED
+    DROPPED
+    WANT_TO_READ
+}
+</code></pre>
+
+<pre><code class="language-kotlin">enum class BookStatus {
+    READING,
+    COMPLETED,
+    DROPPED,
+    WANT_TO_READ
+}
+</code></pre>
+
+<pre><code class="language-typescript">export type BookStatus = "READING" | "COMPLETED" | "DROPPED" | "WANT_TO_READ";
+
+const statusLabels: Record&lt;BookStatus, string&gt; = {
+  READING: 'Currently Reading',
+  COMPLETED: 'Completed',
+  DROPPED: 'Dropped',
+  WANT_TO_READ: 'Want to Read',
+};
+</code></pre>
+
+<div class="tip">
+    <span class="lang-ru">Цепочка: .graphqls → ./gradlew generateJava → Kotlin enum → npm run relay → TypeScript types</span>
+    <span class="lang-en">Chain: .graphqls → ./gradlew generateJava → Kotlin enum → npm run relay → TypeScript types</span>
+</div>
+
+<h2 id="cache-invalidation">
+    <span class="lang-ru">Инвалидация кэша: когда и как</span>
+    <span class="lang-en">Cache Invalidation: When and How</span>
+</h2>
+
+<pre><code class="language-kotlin">// ПРАВИЛО: мутация → инвалидировать кэши
+@Transactional
+fun logReadingSession(input: LogReadingSessionInput, viewer: ViewerContext): LogReadingSessionPayload {
+    // ... save to DB ...
+
+    cacheService.invalidateWidgetData(viewer.userId)
+
+    return LogReadingSessionPayload(...)
+}
+
+fun invalidateWidgetData(userId: UUID) {
+    val keys = redisTemplate.keys("lifegoals:reading:*:$userId")
+    if (keys.isNotEmpty()) {
+        redisTemplate.delete(keys)
+    }
+}
+</code></pre>
+
+<h2 id="project-structure">
+    <span class="lang-ru">Структура проекта: куда класть файлы</span>
+    <span class="lang-en">Project Structure: Where to Put Files</span>
+</h2>
+
+<div class="file-tree">
+<span class="dir">com/mrurec/lifegoals/</span>
+├── <span class="dir">common/</span>
+│   ├── <span class="dir">auth/</span>
+│   ├── <span class="dir">error/</span>
+│   ├── <span class="dir">relay/</span>
+│   ├── <span class="dir">widget/</span>
+│   └── <span class="dir">scalar/</span>
+│
+├── <span class="dir">reading/</span>
+│   ├── <span class="dir">model/</span>
+│   │   ├── <span class="file">Book.kt</span>
+│   │   ├── <span class="file">BookStatus.kt</span>
+│   │   └── <span class="file">ReadingSession.kt</span>
+│   ├── <span class="dir">repository/</span>
+│   │   ├── <span class="file">BookRepository.kt</span>
+│   │   └── <span class="file">ReadingSessionRepository.kt</span>
+│   ├── <span class="dir">service/</span>
+│   │   ├── <span class="file">BookService.kt</span>
+│   │   └── <span class="file">ReadingCacheService.kt</span>
+│   ├── <span class="dir">resolver/</span>
+│   │   ├── <span class="file">BookQueryResolver.kt</span>
+│   │   ├── <span class="file">BookMutationResolver.kt</span>
+│   │   └── <span class="file">BookFieldResolver.kt</span>
+│   ├── <span class="dir">dataloader/</span>
+│   │   └── <span class="file">ReadingDataLoaders.kt</span>
+│   └── <span class="dir">widget/</span>
+│       └── <span class="file">ReadingWidgetProvider.kt</span>
+│
+├── <span class="dir">interviewprep/</span>
+├── <span class="dir">fitness/</span>
+├── <span class="dir">budget/</span>
+├── <span class="dir">dashboard/</span>
+└── <span class="dir">notification/</span>
+
+<span class="dir">src/main/resources/schema/</span>
+├── <span class="file">reading.graphqls</span>
+└── ...
+
+<span class="dir">life-goals-web/src/features/reading/</span>
+├── <span class="dir">components/</span>
+│   ├── <span class="file">BookCard.tsx</span>
+│   ├── <span class="file">BookList.tsx</span>
+│   ├── <span class="file">LogReadingSessionForm.tsx</span>
+│   └── <span class="file">ReadingWidget.tsx</span>
+└── <span class="dir">__generated__/</span>
+</div>
+
+<div class="warning"><strong><span class="lang-ru">Правило модульности:</span><span class="lang-en">Modularity rule:</span></strong> <span class="lang-ru">reading/ может импортировать из common/, но НИКОГДА из fitness/, budget/ или interviewprep/</span><span class="lang-en">reading/ can import from common/, but NEVER from fitness/, budget/, or interviewprep/</span></div>
+
+<!-- ===== META PATTERNS ===== -->
+<h2 id="meta-patterns">
+    <span class="lang-ru">Паттерны Meta Engineering: почему именно так</span>
+    <span class="lang-en">Meta Engineering Patterns: Why This Way</span>
+</h2>
+
+<h4>1. <span class="lang-ru">Fragment Colocation</span><span class="lang-en">Fragment Colocation</span> (Relay)</h4>
+<div class="meta-interview"><strong><span class="lang-ru">"Почему colocate фрагменты с компонентами?"</span><span class="lang-en">"Why colocate fragments with components?"</span></strong> — <span class="lang-ru">"В Meta мы нашли что когда data requirements живут отдельно от компонентов, они расходятся. Кто-то удаляет поле из query но компонент всё ещё его ожидает — crash. Fragment colocation означает что data контракт лежит прямо рядом с кодом, который его использует."</span><span class="lang-en">"At Meta, we found that when data requirements live separately from components, they drift apart. Someone removes a field from the query but a component still expects it — crash. Fragment colocation means the data contract is right next to the code that uses it."</span></div>
+
+<h4>2. <span class="lang-ru">DataLoaders (TAO паттерн)</span><span class="lang-en">DataLoaders (TAO Pattern)</span></h4>
+<div class="meta-interview"><strong><span class="lang-ru">"Как Meta решает N+1?"</span><span class="lang-en">"How does Meta solve N+1?"</span></strong> — <span class="lang-ru">"Meta's TAO система батчит все data fetches в рамках request. DGS DataLoaders реплицируют это: вместо fetch one entity at a time, мы аккумулируем IDs и выполняем один batched query. Это O(N) → O(1) per level."</span><span class="lang-en">"Meta's TAO system batches all data fetches within a request. DGS DataLoaders replicate this: instead of one entity at a time, we accumulate IDs and issue one batched query. This turns O(N) → O(1) per level."</span></div>
+
+<h4>3. <span class="lang-ru">Mutation Payloads (не исключения)</span><span class="lang-en">Mutation Payloads (Not Exceptions)</span></h4>
+<div class="meta-interview"><strong><span class="lang-ru">"Почему не throw exceptions для validation?"</span><span class="lang-en">"Why not throw exceptions for validation?"</span></strong> — <span class="lang-ru">"GraphQL errors — для infrastructure problems. Business errors (validation, not found) — expected outcomes. Возвращаем их в Payload → client handles с type safety."</span><span class="lang-en">"GraphQL errors are for infrastructure problems. Business errors (validation, not found) are expected outcomes. Returning them in Payload lets client handle with type safety."</span></div>
+
+<h4>4. <span class="lang-ru">Viewer-scoped data (Privacy)</span><span class="lang-en">Viewer-Scoped Data (Privacy)</span></h4>
+<div class="meta-interview"><strong><span class="lang-ru">"Как вы предотвращаете data leaks?"</span><span class="lang-en">"How do you prevent data leaks?"</span></strong> — <span class="lang-ru">"Каждый service method берёт ViewerContext. Каждый SQL query включает WHERE user_id = :viewerId. Defense in depth — даже если resolver забыл проверку, repository не выдаст чужие данные."</span><span class="lang-en">"Every service method takes ViewerContext. Every SQL query includes WHERE user_id = :viewerId. Defense in depth — even if resolver forgets, repository won't return foreign data."</span></div>
+
+<!-- ===== INTERVIEW Q&A ===== -->
+<h2 id="meta-interview-qa">
+    <span class="lang-ru">Вопросы и ответы для интервью</span>
+    <span class="lang-en">Interview Q&A</span>
+</h2>
+
+<details>
+<summary><strong><span class="lang-ru">Q: "Пройдите через request от браузера до БД и обратно"</span><span class="lang-en">Q: "Walk me through a request from browser to database and back"</span></strong></summary>
+<div class="details-content">
+<p><strong><span class="lang-ru">A:</span><span class="lang-en">A:</span></strong> <span class="lang-ru">"Браузер отправляет POST в /graphql с query hash (persisted queries) и variables. Spring Security валидирует JWT. DGS смотрит query text по hash. Корневой resolver извлекает ViewerContext из SecurityContext. Сервис проверяет Redis кэш. На cache miss — запрашивает PostgreSQL через Spring Data JPA с WHERE user_id в условии. Для child fields (book.readingSessions) — DataLoader батчит все 20 book IDs и выполняет один SQL. Response нормализуется Relay store (keyed by node ID) и перерендерятся только измененные компоненты."</span><span class="lang-en">"Browser sends POST to /graphql with persisted query hash and variables. Spring Security validates JWT. DGS looks up query text by hash. Root resolver extracts ViewerContext. Service checks Redis cache first. On miss, queries PostgreSQL with WHERE user_id scoped. For child fields, DataLoader batches all IDs and executes one SQL. Response is normalized into Relay store and only changed components re-render."</span></p>
+</div>
+</details>
+
+<details>
+<summary><strong><span class="lang-ru">Q: "Как бы вы добавили новый widget type?"</span><span class="lang-en">Q: "How would you add a new widget type?"</span></strong></summary>
+<div class="details-content">
+<p><strong><span class="lang-ru">A:</span><span class="lang-en">A:</span></strong> <span class="lang-ru">"Три шага, нулевых изменений в existing коде: (1) Backend: новый package с Entity, Repository, Service, Resolver, DataLoader. Реализуем WidgetProvider interface. Spring auto-discovers. (2) GraphQL: добавляем .graphqls с types. Добавляем в WidgetData union в dashboard.graphqls. Запускаем codegen. (3) Frontend: создаём feature folder с Relay fragments и компонентами. Регистрируем в WidgetRegistry.ts (одна строка). Dashboard shell рендерит widget instance из user_dashboard_widget table — works!"</span><span class="lang-en">"Three steps, zero changes: (1) Backend: create package with Entity, Repository, Service, Resolver, DataLoader implementing WidgetProvider. Spring auto-discovers. (2) GraphQL: add .graphqls, add to WidgetData union, run codegen. (3) Frontend: create feature folder, register in WidgetRegistry.ts (one line). Dashboard renders from user_dashboard_widget table — it works."</span></p>
+</div>
+</details>
+
+<details>
+<summary><strong><span class="lang-ru">Q: "Что если Redis упадёт?"</span><span class="lang-en">Q: "What happens when Redis goes down?"</span></strong></summary>
+<div class="details-content">
+<p><strong><span class="lang-ru">A:</span><span class="lang-en">A:</span></strong> <span class="lang-ru">"Graceful degradation. Каждый Redis call в try/catch. На failure — fallback к PostgreSQL. Медленнее (500ms vs 100ms) но функционирует. WebSocket notifications — persisted в PostgreSQL, fetched на next load. Eventual consistency вместо real-time."</span><span class="lang-en">"Graceful degradation. Every Redis call is wrapped in try/catch. On failure, fall back to PostgreSQL directly. Slower (500ms vs 100ms) but works. Notifications persist in DB, fetched on next load."</span></p>
+</div>
+</details>
+
+<details>
+<summary><strong><span class="lang-ru">Q: "Почему cursor-pagination а не offset?"</span><span class="lang-en">Q: "Why cursor-based pagination instead of offset?"</span></strong></summary>
+<div class="details-content">
+<p><strong><span class="lang-ru">A:</span><span class="lang-en">A:</span></strong> <span class="lang-ru">"Три причины: (1) Performance: OFFSET 10000 читает и отбрасывает 10K строк. Cursor использует B-Tree seek — O(log n) vs O(n). (2) Consistency: если добавляется книга во время page 2, offset может показать дубликат. Cursor стабилен. (3) Relay native: @connection и usePaginationFragment спроектированы для cursor pagination."</span><span class="lang-en">"Three reasons: (1) Performance: OFFSET 10000 reads and discards 10K rows. Cursor uses B-Tree seek — O(log n) vs O(n). (2) Consistency: if a book is added during page 2, offset might show duplicates. Cursor is stable. (3) Relay native: @connection and usePaginationFragment are designed for cursor-based pagination."</span></p>
+</div>
+</details>
+
+<!-- ===== TRADEOFFS ===== -->
+<h2 id="tradeoffs">
+    <span class="lang-ru">Trade-off анализ: что бы изменилось при масштабировании</span>
+    <span class="lang-en">Trade-off Analysis: Scaling Changes</span>
+</h2>
+
+<table>
+<thead>
+<tr><th><span class="lang-ru">Текущее решение</span><span class="lang-en">Current Solution</span></th><th><span class="lang-ru">При 10x пользователей</span><span class="lang-en">At 10x Users</span></th><th><span class="lang-ru">При 100x пользователей</span><span class="lang-en">At 100x Users</span></th></tr>
+</thead>
+<tbody>
+<tr><td><span class="lang-ru">Модульный монолит</span><span class="lang-en">Modular monolith</span></td><td><span class="lang-ru">Всё ещё ОК</span><span class="lang-en">Still OK</span></td><td><span class="lang-ru">Извлечь hot-path виджеты в микросервисы</span><span class="lang-en">Extract hot widgets to microservices</span></td></tr>
+<tr><td>PostgreSQL (single instance)</td><td><span class="lang-ru">Read replicas</span><span class="lang-en">Read replicas</span></td><td><span class="lang-ru">Шардинг по user_id (Citus)</span><span class="lang-en">Sharding by user_id (Citus)</span></td></tr>
+<tr><td>Redis (cache + pub/sub)</td><td>Redis Cluster</td><td>Kafka for pub/sub</td></tr>
+<tr><td><span class="lang-ru">Relay persisted queries</span><span class="lang-en">Relay persisted queries</span></td><td>CDN cache</td><td><span class="lang-ru">Edge caching</span><span class="lang-en">Edge caching</span></td></tr>
+</tbody>
+</table>
+
+<!-- ===== ASSIGNMENTS ===== -->
+<h2 id="assignments">
+    <span class="lang-ru">Практические задания</span>
+    <span class="lang-en">Practical Assignments</span>
+</h2>
+
+<p><strong><span class="lang-ru">Задание 17.1 (Полный виджет).</span><span class="lang-en">Assignment 17.1 (Complete Widget).</span></strong> <span class="lang-ru">Реализуйте Reading Tracker: миграция БД → Entity → Repository → GraphQL → DGS → DataLoader → Service + кэш → Relay-компоненты → unit + integration тесты. Проверьте N+1, ошибки в Payload, ViewerContext везде.</span><span class="lang-en">Implement Reading Tracker: database migration → Entity → Repository → GraphQL → DGS → DataLoader → Service + cache → Relay components → tests. Verify no N+1, errors in Payload, ViewerContext everywhere.</span></p>
+
+<p><strong><span class="lang-ru">Задание 17.2 (Error handling).</span><span class="lang-en">Assignment 17.2 (Error Handling).</span></strong> <span class="lang-ru">Тестируйте все три level ошибок: (1) invalid pagesRead=-5 → field error, (2) logReadingSession с чужим bookId → NOT_FOUND, (3) остановите PostgreSQL → graceful degradation works.</span><span class="lang-en">Test all three error levels: (1) invalid pagesRead=-5 → field error, (2) foreign bookId → NOT_FOUND, (3) stop PostgreSQL → graceful degradation works.</span></p>
+
+<p><strong><span class="lang-ru">Задание 17.3 (Performance).</span><span class="lang-en">Assignment 17.3 (Performance).</span></strong> <span class="lang-ru">Создайте 100 книг с 10 reading sessions. Запросите books(first: 50) { readingSessions(first: 5) }. Проверьте: максимум 3 SQL запроса (books + sessions batch + count), а не 51.</span><span class="lang-en">Create 100 books with 10 sessions each. Query books(first: 50) { readingSessions(first: 5) }. Verify: max 3 SQL queries (books + sessions batch + count), not 51.</span></p>
+
+<p><strong><span class="lang-ru">Задание 17.4 (Interview prep).</span><span class="lang-en">Assignment 17.4 (Interview Prep).</span></strong> <span class="lang-ru">Запишите 5-минутное видео на whiteboard: (1) путь данных браузер → БД, (2) почему cursor vs offset, (3) как DataLoaders решают N+1. Это реальный System Design interview в Meta.</span><span class="lang-en">Record 5-minute whiteboard video: (1) data path browser → DB, (2) why cursor vs offset, (3) how DataLoaders solve N+1. This is real Meta System Design interview.</span></p>
+
+<!-- ===== BACKLOG TASKS ===== -->
+<section id="backlog-tasks" class="assignments">
+<h2>
+    <span class="lang-ru">Backlog задачи (TDD)</span>
+    <span class="lang-en">Backlog Tasks (TDD)</span>
+</h2>
+
+<div class="assignment">
+    <h4><span class="lang-ru">Backlog #14: WidgetProvider interface</span><span class="lang-en">Backlog #14: WidgetProvider Interface</span> <span class="tdd-badge">5 SP</span></h4>
+    <p><span class="lang-ru">Описание:</span><span class="lang-en">Description:</span> <span class="lang-ru">Создайте WidgetProvider interface и реализуйте для Reading Tracker.</span><span class="lang-en">Create WidgetProvider interface and implement for Reading Tracker.</span></p>
+</div>
+
+<div class="assignment">
+    <h4><span class="lang-ru">Backlog #31/#39/#46: Widget registration</span><span class="lang-en">Backlog #31/#39/#46: Widget Registration</span> <span class="tdd-badge">2 SP each</span></h4>
+    <p><span class="lang-ru">Описание:</span><span class="lang-en">Description:</span> <span class="lang-ru">Реализуйте WidgetRegistry с auto-discovery через Spring Component scanning.</span><span class="lang-en">Implement WidgetRegistry with auto-discovery via Spring Component scanning.</span></p>
+</div>
+
+<div class="assignment">
+    <h4><span class="lang-ru">Backlog #64: Onboarding flow</span><span class="lang-en">Backlog #64: Onboarding Flow</span> <span class="tdd-badge">5 SP</span></h4>
+    <p><span class="lang-ru">Описание:</span><span class="lang-en">Description:</span> <span class="lang-ru">Создайте React компонент OnboardingFlow, который показывает доступные виджеты и помогает добавить первый на dashboard.</span><span class="lang-en">Create React component OnboardingFlow showing available widgets and helping add the first to dashboard.</span></p>
+</div>
+</section>
+
+<!-- ===== RESOURCES ===== -->
+<h2 id="resources">
+    <span class="lang-ru">Ресурсы</span>
+    <span class="lang-en">Resources</span>
+</h2>
+
+<ul>
+<li><a href="https://engineering.fb.com/2015/09/14/core-infra/tao-the-power-of-the-graph/" target="_blank">Meta TAO: The Power of the Graph</a></li>
+<li><a href="https://relay.dev/docs/principles-and-architecture/thinking-in-relay/" target="_blank">Thinking in Relay</a></li>
+<li><a href="https://netflixtechblog.com/open-sourcing-the-netflix-domain-graph-service-framework-graphql-for-spring-boot-92b9dcecda18" target="_blank">Netflix DGS Announcement</a></li>
+<li><a href="https://use-the-index-luke.com/" target="_blank">Use The Index, Luke</a> — <span class="lang-ru">SQL производительность</span><span class="lang-en">SQL performance</span></li>
+</ul>
+
+<!-- ===== NAV ===== -->
+<div class="nav-footer">
+    <a href="16-testing.html">
+        <span class="lang-ru">← Модуль 16: Тестирование</span>
+        <span class="lang-en">← Module 16: Testing</span>
+    </a>
+    <a href="index.html">
+        <span class="lang-ru">🏠 К оглавлению</span>
+        <span class="lang-en">🏠 To Contents</span>
+    </a>
+</div>
+
+        </main>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-graphql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+<script>
+function setLang(lang) {
+    document.body.classList.toggle('show-en', lang === 'en');
+    document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    try { localStorage.setItem('study-lang', lang); } catch(e) {}
+}
+try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+</script>
+
+</body>
+</html>

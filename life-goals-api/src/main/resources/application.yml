@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: life-goals-api
+  profiles:
+    default: dev
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          lob:
+            non_contextual_creation: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+
+app:
+  security:
+    jwt-secret: ${JWT_SECRET}
+  oauth:
+    client-id: ${OAUTH_CLIENT_ID}
+    client-secret: ${OAUTH_CLIENT_SECRET}
+  exchange-rate:
+    api-key: ${EXCHANGE_RATE_API_KEY}
+    api-url: ${EXCHANGE_RATE_API_URL:https://api.exchangeratesapi.io/v1/latest}
+  feature-flags:
+    path: ${FEATURE_FLAGS_PATH:config/features.json}

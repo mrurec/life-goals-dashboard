@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Goals Dashboard — Интенсив-план обучения</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --bg-card: #1e1e2e;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --lavender: #b4befe;
+            --mauve: #cba6f7;
+            --teal: #94e2d5;
+            --peach: #fab387;
+            --green: #a6e3a1;
+            --blue: #89b4fa;
+            --red: #f38ba8;
+            --yellow: #f9e2af;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Language switcher */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button {
+            padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px;
+            cursor: pointer; font-size: 0.85rem; background: transparent;
+            color: var(--text-secondary); transition: all 0.2s;
+        }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, #1a1a2e 50%, var(--bg-secondary) 100%);
+            border-bottom: 2px solid var(--header);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+        .hero .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        .stat {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            min-width: 140px;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--header);
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Main */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Track sections */
+        .track {
+            margin-bottom: 2.5rem;
+        }
+        .track-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(137,180,250,0.2);
+        }
+        .track-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .track-header h2 {
+            font-size: 1.4rem;
+            color: var(--header);
+        }
+
+        /* Module cards */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .module-card {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(137,180,250,0.15);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .module-card:hover {
+            border-color: var(--header);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+        .module-card.backend::before { background: var(--mauve); }
+        .module-card.frontend::before { background: var(--blue); }
+        .module-card.infra::before { background: var(--teal); }
+        .module-card.extra::before { background: var(--peach); }
+
+        .card-number {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            background: var(--bg);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--header);
+            margin-bottom: 0.5rem;
+            padding-right: 3rem;
+        }
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex-grow: 1;
+            margin-bottom: 0.75rem;
+        }
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .card-duration {
+            background: var(--bg);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .card-prereq {
+            font-style: italic;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+        .tag-backend { background: rgba(203,166,247,0.15); color: var(--mauve); }
+        .tag-frontend { background: rgba(137,180,250,0.15); color: var(--blue); }
+        .tag-infra { background: rgba(148,226,213,0.15); color: var(--teal); }
+        .tag-extra { background: rgba(250,179,135,0.15); color: var(--peach); }
+
+        /* Timeline */
+        .timeline {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid rgba(137,180,250,0.15);
+        }
+        .timeline h2 {
+            color: var(--header);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+        .timeline-bar {
+            display: flex;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .timeline-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #1e1e2e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 4px;
+        }
+        .timeline-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        /* Summary table */
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .summary-table th, .summary-table td {
+            padding: 0.6rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(137,180,250,0.1);
+        }
+        .summary-table th {
+            color: var(--header);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .summary-table tr:hover td {
+            background: rgba(137,180,250,0.05);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(137,180,250,0.1);
+            margin-top: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8rem; }
+            .hero-stats { gap: 1rem; }
+            .stat { min-width: 100px; padding: 0.75rem 1rem; }
+            .stat-value { font-size: 1.5rem; }
+            .modules-grid { grid-template-columns: 1fr; }
+            .container { padding: 1rem; }
+            .lang-switcher { margin-left: 0; margin-top: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="hero">
+        <h1 class="lang-ru">Life Goals Dashboard</h1>
+        <h1 class="lang-en">Life Goals Dashboard</h1>
+        <div class="subtitle lang-ru">Интенсив-план обучения для Junior Developer</div>
+        <div class="subtitle lang-en">Intensive Learning Plan for Junior Developer</div>
+        <div style="background: rgba(245, 194, 231, 0.15); border: 1px solid #f5c2e7; border-radius: 8px; padding: 0.75rem 1.25rem; margin-top: 0.75rem; display: inline-block; max-width: 700px;">
+            <span style="font-size: 1.1rem;">🧪</span>
+            <strong style="color: #f5c2e7;" class="lang-ru">TDD из реального Backlog</strong>
+            <strong style="color: #f5c2e7;" class="lang-en">TDD from Real Backlog</strong>
+            <span style="color: #a6adc7;" class="lang-ru"> — в каждом модуле задания из 91 GitHub Issue проекта с готовыми тестами (включая M7 — Budget Accounts Aggregation)</span>
+            <span style="color: #a6adc7;" class="lang-en"> — each module includes assignments from 91 GitHub Issues with ready-made tests (including M7 — Budget Accounts Aggregation)</span>
+        </div>
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-value">17</div>
+                <div class="stat-label lang-ru">модулей</div>
+                <div class="stat-label lang-en">modules</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">~50</div>
+                <div class="stat-label lang-ru">дней</div>
+                <div class="stat-label lang-en">days</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">9-10</div>
+                <div class="stat-label lang-ru">недель интенсив</div>
+                <div class="stat-label lang-en">weeks intensive</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">60+</div>
+                <div class="stat-label lang-ru">практических заданий</div>
+                <div class="stat-label lang-en">practical assignments</div>
+            </div>
+            <div class="stat" style="border-color: #f5c2e7;">
+                <div class="stat-value" style="color: #f5c2e7;">60+</div>
+                <div class="stat-label lang-ru">TDD тестов из Backlog</div>
+                <div class="stat-label lang-en">TDD tests from Backlog</div>
+            </div>
+            <div class="stat" style="border-color: #fab387;">
+                <div class="stat-value" style="color: #fab387;">23</div>
+                <div class="stat-label lang-ru">задач M7: Accounts</div>
+                <div class="stat-label lang-en">M7: Accounts tasks</div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- Dependency Map -->
+    <div class="timeline">
+        <h2 class="lang-ru">Рекомендуемый порядок прохождения</h2>
+        <h2 class="lang-en">Recommended Learning Path</h2>
+        <div class="timeline-bar">
+            <div class="timeline-segment" style="width:4.5%;background:var(--peach)" title="Git">1</div>
+            <div class="timeline-segment" style="width:6.7%;background:var(--blue)" title="TypeScript">2</div>
+            <div class="timeline-segment" style="width:9%;background:var(--mauve)" title="Kotlin">3</div>
+            <div class="timeline-segment" style="width:6.7%;background:var(--teal)" title="PostgreSQL">4</div>
+            <div class="timeline-segment" style="width:4.5%;background:var(--teal)" title="Redis">5</div>
+            <div class="timeline-segment" style="width:9%;background:var(--mauve)" title="Spring Boot">6</div>
+            <div class="timeline-segment" style="width:6.7%;background:var(--mauve)" title="JPA">7</div>
+            <div class="timeline-segment" style="width:4.5%;background:var(--peach)" title="GraphQL">8</div>
+            <div class="timeline-segment" style="width:6.7%;background:var(--mauve)" title="DGS">9</div>
+            <div class="timeline-segment" style="width:9%;background:var(--blue)" title="React">10</div>
+            <div class="timeline-segment" style="width:3.4%;background:var(--blue)" title="CSS/Vite">11</div>
+            <div class="timeline-segment" style="width:9%;background:var(--blue)" title="Relay">12</div>
+            <div class="timeline-segment" style="width:3.4%;background:var(--blue)" title="Jotai">13</div>
+            <div class="timeline-segment" style="width:4.5%;background:var(--teal)" title="Docker">14</div>
+            <div class="timeline-segment" style="width:3.4%;background:var(--teal)" title="CI/CD">15</div>
+            <div class="timeline-segment" style="width:9%;background:var(--peach)" title="Testing">16</div>
+        </div>
+        <div class="timeline-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--mauve)"></div><span class="lang-ru">Backend</span><span class="lang-en">Backend</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div><span class="lang-ru">Frontend</span><span class="lang-en">Frontend</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div><span class="lang-ru">Инфраструктура</span><span class="lang-en">Infrastructure</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--peach)"></div><span class="lang-ru">Общее</span><span class="lang-en">General</span></div>
+        </div>
+    </div>
+
+    <!-- Track: Foundation -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(250,179,135,0.15)">🏗</div>
+            <h2><span class="lang-ru">Фундамент</span><span class="lang-en">Foundation</span></h2>
+        </div>
+        <div class="modules-grid">
+            <a href="01-git.html" class="module-card extra">
+                <span class="card-number"><span class="lang-ru">01/16</span><span class="lang-en">01/16</span></span>
+                <div class="card-title"><span class="lang-ru">Git & Git Flow</span><span class="lang-en">Git & Git Flow</span></div>
+                <div class="card-desc lang-ru">Ветвление, conventional commits, PR workflow проекта. Branch naming: feature/LGD-{N}-description.</div>
+                <div class="card-desc lang-en">Branching, conventional commits, project PR workflow. Branch naming: feature/LGD-{N}-description.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">2 дня</span><span class="lang-en">2 days</span></span>
+                    <span class="tag tag-extra"><span class="lang-ru">Общее</span><span class="lang-en">General</span></span>
+                </div>
+            </a>
+            <a href="02-typescript.html" class="module-card frontend">
+                <span class="card-number"><span class="lang-ru">02/16</span><span class="lang-en">02/16</span></span>
+                <div class="card-title">TypeScript</div>
+                <div class="card-desc lang-ru">Типы, interfaces, generics, utility types. Типизация React-компонентов и Relay-фрагментов.</div>
+                <div class="card-desc lang-en">Types, interfaces, generics, utility types. Typing React components and Relay fragments.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">3 дня</span><span class="lang-en">3 days</span></span>
+                    <span class="tag tag-frontend">Frontend</span>
+                </div>
+            </a>
+            <a href="03-kotlin.html" class="module-card backend">
+                <span class="card-number"><span class="lang-ru">03/16</span><span class="lang-en">03/16</span></span>
+                <div class="card-title">Kotlin</div>
+                <div class="card-desc lang-ru">Null-safety, data classes, sealed classes, коллекции, корутины. Язык всего backend'а.</div>
+                <div class="card-desc lang-en">Null-safety, data classes, sealed classes, collections, coroutines. Language of entire backend.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">4 дня</span><span class="lang-en">4 days</span></span>
+                    <span class="tag tag-backend">Backend</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Track: Data Layer -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(148,226,213,0.15)">💾</div>
+            <h2><span class="lang-ru">Хранилища данных</span><span class="lang-en">Data Storage</span></h2>
+        </div>
+        <div class="modules-grid">
+            <a href="04-postgresql.html" class="module-card infra">
+                <span class="card-number"><span class="lang-ru">04/16</span><span class="lang-en">04/16</span></span>
+                <div class="card-title">PostgreSQL + Flyway</div>
+                <div class="card-desc lang-ru">SQL, JSONB для widget config, cursor-based пагинация, миграции. Единственная БД проекта.</div>
+                <div class="card-desc lang-en">SQL, JSONB for widget config, cursor-based pagination, migrations. Only database in the project.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">3 дня</span><span class="lang-en">3 days</span></span>
+                    <span class="tag tag-infra"><span class="lang-ru">Инфра</span><span class="lang-en">Infra</span></span>
+                </div>
+            </a>
+            <a href="05-redis.html" class="module-card infra">
+                <span class="card-number"><span class="lang-ru">05/16</span><span class="lang-en">05/16</span></span>
+                <div class="card-title">Redis</div>
+                <div class="card-desc lang-ru">Кэширование (cache-aside, write-through), pub/sub для GraphQL Subscriptions, TTL-стратегии.</div>
+                <div class="card-desc lang-en">Caching (cache-aside, write-through), pub/sub for GraphQL Subscriptions, TTL strategies.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">2 дня</span><span class="lang-en">2 days</span></span>
+                    <span class="tag tag-infra"><span class="lang-ru">Инфра</span><span class="lang-en">Infra</span></span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Track: Backend Framework -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(203,166,247,0.15)">⚙</div>
+            <h2><span class="lang-ru">Backend-фреймворки</span><span class="lang-en">Backend Frameworks</span></h2>
+        </div>
+        <div class="modules-grid">
+            <a href="06-spring-boot.html" class="module-card backend">
+                <span class="card-number"><span class="lang-ru">06/16</span><span class="lang-en">06/16</span></span>
+                <div class="card-title">Spring Boot 3</div>
+                <div class="card-desc lang-ru">DI, конфигурация, security (OAuth2+JWT), ViewerContext, обработка ошибок через Payload.</div>
+                <div class="card-desc lang-en">DI, configuration, security (OAuth2+JWT), ViewerContext, error handling via Payload.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">4 дня</span><span class="lang-en">4 days</span></span>
+                    <span class="tag tag-backend">Backend</span>
+                </div>
+            </a>
+            <a href="07-spring-data-jpa.html" class="module-card backend">
+                <span class="card-number"><span class="lang-ru">07/16</span><span class="lang-en">07/16</span></span>
+                <div class="card-title">Spring Data JPA + Hibernate</div>
+                <div class="card-desc lang-ru">Entity, Repository, транзакции, JSONB-маппинг. FetchType.LAZY + DataLoader вместо EAGER.</div>
+                <div class="card-desc lang-en">Entity, Repository, transactions, JSONB mapping. FetchType.LAZY + DataLoader instead of EAGER.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">3 дня</span><span class="lang-en">3 days</span></span>
+                    <span class="tag tag-backend">Backend</span>
+                </div>
+            </a>
+            <a href="08-graphql.html" class="module-card extra">
+                <span class="card-number"><span class="lang-ru">08/16</span><span class="lang-en">08/16</span></span>
+                <div class="card-title"><span class="lang-ru">GraphQL (теория)</span><span class="lang-en">GraphQL (Theory)</span></div>
+                <div class="card-desc lang-ru">Схема, типы, queries, mutations, subscriptions. Relay Connection pattern. @defer директива.</div>
+                <div class="card-desc lang-en">Schema, types, queries, mutations, subscriptions. Relay Connection pattern. @defer directive.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">2 дня</span><span class="lang-en">2 days</span></span>
+                    <span class="tag tag-extra"><span class="lang-ru">Общее</span><span class="lang-en">General</span></span>
+                </div>
+            </a>
+            <a href="09-dgs.html" class="module-card backend">
+                <span class="card-number"><span class="lang-ru">09/16</span><span class="lang-en">09/16</span></span>
+                <div class="card-title">Netflix DGS</div>
+                <div class="card-desc lang-ru">Schema-first, резолверы, DataLoader'ы (N+1 prevention), WebSocket Subscriptions.</div>
+                <div class="card-desc lang-en">Schema-first, resolvers, DataLoaders (N+1 prevention), WebSocket Subscriptions.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">3 дня</span><span class="lang-en">3 days</span></span>
+                    <span class="tag tag-backend">Backend</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Track: Frontend -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(137,180,250,0.15)">🎨</div>
+            <h2><span class="lang-ru">Frontend</span><span class="lang-en">Frontend</span></h2>
+        </div>
+        <div class="modules-grid">
+            <a href="10-react.html" class="module-card frontend">
+                <span class="card-number"><span class="lang-ru">10/16</span><span class="lang-en">10/16</span></span>
+                <div class="card-title">React 18+</div>
+                <div class="card-desc lang-ru">Компоненты, хуки, Suspense + Error Boundaries. Обязательная обёртка для каждого виджета.</div>
+                <div class="card-desc lang-en">Components, hooks, Suspense + Error Boundaries. Required wrapper for each widget.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">4 дня</span><span class="lang-en">4 days</span></span>
+                    <span class="tag tag-frontend">Frontend</span>
+                </div>
+            </a>
+            <a href="11-css-modules-vite.html" class="module-card frontend">
+                <span class="card-number"><span class="lang-ru">11/16</span><span class="lang-en">11/16</span></span>
+                <div class="card-title">CSS Modules + Vite</div>
+                <div class="card-desc lang-ru">Изолированные стили, CSS-переменные для тем, Vite с proxy и HMR.</div>
+                <div class="card-desc lang-en">Scoped styles, CSS variables for themes, Vite with proxy and HMR.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">1.5 дня</span><span class="lang-en">1.5 days</span></span>
+                    <span class="tag tag-frontend">Frontend</span>
+                </div>
+            </a>
+            <a href="12-relay.html" class="module-card frontend">
+                <span class="card-number"><span class="lang-ru">12/16</span><span class="lang-en">12/16</span></span>
+                <div class="card-title">Relay</div>
+                <div class="card-desc lang-ru">Fragment Colocation, usePaginationFragment, mutations с Payload, Relay Environment.</div>
+                <div class="card-desc lang-en">Fragment Colocation, usePaginationFragment, mutations with Payload, Relay Environment.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">4 дня</span><span class="lang-en">4 days</span></span>
+                    <span class="tag tag-frontend">Frontend</span>
+                </div>
+            </a>
+            <a href="13-jotai.html" class="module-card frontend">
+                <span class="card-number"><span class="lang-ru">13/16</span><span class="lang-en">13/16</span></span>
+                <div class="card-title">Jotai</div>
+                <div class="card-desc lang-ru">Атомы, селекторы, atom families. Глобальное состояние: тема, пользователь, уведомления.</div>
+                <div class="card-desc lang-en">Atoms, selectors, atom families. Global state: theme, user, notifications.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">1.5 дня</span><span class="lang-en">1.5 days</span></span>
+                    <span class="tag tag-frontend">Frontend</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Track: DevOps & Testing -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(166,227,161,0.15)">🚀</div>
+            <h2><span class="lang-ru">Инфраструктура и тестирование</span><span class="lang-en">Infrastructure and Testing</span></h2>
+        </div>
+        <div class="modules-grid">
+            <a href="14-docker.html" class="module-card infra">
+                <span class="card-number"><span class="lang-ru">14/16</span><span class="lang-en">14/16</span></span>
+                <div class="card-title">Docker + Docker Compose</div>
+                <div class="card-desc lang-ru">Multi-stage Dockerfile, Compose с PostgreSQL + Redis + API, volumes, healthchecks.</div>
+                <div class="card-desc lang-en">Multi-stage Dockerfile, Compose with PostgreSQL + Redis + API, volumes, healthchecks.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">2 дня</span><span class="lang-en">2 days</span></span>
+                    <span class="tag tag-infra"><span class="lang-ru">Инфра</span><span class="lang-en">Infra</span></span>
+                </div>
+            </a>
+            <a href="15-github-actions.html" class="module-card infra">
+                <span class="card-number"><span class="lang-ru">15/16</span><span class="lang-en">15/16</span></span>
+                <div class="card-title">GitHub Actions</div>
+                <div class="card-desc lang-ru">CI/CD пайплайны: backend-тесты с сервисами, frontend lint+test, автодеплой.</div>
+                <div class="card-desc lang-en">CI/CD pipelines: backend tests with services, frontend lint+test, auto-deploy.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">1.5 дня</span><span class="lang-en">1.5 days</span></span>
+                    <span class="tag tag-infra"><span class="lang-ru">Инфра</span><span class="lang-en">Infra</span></span>
+                </div>
+            </a>
+            <a href="16-testing.html" class="module-card extra">
+                <span class="card-number"><span class="lang-ru">16/17</span><span class="lang-en">16/17</span></span>
+                <div class="card-title"><span class="lang-ru">Тестирование (полный стек)</span><span class="lang-en">Testing (Full Stack)</span></div>
+                <div class="card-desc lang-ru">JUnit 5 + MockK, Testcontainers, DGS тесты, React Testing Library, Playwright E2E.</div>
+                <div class="card-desc lang-en">JUnit 5 + MockK, Testcontainers, DGS tests, React Testing Library, Playwright E2E.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">4 дня</span><span class="lang-en">4 days</span></span>
+                    <span class="tag tag-extra"><span class="lang-ru">Общее</span><span class="lang-en">General</span></span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Milestone → Module mapping -->
+    <div class="timeline" style="border-color: rgba(245,194,231,0.4);">
+        <h2 style="color:#f5c2e7;">🗺 <span class="lang-ru">Карта Milestone → Модули</span><span class="lang-en">Milestone → Modules map</span></h2>
+        <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.95rem;">
+            <span class="lang-ru">Каждый Milestone из <a href="../BACKLOG.md" style="color:var(--header)">BACKLOG.md</a> разложен по модулям обучения. Используйте таблицы как TDD-дорожную карту: прошли модуль — закройте задачи из соответствующего столбца.</span>
+            <span class="lang-en">Every Milestone from <a href="../BACKLOG.en.md" style="color:var(--header)">BACKLOG.md</a> is broken down by learning module. Use the tables as a TDD roadmap: once you finish a module, close the tasks from the matching column.</span>
+        </p>
+    </div>
+
+    <!-- Track: M1 Foundation -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(250,179,135,0.15)">🏗</div>
+            <h2><span class="lang-ru">Milestone 1: Foundation</span><span class="lang-en">Milestone 1: Foundation</span></h2>
+        </div>
+        <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.95rem;">
+            <span class="lang-ru">18 задач (#1–#18): scaffolding обоих проектов, Docker, CI/CD, миграции БД, OAuth2+JWT, Widget Framework. Полное описание — <a href="../BACKLOG.md#milestone-1-foundation" style="color:var(--header)">BACKLOG.md → M1</a>.</span>
+            <span class="lang-en">18 tasks (#1–#18): scaffolding for both projects, Docker, CI/CD, DB migrations, OAuth2+JWT, Widget Framework. Full spec — <a href="../BACKLOG.en.md#milestone-1-foundation" style="color:var(--header)">BACKLOG.md → M1</a>.</span>
+        </p>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><span class="lang-ru">Задача</span><span class="lang-en">Task</span></th>
+                    <th><span class="lang-ru">Модули (TDD)</span><span class="lang-en">Modules (TDD)</span></th>
+                    <th>SP</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>#1</td><td><span class="lang-ru">Kotlin/Spring Boot backend init</span><span class="lang-en">Kotlin/Spring Boot backend init</span></td><td><a href="01-git.html" style="color:var(--header)">01</a>, <a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>8</td></tr>
+                <tr><td>#2</td><td><span class="lang-ru">React/TypeScript frontend init</span><span class="lang-en">React/TypeScript frontend init</span></td><td><a href="02-typescript.html" style="color:var(--header)">02</a>, <a href="10-react.html" style="color:var(--header)">10</a>, <a href="11-css-modules-vite.html" style="color:var(--header)">11</a>, <a href="12-relay.html" style="color:var(--header)">12</a>, <a href="13-jotai.html" style="color:var(--header)">13</a></td><td>8</td></tr>
+                <tr><td>#3</td><td><span class="lang-ru">Docker Compose для локальной разработки</span><span class="lang-en">Docker Compose for local dev</span></td><td><a href="14-docker.html" style="color:var(--header)">14</a></td><td>3</td></tr>
+                <tr><td>#4</td><td><span class="lang-ru">GitHub Actions CI/CD пайплайн</span><span class="lang-en">GitHub Actions CI/CD pipeline</span></td><td><a href="15-github-actions.html" style="color:var(--header)">15</a></td><td>5</td></tr>
+                <tr><td>#5</td><td><span class="lang-ru">.gitignore + project configs</span><span class="lang-en">.gitignore + project configs</span></td><td><a href="01-git.html" style="color:var(--header)">01</a></td><td>1</td></tr>
+                <tr><td>#6</td><td><span class="lang-ru">Core tables: user + dashboard widget</span><span class="lang-en">Core tables: user + dashboard widget</span></td><td><a href="04-postgresql.html" style="color:var(--header)">04</a></td><td>3</td></tr>
+                <tr><td>#7</td><td><span class="lang-ru">Interview Prep таблицы (SM-2)</span><span class="lang-en">Interview Prep tables (SM-2)</span></td><td><a href="04-postgresql.html" style="color:var(--header)">04</a></td><td>5</td></tr>
+                <tr><td>#8</td><td><span class="lang-ru">Fitness Tracker таблицы</span><span class="lang-en">Fitness Tracker tables</span></td><td><a href="04-postgresql.html" style="color:var(--header)">04</a></td><td>8</td></tr>
+                <tr><td>#9</td><td><span class="lang-ru">Budget Planner таблицы</span><span class="lang-en">Budget Planner tables</span></td><td><a href="04-postgresql.html" style="color:var(--header)">04</a></td><td>3</td></tr>
+                <tr><td>#10</td><td><span class="lang-ru">Notification таблица</span><span class="lang-en">Notification table</span></td><td><a href="04-postgresql.html" style="color:var(--header)">04</a></td><td>2</td></tr>
+                <tr><td>#11</td><td><span class="lang-ru">OAuth2 + JWT аутентификация</span><span class="lang-en">OAuth2 + JWT authentication</span></td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>8</td></tr>
+                <tr><td>#12</td><td><span class="lang-ru">ViewerContext infrastructure</span><span class="lang-en">ViewerContext infrastructure</span></td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>3</td></tr>
+                <tr><td>#13</td><td><span class="lang-ru">DGS GraphQL config</span><span class="lang-en">DGS GraphQL config</span></td><td><a href="08-graphql.html" style="color:var(--header)">08</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>8</td></tr>
+                <tr><td>#14</td><td><span class="lang-ru">Widget Framework (common/widget/)</span><span class="lang-en">Widget Framework (common/widget/)</span></td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>5</td></tr>
+                <tr><td>#15</td><td><span class="lang-ru">Relay Connection утилиты (backend)</span><span class="lang-en">Relay Connection utilities (backend)</span></td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="08-graphql.html" style="color:var(--header)">08</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>3</td></tr>
+                <tr><td>#16</td><td><span class="lang-ru">DataLoader registry</span><span class="lang-en">DataLoader registry</span></td><td><a href="09-dgs.html" style="color:var(--header)">09</a></td><td>3</td></tr>
+                <tr><td>#17</td><td><span class="lang-ru">FeatureFlags сервис</span><span class="lang-en">FeatureFlags service</span></td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>3</td></tr>
+                <tr><td>#18</td><td><span class="lang-ru">Redis caching infrastructure</span><span class="lang-en">Redis caching infrastructure</span></td><td><a href="05-redis.html" style="color:var(--header)">05</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>3</td></tr>
+                <tr style="font-weight:700"><td></td><td><span class="lang-ru">ИТОГО M1</span><span class="lang-en">M1 TOTAL</span></td><td></td><td>~82</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Track: M2 Dashboard + Interview Prep -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(203,166,247,0.15)">🎯</div>
+            <h2><span class="lang-ru">Milestone 2: Dashboard + Interview Prep</span><span class="lang-en">Milestone 2: Dashboard + Interview Prep</span></h2>
+        </div>
+        <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.95rem;">
+            <span class="lang-ru">13 задач (#19–#31): dashboard shell, Add Widget flow, первый виджет Interview Prep, SM-2, readiness score, heat map. <a href="../BACKLOG.md#milestone-2-dashboard--interview-prep" style="color:var(--header)">BACKLOG.md → M2</a>.</span>
+            <span class="lang-en">13 tasks (#19–#31): dashboard shell, Add Widget flow, first Interview Prep widget, SM-2, readiness score, heat map. <a href="../BACKLOG.en.md#milestone-2-dashboard--interview-prep" style="color:var(--header)">BACKLOG.md → M2</a>.</span>
+        </p>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><span class="lang-ru">Задача</span><span class="lang-en">Task</span></th>
+                    <th><span class="lang-ru">Модули (TDD)</span><span class="lang-en">Modules (TDD)</span></th>
+                    <th>SP</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>#19</td><td><span class="lang-ru">Dashboard GraphQL schema + резолверы</span><span class="lang-en">Dashboard GraphQL schema + resolvers</span></td><td><a href="08-graphql.html" style="color:var(--header)">08</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>8</td></tr>
+                <tr><td>#20</td><td><span class="lang-ru">Dashboard page (frontend)</span><span class="lang-en">Dashboard page (frontend)</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>8</td></tr>
+                <tr><td>#21</td><td><span class="lang-ru">"Add Widget" flow (frontend)</span><span class="lang-en">"Add Widget" flow (frontend)</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>5</td></tr>
+                <tr><td>#22</td><td><span class="lang-ru">Frontend routing + app shell</span><span class="lang-en">Frontend routing + app shell</span></td><td><a href="02-typescript.html" style="color:var(--header)">02</a>, <a href="10-react.html" style="color:var(--header)">10</a>, <a href="11-css-modules-vite.html" style="color:var(--header)">11</a></td><td>5</td></tr>
+                <tr><td>#23</td><td><span class="lang-ru">Interview Prep GraphQL schema</span><span class="lang-en">Interview Prep GraphQL schema</span></td><td><a href="08-graphql.html" style="color:var(--header)">08</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>5</td></tr>
+                <tr><td>#24</td><td><span class="lang-ru">CodingProblem CRUD (backend)</span><span class="lang-en">CodingProblem CRUD (backend)</span></td><td><a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>5</td></tr>
+                <tr><td>#25</td><td><span class="lang-ru">Problem Attempt tracking</span><span class="lang-en">Problem Attempt tracking</span></td><td><a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>3</td></tr>
+                <tr><td>#26</td><td><span class="lang-ru">Spaced Repetition (SM-2) service</span><span class="lang-en">Spaced Repetition (SM-2) service</span></td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>5</td></tr>
+                <tr><td>#27</td><td><span class="lang-ru">Readiness Score calculator</span><span class="lang-en">Readiness Score calculator</span></td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>5</td></tr>
+                <tr><td>#28</td><td><span class="lang-ru">Heat Map data resolver</span><span class="lang-en">Heat Map data resolver</span></td><td><a href="04-postgresql.html" style="color:var(--header)">04</a>, <a href="05-redis.html" style="color:var(--header)">05</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>3</td></tr>
+                <tr><td>#29</td><td><span class="lang-ru">Interview Prep frontend widget</span><span class="lang-en">Interview Prep frontend widget</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="11-css-modules-vite.html" style="color:var(--header)">11</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>13</td></tr>
+                <tr><td>#30</td><td><span class="lang-ru">System Design + Behavioral CRUD</span><span class="lang-en">System Design + Behavioral CRUD</span></td><td><a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>8</td></tr>
+                <tr><td>#31</td><td><span class="lang-ru">Register InterviewPrepWidgetProvider</span><span class="lang-en">Register InterviewPrepWidgetProvider</span></td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>2</td></tr>
+                <tr style="font-weight:700"><td></td><td><span class="lang-ru">ИТОГО M2</span><span class="lang-en">M2 TOTAL</span></td><td></td><td>~75</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Track: M3 Fitness Tracker -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(166,227,161,0.15)">💪</div>
+            <h2><span class="lang-ru">Milestone 3: Fitness Tracker</span><span class="lang-en">Milestone 3: Fitness Tracker</span></h2>
+        </div>
+        <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.95rem;">
+            <span class="lang-ru">8 задач (#32–#39): Workout, Body Measurement, FoodProduct каталог, Recipe builder, Meal logging с NutritionCalculator, полный FE-виджет. <a href="../BACKLOG.md#milestone-3-fitness-tracker" style="color:var(--header)">BACKLOG.md → M3</a>.</span>
+            <span class="lang-en">8 tasks (#32–#39): Workout, Body Measurement, FoodProduct catalog, Recipe builder, Meal logging with NutritionCalculator, full FE widget. <a href="../BACKLOG.en.md#milestone-3-fitness-tracker" style="color:var(--header)">BACKLOG.md → M3</a>.</span>
+        </p>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><span class="lang-ru">Задача</span><span class="lang-en">Task</span></th>
+                    <th><span class="lang-ru">Модули (TDD)</span><span class="lang-en">Modules (TDD)</span></th>
+                    <th>SP</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>#32</td><td><span class="lang-ru">Fitness GraphQL schema</span><span class="lang-en">Fitness GraphQL schema</span></td><td><a href="08-graphql.html" style="color:var(--header)">08</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>5</td></tr>
+                <tr><td>#33</td><td><span class="lang-ru">Workout logging (backend)</span><span class="lang-en">Workout logging (backend)</span></td><td><a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>5</td></tr>
+                <tr><td>#34</td><td><span class="lang-ru">Body Measurement tracking</span><span class="lang-en">Body Measurement tracking</span></td><td><a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>3</td></tr>
+                <tr><td>#35</td><td><span class="lang-ru">Food Product catalog + search</span><span class="lang-en">Food Product catalog + search</span></td><td><a href="05-redis.html" style="color:var(--header)">05</a>, <a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>8</td></tr>
+                <tr><td>#36</td><td><span class="lang-ru">Recipe builder</span><span class="lang-en">Recipe builder</span></td><td><a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>5</td></tr>
+                <tr><td>#37</td><td><span class="lang-ru">Meal logging + NutritionCalculator</span><span class="lang-en">Meal logging + NutritionCalculator</span></td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>8</td></tr>
+                <tr><td>#38</td><td><span class="lang-ru">Fitness frontend widget</span><span class="lang-en">Fitness frontend widget</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="11-css-modules-vite.html" style="color:var(--header)">11</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>13</td></tr>
+                <tr><td>#39</td><td><span class="lang-ru">Register FitnessWidgetProvider</span><span class="lang-en">Register FitnessWidgetProvider</span></td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>2</td></tr>
+                <tr style="font-weight:700"><td></td><td><span class="lang-ru">ИТОГО M3</span><span class="lang-en">M3 TOTAL</span></td><td></td><td>~49</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Track: M4 Budget Planner -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(148,226,213,0.15)">💰</div>
+            <h2><span class="lang-ru">Milestone 4: Budget Planner</span><span class="lang-en">Milestone 4: Budget Planner</span></h2>
+        </div>
+        <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.95rem;">
+            <span class="lang-ru">7 задач (#40–#46): Transaction CRUD, Exchange Rate service, Savings Forecast, Trip Budget, FE-виджет. <a href="../BACKLOG.md#milestone-4-budget-planner" style="color:var(--header)">BACKLOG.md → M4</a>.</span>
+            <span class="lang-en">7 tasks (#40–#46): Transaction CRUD, Exchange Rate service, Savings Forecast, Trip Budget, FE widget. <a href="../BACKLOG.en.md#milestone-4-budget-planner" style="color:var(--header)">BACKLOG.md → M4</a>.</span>
+        </p>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><span class="lang-ru">Задача</span><span class="lang-en">Task</span></th>
+                    <th><span class="lang-ru">Модули (TDD)</span><span class="lang-en">Modules (TDD)</span></th>
+                    <th>SP</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>#40</td><td><span class="lang-ru">Budget GraphQL schema</span><span class="lang-en">Budget GraphQL schema</span></td><td><a href="08-graphql.html" style="color:var(--header)">08</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>3</td></tr>
+                <tr><td>#41</td><td><span class="lang-ru">Transaction CRUD (backend)</span><span class="lang-en">Transaction CRUD (backend)</span></td><td><a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>5</td></tr>
+                <tr><td>#42</td><td><span class="lang-ru">Exchange Rate service + cache</span><span class="lang-en">Exchange Rate service + cache</span></td><td><a href="05-redis.html" style="color:var(--header)">05</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>5</td></tr>
+                <tr><td>#43</td><td><span class="lang-ru">Savings Goal + Forecast (3 scenarios)</span><span class="lang-en">Savings Goal + Forecast (3 scenarios)</span></td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="07-spring-data-jpa.html" style="color:var(--header)">07</a></td><td>5</td></tr>
+                <tr><td>#44</td><td><span class="lang-ru">Trip Budget breakdown</span><span class="lang-en">Trip Budget breakdown</span></td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>3</td></tr>
+                <tr><td>#45</td><td><span class="lang-ru">Budget frontend widget</span><span class="lang-en">Budget frontend widget</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="11-css-modules-vite.html" style="color:var(--header)">11</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>13</td></tr>
+                <tr><td>#46</td><td><span class="lang-ru">Register BudgetWidgetProvider</span><span class="lang-en">Register BudgetWidgetProvider</span></td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>2</td></tr>
+                <tr style="font-weight:700"><td></td><td><span class="lang-ru">ИТОГО M4</span><span class="lang-en">M4 TOTAL</span></td><td></td><td>~36</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Track: M5 Notifications + Testing -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(243,139,168,0.15)">🔔</div>
+            <h2><span class="lang-ru">Milestone 5: Notifications + Testing</span><span class="lang-en">Milestone 5: Notifications + Testing</span></h2>
+        </div>
+        <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.95rem;">
+            <span class="lang-ru">16 задач (#47–#56, #63–#68): WebSocket-подписки, achievement system, весь testing stack (unit, integration, DGS, RTL, Playwright), privacy tests. <a href="../BACKLOG.md#milestone-5-notifications--testing" style="color:var(--header)">BACKLOG.md → M5</a>.</span>
+            <span class="lang-en">16 tasks (#47–#56, #63–#68): WebSocket subscriptions, achievement system, full testing stack (unit, integration, DGS, RTL, Playwright), privacy tests. <a href="../BACKLOG.en.md#milestone-5-notifications--testing" style="color:var(--header)">BACKLOG.md → M5</a>.</span>
+        </p>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><span class="lang-ru">Задача</span><span class="lang-en">Task</span></th>
+                    <th><span class="lang-ru">Модули (TDD)</span><span class="lang-en">Modules (TDD)</span></th>
+                    <th>SP</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>#47</td><td><span class="lang-ru">Notification service + резолверы</span><span class="lang-en">Notification service + resolvers</span></td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>5</td></tr>
+                <tr><td>#48</td><td><span class="lang-ru">GraphQL Subscriptions (WebSocket + Redis pub/sub)</span><span class="lang-en">GraphQL Subscriptions (WebSocket + Redis pub/sub)</span></td><td><a href="05-redis.html" style="color:var(--header)">05</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>8</td></tr>
+                <tr><td>#49</td><td><span class="lang-ru">Achievement system (widget-aware)</span><span class="lang-en">Achievement system (widget-aware)</span></td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>8</td></tr>
+                <tr><td>#50</td><td><span class="lang-ru">Notification UI components</span><span class="lang-en">Notification UI components</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="12-relay.html" style="color:var(--header)">12</a>, <a href="13-jotai.html" style="color:var(--header)">13</a></td><td>5</td></tr>
+                <tr><td>#51</td><td><span class="lang-ru">Backend test infrastructure</span><span class="lang-en">Backend test infrastructure</span></td><td><a href="14-docker.html" style="color:var(--header)">14</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>5</td></tr>
+                <tr><td>#52</td><td><span class="lang-ru">Unit tests для всех сервисов</span><span class="lang-en">Unit tests for all services</span></td><td><a href="16-testing.html" style="color:var(--header)">16</a></td><td>13</td></tr>
+                <tr><td>#53</td><td><span class="lang-ru">Integration tests (repo + DataLoader)</span><span class="lang-en">Integration tests (repo + DataLoader)</span></td><td><a href="04-postgresql.html" style="color:var(--header)">04</a>, <a href="14-docker.html" style="color:var(--header)">14</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>8</td></tr>
+                <tr><td>#54</td><td><span class="lang-ru">DGS resolver tests</span><span class="lang-en">DGS resolver tests</span></td><td><a href="09-dgs.html" style="color:var(--header)">09</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>8</td></tr>
+                <tr><td>#55</td><td><span class="lang-ru">Frontend component tests (RTL)</span><span class="lang-en">Frontend component tests (RTL)</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>8</td></tr>
+                <tr><td>#56</td><td><span class="lang-ru">E2E tests (Playwright)</span><span class="lang-en">E2E tests (Playwright)</span></td><td><a href="16-testing.html" style="color:var(--header)">16</a></td><td>13</td></tr>
+                <tr><td>#63</td><td><span class="lang-ru">ErrorBoundary + Suspense wrapper</span><span class="lang-en">ErrorBoundary + Suspense wrapper</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>3</td></tr>
+                <tr><td>#64</td><td><span class="lang-ru">New user onboarding flow</span><span class="lang-en">New user onboarding flow</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="11-css-modules-vite.html" style="color:var(--header)">11</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>5</td></tr>
+                <tr><td>#65</td><td><span class="lang-ru">Settings page</span><span class="lang-en">Settings page</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="12-relay.html" style="color:var(--header)">12</a>, <a href="13-jotai.html" style="color:var(--header)">13</a></td><td>5</td></tr>
+                <tr><td>#66</td><td><span class="lang-ru">Mutation audit logging (cross-cutting)</span><span class="lang-en">Mutation audit logging (cross-cutting)</span></td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="07-spring-data-jpa.html" style="color:var(--header)">07</a></td><td>3</td></tr>
+                <tr><td>#67</td><td><span class="lang-ru">ViewerContext privacy tests</span><span class="lang-en">ViewerContext privacy tests</span></td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>3</td></tr>
+                <tr><td>#68</td><td><span class="lang-ru">Widget config schema validation tests</span><span class="lang-en">Widget config schema validation tests</span></td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>2</td></tr>
+                <tr style="font-weight:700"><td></td><td><span class="lang-ru">ИТОГО M5</span><span class="lang-en">M5 TOTAL</span></td><td></td><td>~102</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Track: M6 Polish + Deploy -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(137,180,250,0.15)">🚀</div>
+            <h2><span class="lang-ru">Milestone 6: Polish + Deploy</span><span class="lang-en">Milestone 6: Polish + Deploy</span></h2>
+        </div>
+        <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.95rem;">
+            <span class="lang-ru">6 задач (#57–#62): CSV/PDF export, Workout Templates, Practice Timer, деплой на Railway/Render + Vercel, production monitoring. <a href="../BACKLOG.md#milestone-6-polish--deploy" style="color:var(--header)">BACKLOG.md → M6</a>.</span>
+            <span class="lang-en">6 tasks (#57–#62): CSV/PDF export, Workout Templates, Practice Timer, deploy to Railway/Render + Vercel, production monitoring. <a href="../BACKLOG.en.md#milestone-6-polish--deploy" style="color:var(--header)">BACKLOG.md → M6</a>.</span>
+        </p>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><span class="lang-ru">Задача</span><span class="lang-en">Task</span></th>
+                    <th><span class="lang-ru">Модули (TDD)</span><span class="lang-en">Modules (TDD)</span></th>
+                    <th>SP</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>#57</td><td><span class="lang-ru">CSV/PDF data export</span><span class="lang-en">CSV/PDF data export</span></td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="10-react.html" style="color:var(--header)">10</a></td><td>5</td></tr>
+                <tr><td>#58</td><td><span class="lang-ru">Workout Templates</span><span class="lang-en">Workout Templates</span></td><td><a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="10-react.html" style="color:var(--header)">10</a></td><td>5</td></tr>
+                <tr><td>#59</td><td><span class="lang-ru">Practice Timer для Interview Prep</span><span class="lang-en">Practice Timer for Interview Prep</span></td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="13-jotai.html" style="color:var(--header)">13</a></td><td>3</td></tr>
+                <tr><td>#60</td><td><span class="lang-ru">Deploy backend (Railway/Render)</span><span class="lang-en">Deploy backend (Railway/Render)</span></td><td><a href="14-docker.html" style="color:var(--header)">14</a>, <a href="15-github-actions.html" style="color:var(--header)">15</a></td><td>5</td></tr>
+                <tr><td>#61</td><td><span class="lang-ru">Deploy frontend (Vercel)</span><span class="lang-en">Deploy frontend (Vercel)</span></td><td><a href="15-github-actions.html" style="color:var(--header)">15</a></td><td>2</td></tr>
+                <tr><td>#62</td><td><span class="lang-ru">Production monitoring + alerting</span><span class="lang-en">Production monitoring + alerting</span></td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="14-docker.html" style="color:var(--header)">14</a>, <a href="15-github-actions.html" style="color:var(--header)">15</a></td><td>3</td></tr>
+                <tr style="font-weight:700"><td></td><td><span class="lang-ru">ИТОГО M6</span><span class="lang-en">M6 TOTAL</span></td><td></td><td>~23</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Track: Budget Accounts Aggregation (M7) -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(250,179,135,0.15)">🏦</div>
+            <h2><span class="lang-ru">Capstone-фича: Budget Accounts Aggregation (M7)</span><span class="lang-en">Capstone feature: Budget Accounts Aggregation (M7)</span></h2>
+        </div>
+        <p style="color:var(--text-secondary);margin-bottom:1rem;font-size:0.95rem;">
+            <span class="lang-ru">23 новые задачи (#69–#91) расширяют Budget widget: manual / crypto.com / Open Banking провайдеры, credential vault с envelope encryption, real-time subscriptions, observability. Задачи распределены по ранее изученным модулям — используйте их как TDD-практикум для закрепления всего стека. Полное описание: <a href="../BACKLOG.md#milestone-7-budget-accounts-aggregation" style="color:var(--header)">BACKLOG.md → M7</a>, <a href="../budget-accounts/ENGINEERING_BREAKDOWN_budget_accounts.md" style="color:var(--header)">Engineering Breakdown</a>.</span>
+            <span class="lang-en">23 new tasks (#69–#91) extend the Budget widget: manual / crypto.com / Open Banking providers, credential vault with envelope encryption, real-time subscriptions, observability. Tasks are mapped to modules you've already studied — use them as a TDD capstone to lock in the whole stack. Full spec: <a href="../BACKLOG.en.md#milestone-7-budget-accounts-aggregation" style="color:var(--header)">BACKLOG.en.md → M7</a>, <a href="../budget-accounts/ENGINEERING_BREAKDOWN_budget_accounts.md" style="color:var(--header)">Engineering Breakdown</a>.</span>
+        </p>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><span class="lang-ru">Задача</span><span class="lang-en">Task</span></th>
+                    <th><span class="lang-ru">Фаза</span><span class="lang-en">Phase</span></th>
+                    <th><span class="lang-ru">Модули (TDD)</span><span class="lang-en">Modules (TDD)</span></th>
+                    <th>SP</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>#69</td><td><span class="lang-ru">Flyway schema: accounts, credentials, snapshots, access log</span><span class="lang-en">Flyway schema: accounts, credentials, snapshots, access log</span></td><td>phase-0</td><td><a href="04-postgresql.html" style="color:var(--header)">04</a></td><td>5</td></tr>
+                <tr><td>#70</td><td><span class="lang-ru">JPA entities + repositories (optimistic locking)</span><span class="lang-en">JPA entities + repositories (optimistic locking)</span></td><td>phase-0</td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>5</td></tr>
+                <tr><td>#71</td><td><span class="lang-ru">AccountProvider interface + registry (contract tests)</span><span class="lang-en">AccountProvider interface + registry (contract tests)</span></td><td>phase-0</td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>5</td></tr>
+                <tr><td>#72</td><td><span class="lang-ru">Credential vault: envelope encryption + audit</span><span class="lang-en">Credential vault: envelope encryption + audit</span></td><td>phase-0</td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="07-spring-data-jpa.html" style="color:var(--header)">07</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>8</td></tr>
+                <tr><td>#73</td><td><span class="lang-ru">ManualProvider (smoke-test инфры)</span><span class="lang-en">ManualProvider (infra smoke test)</span></td><td>phase-0</td><td><a href="03-kotlin.html" style="color:var(--header)">03</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>3</td></tr>
+                <tr><td>#74</td><td><span class="lang-ru">Observability baseline (structured logs + metrics)</span><span class="lang-en">Observability baseline (structured logs + metrics)</span></td><td>phase-0</td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="15-github-actions.html" style="color:var(--header)">15</a></td><td>3</td></tr>
+                <tr><td>#75</td><td><span class="lang-ru">GraphQL schema v1 (Account, manual mutations)</span><span class="lang-en">GraphQL schema v1 (Account, manual mutations)</span></td><td>phase-0</td><td><a href="08-graphql.html" style="color:var(--header)">08</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>5</td></tr>
+                <tr><td>#76</td><td><span class="lang-ru">Spike: crypto.com Exchange API</span><span class="lang-en">Spike: crypto.com Exchange API</span></td><td>phase-1</td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>2</td></tr>
+                <tr><td>#77</td><td><span class="lang-ru">CryptoComProvider (HMAC, валидация permissions)</span><span class="lang-en">CryptoComProvider (HMAC, permission validation)</span></td><td>phase-1</td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>8</td></tr>
+                <tr><td>#78</td><td><span class="lang-ru">Redis cache + scheduler + token bucket</span><span class="lang-en">Redis cache + scheduler + token bucket</span></td><td>phase-1</td><td><a href="05-redis.html" style="color:var(--header)">05</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>5</td></tr>
+                <tr><td>#79</td><td><span class="lang-ru">GraphQL connect mutation + subscription (pub/sub)</span><span class="lang-en">GraphQL connect mutation + subscription (pub/sub)</span></td><td>phase-1</td><td><a href="05-redis.html" style="color:var(--header)">05</a>, <a href="09-dgs.html" style="color:var(--header)">09</a></td><td>5</td></tr>
+                <tr><td>#80</td><td><span class="lang-ru">Frontend: Accounts tab + connect flow</span><span class="lang-en">Frontend: Accounts tab + connect flow</span></td><td>phase-1</td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="12-relay.html" style="color:var(--header)">12</a>, <a href="13-jotai.html" style="color:var(--header)">13</a></td><td>13</td></tr>
+                <tr><td>#81</td><td><span class="lang-ru">Spike: GoCardless BAD sandbox</span><span class="lang-en">Spike: GoCardless BAD sandbox</span></td><td>phase-2</td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>3</td></tr>
+                <tr><td>#82</td><td><span class="lang-ru">OpenBankingProvider (GoCardless client)</span><span class="lang-en">OpenBankingProvider (GoCardless client)</span></td><td>phase-2</td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>8</td></tr>
+                <tr><td>#83</td><td><span class="lang-ru">Consent flow (requisition + callback + picker)</span><span class="lang-en">Consent flow (requisition + callback + picker)</span></td><td>phase-2</td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="10-react.html" style="color:var(--header)">10</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>8</td></tr>
+                <tr><td>#84</td><td><span class="lang-ru">Re-consent lifecycle + notifications</span><span class="lang-en">Re-consent lifecycle + notifications</span></td><td>phase-2</td><td><a href="06-spring-boot.html" style="color:var(--header)">06</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>5</td></tr>
+                <tr><td>#85</td><td><span class="lang-ru">Rate-limit guard per provider</span><span class="lang-en">Rate-limit guard per provider</span></td><td>phase-2</td><td><a href="05-redis.html" style="color:var(--header)">05</a>, <a href="06-spring-boot.html" style="color:var(--header)">06</a></td><td>5</td></tr>
+                <tr><td>#86</td><td><span class="lang-ru">Frontend: donut chart (allocation)</span><span class="lang-en">Frontend: donut chart (allocation)</span></td><td>phase-3</td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>5</td></tr>
+                <tr><td>#87</td><td><span class="lang-ru">90-day balance line chart (BE + FE)</span><span class="lang-en">90-day balance line chart (BE + FE)</span></td><td>phase-3</td><td><a href="09-dgs.html" style="color:var(--header)">09</a>, <a href="10-react.html" style="color:var(--header)">10</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>5</td></tr>
+                <tr><td>#88</td><td><span class="lang-ru">Per-row actions (refresh / reconnect / disconnect)</span><span class="lang-en">Per-row actions (refresh / reconnect / disconnect)</span></td><td>phase-3</td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="12-relay.html" style="color:var(--header)">12</a></td><td>3</td></tr>
+                <tr><td>#89</td><td><span class="lang-ru">A11y audit + keyboard nav (Accounts tab)</span><span class="lang-en">A11y audit + keyboard nav (Accounts tab)</span></td><td>phase-3</td><td><a href="10-react.html" style="color:var(--header)">10</a>, <a href="16-testing.html" style="color:var(--header)">16</a></td><td>3</td></tr>
+                <tr><td>#90</td><td><span class="lang-ru">Grafana/OpenSearch dashboard</span><span class="lang-en">Grafana/OpenSearch dashboard</span></td><td>phase-3</td><td><a href="14-docker.html" style="color:var(--header)">14</a>, <a href="15-github-actions.html" style="color:var(--header)">15</a></td><td>3</td></tr>
+                <tr><td>#91</td><td><span class="lang-ru">Docs + onboarding guide</span><span class="lang-en">Docs + onboarding guide</span></td><td>phase-3</td><td>—</td><td>2</td></tr>
+                <tr style="font-weight:700"><td></td><td><span class="lang-ru">ИТОГО M7</span><span class="lang-en">M7 TOTAL</span></td><td></td><td></td><td>~118</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Track: Integration -->
+    <div class="track">
+        <div class="track-header">
+            <div class="track-icon" style="background:rgba(243,139,168,0.15)">🎯</div>
+            <h2><span class="lang-ru">Финал: интеграция + Meta Interview Prep</span><span class="lang-en">Final: Integration + Meta Interview Prep</span></h2>
+        </div>
+        <div class="modules-grid">
+            <a href="17-integration.html" class="module-card extra" style="border-color:var(--accent)">
+                <span class="card-number"><span class="lang-ru">17/17</span><span class="lang-en">17/17</span></span>
+                <div class="card-title" style="color:var(--accent)"><span class="lang-ru">Собираем всё вместе</span><span class="lang-en">Putting It All Together</span></div>
+                <div class="card-desc lang-ru">Сквозной пример нового виджета (10 шагов: БД → Entity → GraphQL → DGS → Relay). Архитектурные решения для Meta-интервью. Trade-off анализ.</div>
+                <div class="card-desc lang-en">End-to-end widget example (10 steps: DB → Entity → GraphQL → DGS → Relay). Architecture decisions for Meta interview. Trade-off analysis.</div>
+                <div class="card-meta">
+                    <span class="card-duration"><span class="lang-ru">5 дней</span><span class="lang-en">5 days</span></span>
+                    <span class="tag" style="background:rgba(243,139,168,0.15);color:var(--accent)"><span class="lang-ru">Ключевой</span><span class="lang-en">Key</span></span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Table -->
+    <div class="timeline">
+        <h2 class="lang-ru">Сводная таблица</h2>
+        <h2 class="lang-en">Summary Table</h2>
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th><span class="lang-ru">Модуль</span><span class="lang-en">Module</span></th>
+                    <th><span class="lang-ru">Дни</span><span class="lang-en">Days</span></th>
+                    <th><span class="lang-ru">Трек</span><span class="lang-en">Track</span></th>
+                    <th><span class="lang-ru">Пререквизиты</span><span class="lang-en">Prerequisites</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td><a href="01-git.html" style="color:var(--header)"><span class="lang-ru">Git & Git Flow</span><span class="lang-en">Git & Git Flow</span></a></td><td>2</td><td><span class="tag tag-extra"><span class="lang-ru">Общее</span><span class="lang-en">General</span></span></td><td>—</td></tr>
+                <tr><td>2</td><td><a href="02-typescript.html" style="color:var(--header)">TypeScript</a></td><td>3</td><td><span class="tag tag-frontend">Frontend</span></td><td><span class="lang-ru">Базовый JS</span><span class="lang-en">Basic JS</span></td></tr>
+                <tr><td>3</td><td><a href="03-kotlin.html" style="color:var(--header)">Kotlin</a></td><td>4</td><td><span class="tag tag-backend">Backend</span></td><td><span class="lang-ru">Любой ООП-язык</span><span class="lang-en">Any OOP language</span></td></tr>
+                <tr><td>4</td><td><a href="04-postgresql.html" style="color:var(--header)">PostgreSQL + Flyway</a></td><td>3</td><td><span class="tag tag-infra"><span class="lang-ru">Инфра</span><span class="lang-en">Infra</span></span></td><td><span class="lang-ru">Базовые БД</span><span class="lang-en">Basic Databases</span></td></tr>
+                <tr><td>5</td><td><a href="05-redis.html" style="color:var(--header)">Redis</a></td><td>2</td><td><span class="tag tag-infra"><span class="lang-ru">Инфра</span><span class="lang-en">Infra</span></span></td><td><span class="lang-ru">Модуль 4</span><span class="lang-en">Module 4</span></td></tr>
+                <tr><td>6</td><td><a href="06-spring-boot.html" style="color:var(--header)">Spring Boot 3</a></td><td>4</td><td><span class="tag tag-backend">Backend</span></td><td><span class="lang-ru">Модуль 3</span><span class="lang-en">Module 3</span></td></tr>
+                <tr><td>7</td><td><a href="07-spring-data-jpa.html" style="color:var(--header)"><span class="lang-ru">Spring Data JPA</span><span class="lang-en">Spring Data JPA</span></a></td><td>3</td><td><span class="tag tag-backend">Backend</span></td><td><span class="lang-ru">Модули 4, 6</span><span class="lang-en">Modules 4, 6</span></td></tr>
+                <tr><td>8</td><td><a href="08-graphql.html" style="color:var(--header)"><span class="lang-ru">GraphQL (теория)</span><span class="lang-en">GraphQL (Theory)</span></a></td><td>2</td><td><span class="tag tag-extra"><span class="lang-ru">Общее</span><span class="lang-en">General</span></span></td><td><span class="lang-ru">HTTP API</span><span class="lang-en">HTTP API</span></td></tr>
+                <tr><td>9</td><td><a href="09-dgs.html" style="color:var(--header)">Netflix DGS</a></td><td>3</td><td><span class="tag tag-backend">Backend</span></td><td><span class="lang-ru">Модули 6, 8</span><span class="lang-en">Modules 6, 8</span></td></tr>
+                <tr><td>10</td><td><a href="10-react.html" style="color:var(--header)">React 18+</a></td><td>4</td><td><span class="tag tag-frontend">Frontend</span></td><td><span class="lang-ru">Модуль 2</span><span class="lang-en">Module 2</span></td></tr>
+                <tr><td>11</td><td><a href="11-css-modules-vite.html" style="color:var(--header)">CSS Modules + Vite</a></td><td>1.5</td><td><span class="tag tag-frontend">Frontend</span></td><td><span class="lang-ru">Модуль 10</span><span class="lang-en">Module 10</span></td></tr>
+                <tr><td>12</td><td><a href="12-relay.html" style="color:var(--header)">Relay</a></td><td>4</td><td><span class="tag tag-frontend">Frontend</span></td><td><span class="lang-ru">Модули 8, 10</span><span class="lang-en">Modules 8, 10</span></td></tr>
+                <tr><td>13</td><td><a href="13-jotai.html" style="color:var(--header)">Jotai</a></td><td>1.5</td><td><span class="tag tag-frontend">Frontend</span></td><td><span class="lang-ru">Модуль 10</span><span class="lang-en">Module 10</span></td></tr>
+                <tr><td>14</td><td><a href="14-docker.html" style="color:var(--header)">Docker + Compose</a></td><td>2</td><td><span class="tag tag-infra"><span class="lang-ru">Инфра</span><span class="lang-en">Infra</span></span></td><td><span class="lang-ru">CLI</span><span class="lang-en">CLI</span></td></tr>
+                <tr><td>15</td><td><a href="15-github-actions.html" style="color:var(--header)">GitHub Actions</a></td><td>1.5</td><td><span class="tag tag-infra"><span class="lang-ru">Инфра</span><span class="lang-en">Infra</span></span></td><td><span class="lang-ru">Модули 1, 14</span><span class="lang-en">Modules 1, 14</span></td></tr>
+                <tr><td>16</td><td><a href="16-testing.html" style="color:var(--header)"><span class="lang-ru">Тестирование</span><span class="lang-en">Testing</span></a></td><td>4</td><td><span class="tag tag-extra"><span class="lang-ru">Общее</span><span class="lang-en">General</span></span></td><td><span class="lang-ru">Все модули</span><span class="lang-en">All modules</span></td></tr>
+                <tr><td>17</td><td><a href="17-integration.html" style="color:var(--accent);font-weight:700"><span class="lang-ru">Собираем всё вместе</span><span class="lang-en">Putting It All Together</span></a></td><td>5</td><td><span class="tag" style="background:rgba(243,139,168,0.15);color:var(--accent)"><span class="lang-ru">Ключевой</span><span class="lang-en">Key</span></span></td><td><span class="lang-ru">Все модули</span><span class="lang-en">All modules</span></td></tr>
+                <tr style="font-weight:700"><td></td><td><span class="lang-ru">ИТОГО</span><span class="lang-en">TOTAL</span></td><td>49.5</td><td></td><td></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<footer>
+    <span class="lang-ru">Life Goals Dashboard — Onboarding Learning Plan<br>При интенсивном режиме (6 ч/день) ≈ 8-9 недель &nbsp;|&nbsp; При умеренном (4 ч/день) ≈ 11-12 недель</span>
+    <span class="lang-en">Life Goals Dashboard — Onboarding Learning Plan<br>Intensive mode (6 hours/day) ≈ 8-9 weeks &nbsp;|&nbsp; Moderate mode (4 hours/day) ≈ 11-12 weeks</span>
+</footer>
+
+    <script>
+        function setLang(lang) {
+            document.body.classList.toggle('show-en', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('study-lang', lang); } catch(e) {}
+        }
+        try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+    </script>
+
+</body>
+</html>

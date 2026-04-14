@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 12: Relay - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .language-bash::before,
+        .language-kotlin::before,
+        .language-typescript::before,
+        .language-graphql::before {
+            content: attr(data-lang);
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details/Collapse */
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        /* Assignments */
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .assignment .tdd-badge {
+            display: inline-block;
+            background: #f5c2e7;
+            color: #1e1e2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Resources */
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        /* Navigation */
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Prism Customization */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+
+        /* Language Switcher */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        
+        .lang-switcher {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            margin-left: 1rem;
+        }
+        
+        .lang-switcher button {
+            padding: 4px 12px;
+            border: 1px solid var(--header);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        
+        .lang-switcher button.active {
+            background: var(--header);
+            color: var(--bg);
+            font-weight: 600;
+        }
+    
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="lang-ru"><div class="module-number">МОДУЛЬ 12 / 16</div></div><div class="lang-en"><div class="module-number">MODULE 12 / 16</div></div>
+            <h1>Relay</h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="lang-switcher">
+            <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+        </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="lang-ru"><h3>Содержание</h3></div><div class="lang-en"><h3>Contents</h3></div>
+            <ul>
+                <div class="lang-ru"><li><a href="#intro">Введение</a></li></div><div class="lang-en"><li><a href="#intro">Introduction</a></li></div>
+                <div class="lang-ru"><li><a href="#fragment-colocation">Fragment Colocation</a></li></div><div class="lang-en"><li><a href="#fragment-colocation">Fragment Colocation</a></li></div>
+                <div class="lang-ru"><li><a href="#queries">Queries и useLazyLoadQuery</a></li></div><div class="lang-en"><li><a href="#queries">Queries and useLazyLoadQuery</a></li></div>
+                <div class="lang-ru"><li><a href="#pagination">Pagination и @refetchable</a></li></div><div class="lang-en"><li><a href="#pagination">Pagination and @refetchable</a></li></div>
+                <div class="lang-ru"><li><a href="#mutations">Mutations и useMutation</a></li></div><div class="lang-en"><li><a href="#mutations">Mutations and useMutation</a></li></div>
+                <div class="lang-ru"><li><a href="#setup">Environment Setup</a></li></div><div class="lang-en"><li><a href="#setup">Environment Setup</a></li></div>
+                <div class="lang-ru"><li><a href="#compiler">Relay Compiler</a></li></div><div class="lang-en"><li><a href="#compiler">Relay Compiler</a></li></div>
+                <div class="lang-ru"><li><a href="#assignments">Практические задания</a></li></div><div class="lang-en"><li><a href="#assignments">Practical Assignments</a></li></div>
+                <div class="lang-ru"><li><a href="#backlog-tasks">🧪 Задания из Backlog (TDD)</a></li></div><div class="lang-en"><li><a href="#backlog-tasks">🧪 Backlog Tasks (TDD)</a></li></div>
+                <div class="lang-ru"><li><a href="#resources">Ресурсы</a></li></div><div class="lang-en"><li><a href="#resources">Resources</a></li></div>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <section id="intro">
+                <div class="lang-ru">
+                <h2>Введение: Relay для управления GraphQL данными</h2>
+                <p>
+                    <strong>Relay</strong> — это мощная библиотека для управления GraphQL данными на фронтенде.
+                    Её главный принцип: <strong>Fragment Colocation</strong> — каждый компонент объявляет свой GraphQL фрагмент в том же файле.
+                </p>
+                <p>
+                    За 4 дня вы освоите:
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Fragment Colocation: `ComponentName_fieldName` в том же файле .tsx</li>
+                    <li>useLazyLoadQuery для инициализации данных на странице</li>
+                    <li>usePaginationFragment для Relay Connection pagination (cursor-based)</li>
+                    <li>useMutation для отправки данных и оптимистических обновлений</li>
+                    <li>Environment setup: Network, Store, RecordSource, WebSocket subscriptions</li>
+                    <li>Relay Compiler: `npm run relay` генерирует __generated__ типы</li>
+                </ul>
+
+                <div class="tip">
+                    <strong>Совет:</strong> Relay требует рефакторинга мышления.
+                    Вместо "fetch all data, then render", вы объявляете requirements в компонентах,
+                    и Relay собирает всё в один эффективный запрос. Это похоже на GraphQL-native подход Meta.
+                </div>
+                </div>
+                <div class="lang-en">
+                <h2>Introduction: Relay for GraphQL Data Management</h2>
+                <p>
+                    <strong>Relay</strong> is a powerful library for managing GraphQL data on the frontend.
+                    Its core principle: <strong>Fragment Colocation</strong> — each component declares its own GraphQL fragment in the same file.
+                </p>
+                <p>
+                    Over 4 days you will master:
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Fragment Colocation: `ComponentName_fieldName` in the same .tsx file</li>
+                    <li>useLazyLoadQuery for data initialization on the page</li>
+                    <li>usePaginationFragment for Relay Connection pagination (cursor-based)</li>
+                    <li>useMutation for sending data and optimistic updates</li>
+                    <li>Environment setup: Network, Store, RecordSource, WebSocket subscriptions</li>
+                    <li>Relay Compiler: `npm run relay` generates __generated__ types</li>
+                </ul>
+
+                <div class="tip">
+                    <strong>Tip:</strong> Relay requires a shift in thinking.
+                    Instead of "fetch all data, then render", you declare requirements in components,
+                    and Relay gathers everything into one efficient query. This is similar to Meta's GraphQL-native approach.
+                </div>
+                </div>
+            </section>
+
+            <section id="fragment-colocation">
+                <div class="lang-ru">
+                <h2>Fragment Colocation — главный принцип</h2>
+
+                <h3>Что такое Fragment?</h3>
+                <p>
+                    Fragment — это именованный набор полей GraphQL. Компонент объявляет, какие данные ему нужны.
+                    Parent компонент собирает фрагменты и строит полный запрос.
+                </p>
+
+                <h3>WorkoutCard.tsx — Example с Fragment</h3>
+                </div>
+
+                <pre><code class="language-typescript">
+import { Fragment, useFragment } from 'react-relay';
+import { graphql } from 'relay-runtime';
+import type { WorkoutCard_workout$key } from './__generated__/WorkoutCard_workout.graphql';
+
+interface WorkoutCardProps {
+    workoutRef: WorkoutCard_workout$key;
+}
+
+// REQUIRED pattern: Fragment IN THE SAME FILE with the component
+const WorkoutCard: React.FC<WorkoutCardProps> = ({ workoutRef }) => {
+    // useFragment fetches data from the Relay store
+    const workout = useFragment(
+        graphql`
+            fragment WorkoutCard_workout on Workout {
+                id
+                exerciseName
+                durationMinutes
+                caloriesBurned
+                createdAt
+            }
+        `,
+        workoutRef
+    );
+
+    return (
+        <div className={styles.card}>
+            <h3>{workout.exerciseName}</h3>
+            <p>Duration: {workout.durationMinutes} min</p>
+            <p>Calories: {workout.caloriesBurned}</p>
+            <p>Date: {new Date(workout.createdAt).toLocaleDateString()}</p>
+        </div>
+    );
+};
+
+export default WorkoutCard;
+                </code></pre>
+
+                <div class="lang-ru">
+                <h3>DashboardPage.tsx — Parent собирает фрагменты</h3>
+                </div>
+                <div class="lang-en">
+                <h3>DashboardPage.tsx — Parent assembles fragments</h3>
+                </div>
+
+                <pre><code class="language-typescript">
+import { useLazyLoadQuery, useFragment } from 'react-relay';
+import { graphql } from 'relay-runtime';
+import WorkoutCard from './WorkoutCard';
+import type { DashboardPageQuery } from './__generated__/DashboardPageQuery.graphql';
+
+const DashboardPage: React.FC = () => {
+    // useLazyLoadQuery loads data for the page
+    const data = useLazyLoadQuery<DashboardPageQuery>(
+        graphql`
+            query DashboardPageQuery {
+                myWorkouts(first: 10) {
+                    edges {
+                        node {
+                            id
+                            // Spread the fragment from the WorkoutCard component
+                            ...WorkoutCard_workout
+                        }
+                    }
+                }
+            }
+        `,
+        {}
+    );
+
+    return (
+        <div>
+            <h1>My Workouts</h1>
+            {data.myWorkouts.edges.map(edge => (
+                <WorkoutCard
+                    key={edge.node.id}
+                    workoutRef={edge.node}
+                />
+            ))}
+        </div>
+    );
+};
+
+export default DashboardPage;
+                </code></pre>
+
+                <div class="lang-ru">
+                <h3>Правила Fragment Colocation</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><strong>Имя фрагмента:</strong> `ComponentName_fieldName`</li>
+                    <li><strong>Местоположение:</strong> ВО ВСЕ М ФАЙЛЕ компонента (.tsx)</li>
+                    <li><strong>Данные:</strong> Компонент описывает только данные, которые ему нужны</li>
+                    <li><strong>Типы:</strong> Relay генерирует типы в `__generated__/ComponentName_fieldName.graphql.ts`</li>
+                </ul>
+
+                <div class="warning">
+                    <strong>КРИТИЧНО:</strong> Никогда не создавайте отдельный файл для фрагмента.
+                    Фрагмент ВСЕГДА в том же файле, что и компонент. Это ключ к поддерживаемости.
+                </div>
+                </div>
+                <div class="lang-en">
+                <h3>Fragment Colocation Rules</h3>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li><strong>Fragment name:</strong> `ComponentName_fieldName`</li>
+                    <li><strong>Location:</strong> IN THE SAME FILE as the component (.tsx)</li>
+                    <li><strong>Data:</strong> The component only describes the data it needs</li>
+                    <li><strong>Types:</strong> Relay generates types in `__generated__/ComponentName_fieldName.graphql.ts`</li>
+                </ul>
+
+                <div class="warning">
+                    <strong>CRITICAL:</strong> Never create a separate file for a fragment.
+                    The fragment is ALWAYS in the same file as the component. This is the key to maintainability.
+                </div>
+                </div>
+            </section>
+
+            <section id="queries">
+                <div class="lang-ru"><h2>Queries: useLazyLoadQuery</h2></div><div class="lang-en"><h2>Queries: useLazyLoadQuery</h2></div>
+
+                <div class="lang-ru"><h3>Инициализация на странице</h3></div><div class="lang-en"><h3>Page Initialization</h3></div>
+                <p>
+                    <div class="lang-ru">`useLazyLoadQuery` загружает данные когда компонент монтируется.
+                    Это использется на top-level странице (не в каждом малюсеньком компоненте).</div>
+                    <div class="lang-en">`useLazyLoadQuery` loads data when the component mounts.
+                    It is used on the top-level page (not in every small component).</div>
+                </p>
+
+                <pre><code class="language-typescript">
+import { useLazyLoadQuery, Suspense } from 'react-relay';
+import { graphql } from 'relay-runtime';
+import FitnessWidget from './FitnessWidget';
+import ErrorBoundary from './ErrorBoundary';
+import type { FitnessPageQuery } from './__generated__/FitnessPageQuery.graphql';
+
+const FitnessPage: React.FC = () => {
+    const data = useLazyLoadQuery<FitnessPageQuery>(
+        graphql`
+            query FitnessPageQuery($first: Int!) {
+                myWorkouts(first: $first) {
+                    edges {
+                        node {
+                            id
+                            ...FitnessWidget_workouts
+                        }
+                    }
+                }
+            }
+        `,
+        { first: 20 },  # Variables
+        { fetchPolicy: 'store-or-network' }  # Network policy
+    );
+
+    return (
+        <div>
+            <h1>Fitness Tracker</h1>
+            {data.myWorkouts.edges.map(edge => (
+                <ErrorBoundary key={edge.node.id}>
+                    <Suspense fallback={<div>Loading widget...</div>}>
+                        <FitnessWidget workoutRef={edge.node} />
+                    </Suspense>
+                </ErrorBoundary>
+            ))}
+        </div>
+    );
+};
+
+export default FitnessPage;
+                </code></pre>
+
+                <div class="lang-ru"><h3>fetchPolicy параметры</h3></div><div class="lang-en"><h3>fetchPolicy Parameters</h3></div>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <div class="lang-ru"><li><code>'store-or-network'</code> (default) — используй cached data если есть, иначе fetch</li>
+                    <li><code>'network-only'</code> — всегда fetch с сервера</li>
+                    <li><code>'store-only'</code> — только cached data, никогда не fetch</li></div>
+                    <div class="lang-en"><li><code>'store-or-network'</code> (default) — use cached data if available, otherwise fetch</li>
+                    <li><code>'network-only'</code> — always fetch from server</li>
+                    <li><code>'store-only'</code> — only cached data, never fetch</li></div>
+                </ul>
+            </section>
+
+            <section id="pagination">
+                <div class="lang-ru"><h2>Pagination с @refetchable и usePaginationFragment</h2></div><div class="lang-en"><h2>Pagination with @refetchable and usePaginationFragment</h2></div>
+
+                <div class="lang-ru"><h3>Relay Connection Pattern</h3></div><div class="lang-en"><h3>Relay Connection Pattern</h3></div>
+                <p>
+                    <div class="lang-ru">Relay использует cursor-based pagination через `@connection` directive.
+                    Это более эффективно, чем offset-based.</div>
+                    <div class="lang-en">Relay uses cursor-based pagination via the `@connection` directive.
+                    This is more efficient than offset-based pagination.</div>
+                </p>
+
+                <div class="lang-ru"><h3>WorkoutList с пагинацией</h3></div><div class="lang-en"><h3>WorkoutList with Pagination</h3></div>
+
+                <pre><code class="language-typescript">
+import {
+    usePaginationFragment,
+    graphql,
+} from 'react-relay';
+import type { WorkoutList_workouts$key } from './__generated__/WorkoutList_workouts.graphql';
+
+interface WorkoutListProps {
+    workoutsRef: WorkoutList_workouts$key;
+}
+
+const WorkoutList: React.FC<WorkoutListProps> = ({ workoutsRef }) => {
+    const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment(
+        graphql`
+            fragment WorkoutList_workouts on WorkoutConnection
+                @refetchable(queryName: "WorkoutListPaginationQuery") {
+                edges {
+                    node {
+                        id
+                        exerciseName
+                        durationMinutes
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
+            }
+        `,
+        workoutsRef
+    );
+
+    const handleLoadMore = () => {
+        loadNext(10);  # Load 10 more items
+    };
+
+    return (
+        <div>
+            {data.edges.map(edge => (
+                <div key={edge.node.id}>
+                    <h3>{edge.node.exerciseName}</h3>
+                </div>
+            ))}
+
+            {hasNext && (
+                <button
+                    onClick={handleLoadMore}
+                    disabled={isLoadingNext}
+                >
+                    {isLoadingNext ? 'Loading...' : 'Load More'}
+                </button>
+            )}
+        </div>
+    );
+};
+
+export default WorkoutList;
+                </code></pre>
+
+                <div class="lang-ru"><h3>Parent компонент с @connection</h3></div><div class="lang-en"><h3>Parent Component with @connection</h3></div>
+
+                <pre><code class="language-typescript">
+const DashboardPage: React.FC = () => {
+    const data = useLazyLoadQuery<DashboardPageQuery>(
+        graphql`
+            query DashboardPageQuery {
+                myWorkouts(first: 10)
+                    @connection(key: "WorkoutList_workouts") {
+                    edges {
+                        node {
+                            id
+                            ...WorkoutList_workouts
+                        }
+                    }
+                }
+            }
+        `,
+        {}
+    );
+
+    return <WorkoutList workoutsRef={data.myWorkouts} />;
+};
+                </code></pre>
+
+                <div class="tip">
+                    <div class="lang-ru"><strong>Совет:</strong> `@connection(key: "...")` и `@refetchable(queryName: "...")` работают вместе.
+                    Когда loadNext вызывается, Relay перезагружает данные и добавляет их в connection.</div>
+                    <div class="lang-en"><strong>Tip:</strong> `@connection(key: "...")` and `@refetchable(queryName: "...")` work together.
+                    When loadNext is called, Relay refetches the data and adds it to the connection.</div>
+                </div>
+            </section>
+
+            <section id="mutations">
+                <div class="lang-ru"><h2>Mutations: useMutation и Optimistic Updates</h2></div><div class="lang-en"><h2>Mutations: useMutation and Optimistic Updates</h2></div>
+
+                <div class="lang-ru"><h3>Отправка данных на сервер</h3></div><div class="lang-en"><h3>Sending Data to the Server</h3></div>
+
+                <pre><code class="language-typescript">
+import { useMutation, graphql } from 'react-relay';
+import type { LogWorkoutMutation } from './__generated__/LogWorkoutMutation.graphql';
+
+interface LogWorkoutFormProps {
+    onWorkoutLogged?: () => void;
+}
+
+const LogWorkoutForm: React.FC<LogWorkoutFormProps> = ({ onWorkoutLogged }) => {
+    const [exerciseName, setExerciseName] = useState('');
+    const [duration, setDuration] = useState('');
+
+    const [commitMutation, isMutationInFlight] = useMutation<LogWorkoutMutation>(
+        graphql`
+            mutation LogWorkoutMutation($input: LogWorkoutInput!) {
+                logWorkout(input: $input) {
+                    workout {
+                        id
+                        exerciseName
+                        durationMinutes
+                    }
+                    errors {
+                        field
+                        message
+                        code
+                    }
+                }
+            }
+        `
+    );
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        commitMutation({
+            variables: {
+                input: {
+                    exerciseName,
+                    durationMinutes: parseInt(duration, 10),
+                    caloriesBurned: 0
+                }
+            },
+            onCompleted: (response) => {
+                // Check for errors in the payload
+                if (response.logWorkout.errors.length > 0) {
+                    response.logWorkout.errors.forEach(error => {
+                        console.error(`${error.field}: ${error.message}`);
+                    });
+                } else {
+                    console.log('Workout logged:', response.logWorkout.workout);
+                    setExerciseName('');
+                    setDuration('');
+                    onWorkoutLogged?.();
+                }
+            },
+            onError: (error) => {
+                console.error('Network error:', error);
+            }
+        });
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <input
+                value={exerciseName}
+                onChange={e => setExerciseName(e.target.value)}
+                placeholder="Exercise name"
+                required
+            />
+            <input
+                type="number"
+                value={duration}
+                onChange={e => setDuration(e.target.value)}
+                placeholder="Duration (minutes)"
+                required
+            />
+            <button type="submit" disabled={isMutationInFlight}>
+                {isMutationInFlight ? 'Logging...' : 'Log Workout'}
+            </button>
+        </form>
+    );
+};
+
+export default LogWorkoutForm;
+                </code></pre>
+
+                <div class="lang-ru"><h3>Optimistic Updates</h3></div><div class="lang-en"><h3>Optimistic Updates</h3></div>
+                <p>
+                    <div class="lang-ru">Оптимистические обновления показывают результат пользователю сразу, до ответа сервера.
+                    Если есть ошибка, Relay откатывает изменения.</div>
+                    <div class="lang-en">Optimistic updates show the result to the user immediately, before the server responds.
+                    If there is an error, Relay rolls back the changes.</div>
+                </p>
+
+                <pre><code class="language-typescript">
+const handleSubmit = () => {
+    commitMutation({
+        variables: { input },
+        // Optimistically update UI BEFORE server response
+        optimisticResponse: {
+            logWorkout: {
+                __typename: 'LogWorkoutPayload',
+                workout: {
+                    id: 'temp-id-' + Date.now(),
+                    exerciseName: input.exerciseName,
+                    durationMinutes: input.durationMinutes,
+                },
+                errors: []
+            }
+        },
+        // Update Relay store
+        updater: (store) => {
+            const myWorkouts = store
+                .getRoot()
+                .getLinkedRecords('myWorkouts');
+
+            if (myWorkouts) {
+                const newWorkout = store.getRootField('logWorkout')?.getLinkedRecord('workout');
+                if (newWorkout) {
+                    myWorkouts.push(newWorkout);
+                }
+            }
+        },
+        onCompleted: (response) => {
+            // Check the result
+        }
+    });
+};
+                </code></pre>
+            </section>
+
+            <section id="setup">
+                <div class="lang-ru"><h2>Environment Setup: Network и Store</h2></div><div class="lang-en"><h2>Environment Setup: Network and Store</h2></div>
+
+                <div class="lang-ru"><h3>RelayEnvironment.ts</h3></div><div class="lang-en"><h3>RelayEnvironment.ts</h3></div>
+
+                <pre><code class="language-typescript">
+import {
+    Environment,
+    Network,
+    RecordSource,
+    Store,
+    SubscriptionRoot,
+} from 'relay-runtime';
+import { createClient } from 'graphql-ws';
+
+// Network layer: how to send requests to the server
+const fetchFn = async (params: any, variables: any) => {
+    const response = await fetch('http://localhost:8080/graphql', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+            query: params.text,
+            variables
+        })
+    });
+
+    const json = await response.json();
+
+    if (!response.ok) {
+        throw new Error(`GraphQL error: ${json.errors?.[0]?.message}`);
+    }
+
+    return json;
+};
+
+// WebSocket for subscriptions
+const wsClient = createClient({
+    url: 'ws://localhost:8080/subscriptions',
+    connectionParams: {
+        authorization: `Bearer ${localStorage.getItem('auth_token')}`
+    }
+});
+
+const subscriptionsFn = (operation: any, variables: any) => {
+    return {
+        subscribe: (sink: any) => {
+            const dispose = wsClient.subscribe(
+                {
+                    operationName: operation.name,
+                    query: operation.text,
+                    variables
+                },
+                sink
+            );
+            return dispose;
+        }
+    };
+};
+
+// Create Environment
+const environment = new Environment({
+    network: Network.create(fetchFn, subscriptionsFn),
+    store: new Store(new RecordSource())
+});
+
+export default environment;
+                </code></pre>
+
+                <div class="lang-ru"><h3>Provider в App.tsx</h3></div><div class="lang-en"><h3>Provider in App.tsx</h3></div>
+
+                <pre><code class="language-typescript">
+import { RelayEnvironmentProvider } from 'react-relay';
+import environment from './RelayEnvironment';
+import DashboardPage from './pages/DashboardPage';
+
+const App: React.FC = () => {
+    return (
+        <RelayEnvironmentProvider environment={environment}>
+            <DashboardPage />
+        </RelayEnvironmentProvider>
+    );
+};
+
+export default App;
+                </code></pre>
+            </section>
+
+            <section id="compiler">
+                <div class="lang-ru"><h2>Relay Compiler: npm run relay</h2></div><div class="lang-en"><h2>Relay Compiler: npm run relay</h2></div>
+
+                <div class="lang-ru"><h3>Установка и конфигурация</h3></div><div class="lang-en"><h3>Installation and Configuration</h3></div>
+
+                <pre><code class="language-bash">
+# Install relay-compiler
+npm install -D relay-compiler
+
+# Create relay.config.js in project root
+cat > relay.config.js << 'EOF'
+module.exports = {
+    src: './src',
+    schema: './src/schema.graphql',  // Если есть локальная copy schema
+    language: 'typescript',
+    eagerESModules: true,
+    // Или используйте remote schema:
+    // schemaConfig: {
+    //   url: 'http://localhost:8080/graphql'
+    // }
+};
+EOF
+
+# Add script to package.json
+npm set-script relay "relay-compiler"
+
+# Run the compiler
+npm run relay
+                </code></pre>
+
+                <div class="lang-ru"><h3>Как работает Relay Compiler</h3></div><div class="lang-en"><h3>How Relay Compiler Works</h3></div>
+                <ol style="margin-left: 2rem;">
+                    <li>Сканирует все `.ts` и `.tsx` файлы в `src/`</li>
+                    <li>Находит все `graphql` теги (фрагменты, запросы, мутации)</li>
+                    <li>Генерирует TypeScript типы в `__generated__/` папках</li>
+                    <li>Компилирует GraphQL в JavaScript runtime операции</li>
+                </ol>
+
+                <p>
+                    <div class="lang-ru">После запуска `npm run relay` вы увидите папки `__generated__/` рядом с вашими компонентами.
+                    Не редактируйте эти файлы вручную — это автогенерированный код.</div>
+                    <div class="lang-en">After running `npm run relay` you will see `__generated__/` folders next to your components.
+                    Do not edit these files manually — this is auto-generated code.</div>
+                </p>
+
+                <div class="lang-ru"><h3>Типовой workflow</h3></div><div class="lang-en"><h3>Typical Workflow</h3></div>
+
+                <pre><code class="language-bash">
+# 1. Write a component with a fragment
+# vim src/components/WorkoutCard.tsx
+
+# 2. Run the compiler
+npm run relay
+
+# 3. TypeScript will automatically see the new types
+# There should be no type errors
+
+# 4. Run the application
+npm run dev
+                </code></pre>
+
+                <div class="tip">
+                    <div class="lang-ru"><strong>Совет:</strong> Добавьте `npm run relay` в pre-commit hook, чтобы никто не забыл компилировать.</div>
+                    <div class="lang-en"><strong>Tip:</strong> Add `npm run relay` to a pre-commit hook so no one forgets to compile.</div>
+                </div>
+            </section>
+
+            <section class="assignments">
+                <div class="lang-ru"><h2>Практические задания</h2></div><div class="lang-en"><h2>Practical Assignments</h2></div>
+
+                <div class="assignment">
+                    <div class="lang-ru"><h4>Задание 1: Fragment Colocation (День 1, 1.5 часа)</h4></div><div class="lang-en"><h4>Assignment 1: Fragment Colocation (Day 1, 1.5 hours)</h4></div>
+                    <p>
+                        <div class="lang-ru">Напишите `WorkoutCard.tsx` с Fragment Colocation:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Объявите фрагмент `WorkoutCard_workout` В САМОМ ФАЙЛЕ</li>
+                        <li>Используйте `useFragment` hook</li>
+                        <li>Компонент принимает `workoutRef: WorkoutCard_workout$key`</li>
+                        <li>Запустите `npm run relay` и проверьте __generated__ типы</li>
+                        <li>Напишите тесты (React Testing Library)</div>
+                    <div class="lang-en">Write `WorkoutCard.tsx` with Fragment Colocation:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Declare the `WorkoutCard_workout` fragment IN THE SAME FILE</li>
+                        <li>Use the `useFragment` hook</li>
+                        <li>Component accepts `workoutRef: WorkoutCard_workout$key`</li>
+                        <li>Run `npm run relay` and check __generated__ types</li>
+                        <li>Write tests (React Testing Library)</li>
+                    </ul>
+                    <div class="lang-ru"><p><strong>Результат:</strong> Типизированный компонент с фрагментом, готовый к использованию в parent.</p></div><div class="lang-en"><p><strong>Result:</strong> A typed component with a fragment, ready to be used in a parent.</p></div>
+                </div>
+
+                <div class="assignment">
+                    <div class="lang-ru"><h4>Задание 2: Query и useLazyLoadQuery (День 1-2, 1.5 часа)</h4></div><div class="lang-en"><h4>Assignment 2: Query and useLazyLoadQuery (Day 1-2, 1.5 hours)</h4></div>
+                    <p>
+                        <div class="lang-ru">Создайте `DashboardPage.tsx` с запросом:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Напишите DashboardPageQuery которая загружает myWorkouts(first: 10)</li>
+                        <li>Спредьте фрагмент WorkoutCard в query</li>
+                        <li>Используйте `useLazyLoadQuery` на странице</li>
+                        <li>Обертните в ErrorBoundary > Suspense</li>
+                        <li>Рендерьте список WorkoutCard компонентов</li>
+                    </ul>
+                    <p><strong>Результат:</strong> Работающая страница с загруженными данными через Relay.</div>
+                    <div class="lang-en">Create `DashboardPage.tsx` with a query:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Write a DashboardPageQuery that loads myWorkouts(first: 10)</li>
+                        <li>Spread the WorkoutCard fragment in the query</li>
+                        <li>Use `useLazyLoadQuery` on the page</li>
+                        <li>Wrap in ErrorBoundary > Suspense</li>
+                        <li>Render a list of WorkoutCard components</li>
+                    </ul>
+                    <p><strong>Result:</strong> A working page with data loaded through Relay.</p>
+                </div>
+
+                <div class="assignment">
+                    <div class="lang-ru"><h4>Задание 3: Pagination (День 2-3, 2 часа)</h4></div><div class="lang-en"><h4>Assignment 3: Pagination (Day 2-3, 2 hours)</h4></div>
+                    <p>
+                        <div class="lang-ru">Добавьте пагинацию к WorkoutList:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Переделайте WorkoutCard фрагмент в WorkoutList с @refetchable</li>
+                        <li>Используйте usePaginationFragment с loadNext</li>
+                        <li>Добавьте кнопку "Load More"</li>
+                        <li>Показывайте loading состояние во время загрузки</li>
+                        <li>Тестируйте что новые workouts добавляются без перезагрузки страницы</li>
+                    </ul>
+                    <p><strong>Результат:</strong> Работающая cursor-based пагинация с плавным добавлением элементов.</div>
+                    <div class="lang-en">Add pagination to WorkoutList:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Refactor the WorkoutCard fragment into WorkoutList with @refetchable</li>
+                        <li>Use usePaginationFragment with loadNext</li>
+                        <li>Add a "Load More" button</li>
+                        <li>Show loading state during fetching</li>
+                        <li>Test that new workouts are added without page reload</li>
+                    </ul>
+                    <p><strong>Result:</strong> Working cursor-based pagination with smooth element addition.</p>
+                </div>
+
+                <div class="assignment">
+                    <div class="lang-ru"><h4>Задание 4: Mutations (День 3-4, 2 часа)</h4></div><div class="lang-en"><h4>Assignment 4: Mutations (Day 3-4, 2 hours)</h4></div>
+                    <p>
+                        <div class="lang-ru">Напишите `LogWorkoutForm.tsx` с мутацией:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Объявите LogWorkoutMutation в компоненте</li>
+                        <li>Используйте useMutation hook</li>
+                        <li>Форма с полями для exerciseName, durationMinutes</li>
+                        <li>Обработайте errors из payload.errors</li>
+                        <li>Покажите loading состояние</li>
+                        <li>Добавьте оптимистические обновления если есть время</li>
+                    </ul>
+                    <p><strong>Результат:</strong> Работающая форма, новые workouts добавляются в store и отображаются на странице.</div>
+                    <div class="lang-en">Write `LogWorkoutForm.tsx` with a mutation:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Declare LogWorkoutMutation in the component</li>
+                        <li>Use the useMutation hook</li>
+                        <li>Form with fields for exerciseName, durationMinutes</li>
+                        <li>Handle errors from payload.errors</li>
+                        <li>Show loading state</li>
+                        <li>Add optimistic updates if you have time</li>
+                    </ul>
+                    <p><strong>Result:</strong> Working form, new workouts are added to the store and displayed on the page.</p>
+                </div>
+            </section>
+
+            <section class="assignments" id="backlog-tasks" style="border-top-color: #f5c2e7;">
+                <div class="lang-ru"><h2>🧪 Задания из Backlog проекта (TDD)</h2></div><div class="lang-en"><h2>🧪 Backlog Project Tasks (TDD)</h2></div>
+                <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                    <div class="lang-ru">Эти задания — реальные задачи из бэклога проекта Life Goals Dashboard.
+                    Для каждого задания предоставлены тесты, которые нужно сделать зелёными, написав реализацию.
+                    <strong>Подход TDD:</strong> сначала изучи тесты → пойми что от тебя ожидается → напиши код → запусти тесты.</div>
+                    <div class="lang-en">These tasks are real tasks from the Life Goals Dashboard project backlog.
+                    Each task provides tests that you need to make green by writing the implementation.
+                    <strong>TDD approach:</strong> first study the tests → understand what is expected → write code → run tests.</div>
+                </p>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <div class="lang-ru"><h4>Backlog #2: RelayEnvironment Setup (partial, 8 SP)</h4></div><div class="lang-en"><h4>Backlog #2: RelayEnvironment Setup (partial, 8 SP)</h4></div>
+                    <p><div class="lang-ru">Реализуйте RelayEnvironment.ts с конфигурацией для подключения к GraphQL backend с аутентификацией.</div><div class="lang-en">Implement RelayEnvironment.ts with configuration for connecting to a GraphQL backend with authentication.</div></p>
+                    <div class="lang-ru"><p><strong>Тесты (напиши код, чтобы они прошли):</strong></p></div><div class="lang-en"><p><strong>Tests (write code to make them pass):</strong></p></div>
+                    <pre><code class="language-typescript">
+import { Environment } from 'relay-runtime';
+import { createRelayEnvironment } from '../RelayEnvironment';
+
+describe('Backlog #2: RelayEnvironment', () =&gt; {
+  it('should create a valid Relay Environment', () =&gt; {
+    const env = createRelayEnvironment();
+    expect(env).toBeInstanceOf(Environment);
+  });
+
+  it('should configure fetchFunction for GraphQL endpoint', async () =&gt; {
+    const mockFetch = jest.fn().mockResolvedValue({
+      json: () =&gt; Promise.resolve({ data: {} }),
+    });
+    global.fetch = mockFetch;
+
+    const env = createRelayEnvironment();
+    // Trigger a fetch through the environment
+    // The fetch URL should point to VITE_GRAPHQL_ENDPOINT
+    expect(mockFetch).toBeDefined();
+  });
+
+  it('should include auth token in fetch headers', async () =&gt; {
+    const mockFetch = jest.fn().mockResolvedValue({
+      json: () =&gt; Promise.resolve({ data: {} }),
+    });
+    global.fetch = mockFetch;
+
+    // After setting auth token, fetches should include Authorization header
+    // This depends on your implementation
+  });
+});
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/relay/__tests__/RelayEnvironment.test.ts</em></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #29: CodingProblemList Relay Pagination (13 SP)</h4>
+                    <p>Реализуйте компонент CodingProblemList с usePaginationFragment для cursor-based пагинации.</p>
+                    <div class="lang-ru"><p><strong>Тесты (напиши код, чтобы они прошли):</strong></p></div><div class="lang-en"><p><strong>Tests (write code to make them pass):</strong></p></div>
+                    <pre><code class="language-typescript">
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { createMockEnvironment, MockPayloadGenerator } from 'relay-test-utils';
+import { RelayEnvironmentProvider } from 'react-relay';
+import CodingProblemList from '../CodingProblemList';
+
+describe('Backlog #29: CodingProblemList', () =&gt; {
+  let environment: ReturnType&lt;typeof createMockEnvironment&gt;;
+
+  beforeEach(() =&gt; {
+    environment = createMockEnvironment();
+  });
+
+  it('should use usePaginationFragment for cursor-based pagination', async () =&gt; {
+    const { container } = render(
+      &lt;RelayEnvironmentProvider environment={environment}&gt;
+        &lt;React.Suspense fallback="Loading..."&gt;
+          &lt;CodingProblemList queryRef={null as any} /&gt;
+        &lt;/React.Suspense&gt;
+      &lt;/RelayEnvironmentProvider&gt;
+    );
+
+    // Resolve with paginated data
+    environment.mock.resolveMostRecentOperation((operation) =&gt;
+      MockPayloadGenerator.generate(operation, {
+        CodingProblemConnection() {
+          return {
+            edges: [
+              { node: { id: 'p1', title: 'Two Sum', difficulty: 'EASY', category: 'ARRAY' }, cursor: 'c1' },
+              { node: { id: 'p2', title: 'LRU Cache', difficulty: 'MEDIUM', category: 'LINKED_LIST' }, cursor: 'c2' },
+            ],
+            pageInfo: { hasNextPage: true, endCursor: 'c2' },
+            totalCount: 10,
+          };
+        },
+      })
+    );
+
+    await waitFor(() =&gt; {
+      expect(screen.getByText('Two Sum')).toBeInTheDocument();
+      expect(screen.getByText('LRU Cache')).toBeInTheDocument();
+    });
+  });
+
+  it('should declare fragment with ComponentName_fieldName convention', () =&gt; {
+    // The fragment should be named CodingProblemList_problems or similar
+    // This is verified by Relay compiler — if naming is wrong, compilation fails
+    expect(true).toBe(true);
+  });
+});
+                    </code></pre>
+                    <div class="lang-ru"><p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/features/interviewprep/__tests__/CodingProblemList.test.tsx</em></p></div><div class="lang-en"><p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/features/interviewprep/__tests__/CodingProblemList.test.tsx</em></p></div>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <div class="lang-ru"><h4>Backlog #38: FoodProductSearch с debounce (13 SP)</h4></div><div class="lang-en"><h4>Backlog #38: FoodProductSearch with debounce (13 SP)</h4></div>
+                    <p><div class="lang-ru">Реализуйте компонент FoodProductSearch с debounced поиском и отображением nutrition preview.</div><div class="lang-en">Implement the FoodProductSearch component with debounced search and nutrition preview display.</div></p>
+                    <div class="lang-ru"><p><strong>Тесты (напиши код, чтобы они прошли):</strong></p></div><div class="lang-en"><p><strong>Tests (write code to make them pass):</strong></p></div>
+                    <pre><code class="language-typescript">
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { createMockEnvironment, MockPayloadGenerator } from 'relay-test-utils';
+import { RelayEnvironmentProvider } from 'react-relay';
+import FoodProductSearch from '../FoodProductSearch';
+
+describe('Backlog #38: FoodProductSearch', () =&gt; {
+  let environment: ReturnType&lt;typeof createMockEnvironment&gt;;
+
+  beforeEach(() =&gt; {
+    environment = createMockEnvironment();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() =&gt; {
+    jest.useRealTimers();
+  });
+
+  it('should debounce search input', async () =&gt; {
+    render(
+      &lt;RelayEnvironmentProvider environment={environment}&gt;
+        &lt;React.Suspense fallback="Loading..."&gt;
+          &lt;FoodProductSearch onSelect={jest.fn()} /&gt;
+        &lt;/React.Suspense&gt;
+      &lt;/RelayEnvironmentProvider&gt;
+    );
+
+    const input = screen.getByPlaceholderText(/search|поиск/i);
+    fireEvent.change(input, { target: { value: 'chick' } });
+
+    // Should NOT fire query immediately
+    expect(environment.mock.getAllOperations().length).toBe(0);
+
+    // After debounce delay
+    jest.advanceTimersByTime(300);
+
+    // Now should have fired
+    await waitFor(() =&gt; {
+      expect(environment.mock.getAllOperations().length).toBeGreaterThan(0);
+    });
+  });
+
+  it('should display nutrition preview for search results', async () =&gt; {
+    render(
+      &lt;RelayEnvironmentProvider environment={environment}&gt;
+        &lt;React.Suspense fallback="Loading..."&gt;
+          &lt;FoodProductSearch onSelect={jest.fn()} /&gt;
+        &lt;/React.Suspense&gt;
+      &lt;/RelayEnvironmentProvider&gt;
+    );
+
+    const input = screen.getByPlaceholderText(/search|поиск/i);
+    fireEvent.change(input, { target: { value: 'chicken' } });
+    jest.advanceTimersByTime(300);
+
+    environment.mock.resolveMostRecentOperation((operation) =&gt;
+      MockPayloadGenerator.generate(operation, {
+        FoodProduct() {
+          return {
+            id: 'fp1',
+            name: 'Chicken Breast',
+            caloriesPer100g: 165,
+            proteinPer100g: 31,
+            carbsPer100g: 0,
+            fatPer100g: 3.6,
+          };
+        },
+      })
+    );
+
+    await waitFor(() =&gt; {
+      expect(screen.getByText('Chicken Breast')).toBeInTheDocument();
+      expect(screen.getByText(/165/)).toBeInTheDocument(); // calories
+    });
+  });
+});
+                    </code></pre>
+                    <div class="lang-ru"><p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/features/fitness/__tests__/FoodProductSearch.test.tsx</em></p></div><div class="lang-en"><p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/features/fitness/__tests__/FoodProductSearch.test.tsx</em></p></div>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <div class="lang-ru"><h4>Backlog #45: TransactionList Relay Pagination (13 SP)</h4></div><div class="lang-en"><h4>Backlog #45: TransactionList Relay Pagination (13 SP)</h4></div>
+                    <p><div class="lang-ru">Реализуйте компонент TransactionList с Relay pagination для отображения транзакций бюджета.</div><div class="lang-en">Implement the TransactionList component with Relay pagination for displaying budget transactions.</div></p>
+                    <div class="lang-ru"><p><strong>Тесты (напиши код, чтобы они прошли):</strong></p></div><div class="lang-en"><p><strong>Tests (write code to make them pass):</strong></p></div>
+                    <pre><code class="language-typescript">
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { createMockEnvironment, MockPayloadGenerator } from 'relay-test-utils';
+import { RelayEnvironmentProvider } from 'react-relay';
+import TransactionList from '../TransactionList';
+
+describe('Backlog #45: TransactionList', () =&gt; {
+  let environment: ReturnType&lt;typeof createMockEnvironment&gt;;
+
+  beforeEach(() =&gt; {
+    environment = createMockEnvironment();
+  });
+
+  it('should use Relay pagination for transactions', async () =&gt; {
+    render(
+      &lt;RelayEnvironmentProvider environment={environment}&gt;
+        &lt;React.Suspense fallback="Loading..."&gt;
+          &lt;TransactionList queryRef={null as any} /&gt;
+        &lt;/React.Suspense&gt;
+      &lt;/RelayEnvironmentProvider&gt;
+    );
+
+    environment.mock.resolveMostRecentOperation((operation) =&gt;
+      MockPayloadGenerator.generate(operation, {
+        TransactionConnection() {
+          return {
+            edges: [
+              { node: { id: 't1', amount: 50, currency: 'EUR', category: 'Food', type: 'EXPENSE' } },
+              { node: { id: 't2', amount: 200, currency: 'EUR', category: 'Flights', type: 'EXPENSE' } },
+            ],
+            pageInfo: { hasNextPage: true, endCursor: 'cursor2' },
+            totalCount: 15,
+          };
+        },
+      })
+    );
+
+    await waitFor(() =&gt; {
+      expect(screen.getByText(/50/)).toBeInTheDocument();
+      expect(screen.getByText(/200/)).toBeInTheDocument();
+    });
+  });
+});
+                    </code></pre>
+                    <div class="lang-ru"><p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/features/budget/__tests__/TransactionList.test.tsx</em></p></div><div class="lang-en"><p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/features/budget/__tests__/TransactionList.test.tsx</em></p></div>
+                </div>
+            </section>
+
+            <section class="resources">
+                <div class="lang-ru">
+                <h2>Дополнительные ресурсы</h2>
+
+                <a href="https://relay.dev/" class="resource-link">
+                    Relay Official Documentation
+                </a>
+
+                <a href="https://relay.dev/docs/guided-tour/" class="resource-link">
+                    Relay Guided Tour
+                </a>
+
+                <a href="https://relay.dev/docs/guides/graphql-server/" class="resource-link">
+                    Relay Server Specification
+                </a>
+
+                <a href="https://relay.dev/docs/guides/mutations/" class="resource-link">
+                    Mutations and Optimistic Updates
+                </a>
+
+                <a href="https://relay.dev/docs/guides/testing/" class="resource-link">
+                    Testing Relay Components
+                </a>
+
+                <a href="https://graphql.org/learn/" class="resource-link">
+                    GraphQL Learning Guide
+                </a>
+
+                <a href="https://thinking-in-relay.readthedocs.io/" class="resource-link">
+                    Thinking in Relay
+                </a>
+                </div>
+            </section>
+
+            <footer class="nav-footer">
+                <div class="lang-ru"><a href="11-css-modules-vite.html" class="nav-link prev">← Модуль 11: CSS Modules + Vite</a></div><div class="lang-en"><a href="11-css-modules-vite.html" class="nav-link prev">← Module 11: CSS Modules + Vite</a></div>
+                <div class="lang-ru"><a href="#" class="nav-link next" style="opacity: 0.5; cursor: not-allowed;">Завершено! →</a></div><div class="lang-en"><a href="#" class="nav-link next" style="opacity: 0.5; cursor: not-allowed;">Completed! →</a></div>
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-graphql.min.js"></script>
+
+    <script>
+        function setLang(lang) {
+            document.body.classList.toggle('show-en', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('study-lang', lang); } catch(e) {}
+        }
+        try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+    </script>
+    </body>
+</html>

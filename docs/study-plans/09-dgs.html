@@ -1,0 +1,2198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 9: Netflix DGS (GraphQL на backend) - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --code-bg: #181825;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--header);
+            padding: 1.5rem 2rem;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            width: 56.25%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--warning));
+            transition: width 0.3s ease;
+        }
+
+        .module-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-secondary);
+            padding: 2rem 1.5rem;
+            border-right: 1px solid var(--text-secondary);
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            position: sticky;
+            top: 100px;
+        }
+
+        .sidebar h3 {
+            color: var(--header);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--bg);
+            color: var(--header);
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-x: hidden;
+        }
+
+        h2 {
+            color: var(--header);
+            font-size: 1.8rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+            padding-left: 1rem;
+        }
+
+        h3 {
+            color: var(--header);
+            font-size: 1.3rem;
+            margin-top: 1.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        strong {
+            color: var(--accent);
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        .language-bash::before,
+        .language-kotlin::before,
+        .language-typescript::before,
+        .language-graphql::before {
+            content: attr(data-lang);
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Details/Collapse */
+        details {
+            background: var(--code-bg);
+            border: 1px solid var(--text-secondary);
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        details[open] {
+            background: var(--bg-secondary);
+        }
+
+        summary {
+            color: var(--header);
+            font-weight: bold;
+            user-select: none;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+
+        summary:hover {
+            color: var(--accent);
+        }
+
+        details > *:not(summary) {
+            margin-top: 1rem;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 4px solid var(--success);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .tip strong {
+            color: var(--success);
+        }
+
+        .warning {
+            background: rgba(250, 179, 135, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .warning strong {
+            color: var(--warning);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        thead {
+            background: var(--code-bg);
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--text-secondary);
+        }
+
+        th {
+            color: var(--header);
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background: rgba(243, 139, 168, 0.05);
+        }
+
+        /* Assignments */
+        .assignments {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--accent);
+        }
+
+        .assignment {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--warning);
+        }
+
+        .assignment h4 {
+            color: var(--header);
+            margin-bottom: 0.5rem;
+        }
+
+        .assignment .tdd-badge {
+            display: inline-block;
+            background: #f5c2e7;
+            color: #1e1e2e;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        /* Resources */
+        .resources {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--success);
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            background: var(--code-bg);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--header);
+            transition: all 0.2s;
+        }
+
+        .resource-link:hover {
+            background: var(--bg-secondary);
+            transform: translateX(5px);
+        }
+
+        .resource-link::before {
+            content: '→';
+            margin-right: 1rem;
+            color: var(--success);
+        }
+
+        /* Navigation */
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--text-secondary);
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .nav-link.prev {
+            background: var(--code-bg);
+            color: var(--text-secondary);
+        }
+
+        .nav-link.next {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .nav-link.next:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(243, 139, 168, 0.3);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid var(--text-secondary);
+                padding: 1rem;
+            }
+
+            .sidebar ul {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Prism Customization */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #a6adc7;
+        }
+
+        .token.punctuation {
+            color: #89dceb;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: #f38ba8;
+        }
+
+        .token.boolean,
+        .token.number {
+            color: #fab387;
+        }
+
+        .token.attr-name,
+        .token.variable,
+        .token.template-punctuation,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: #a6e3a1;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #89b4fa;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #cba6f7;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #f9e2af;
+        }
+
+        /* Language switcher */
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button {
+            padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px;
+            cursor: pointer; font-size: 0.85rem; background: transparent;
+            color: var(--text-secondary); transition: all 0.2s;
+        }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <div class="module-number lang-ru">МОДУЛЬ 9 / 16</div>
+            <div class="module-number lang-en" style="display: none;">MODULE 9 / 16</div>
+            <h1><span class="lang-ru">Netflix DGS (GraphQL на backend)</span><span class="lang-en" style="display: none;">Netflix DGS (GraphQL Backend)</span></h1>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+        <div class="lang-switcher">
+            <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+            <button id="btn-en" onclick="setLang('en')">EN</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3><span class="lang-ru">Содержание</span><span class="lang-en" style="display: none;">Table of Contents</span></h3>
+            <ul>
+                <li><a href="#intro"><span class="lang-ru">Введение</span><span class="lang-en" style="display: none;">Introduction</span></a></li>
+                <li><a href="#schema-first"><span class="lang-ru">Schema-first подход</span><span class="lang-en" style="display: none;">Schema-first Approach</span></a></li>
+                <li><a href="#resolvers"><span class="lang-ru">Resolvers</span><span class="lang-en" style="display: none;">Resolvers</span></a></li>
+                <li><a href="#dataloaders"><span class="lang-ru">DataLoaders</span><span class="lang-en" style="display: none;">DataLoaders</span></a></li>
+                <li><a href="#subscriptions"><span class="lang-ru">Subscriptions</span><span class="lang-en" style="display: none;">Subscriptions</span></a></li>
+                <li><a href="#best-practices"><span class="lang-ru">Best Practices</span><span class="lang-en" style="display: none;">Best Practices</span></a></li>
+                <li><a href="#assignments"><span class="lang-ru">Практические задания</span><span class="lang-en" style="display: none;">Practical Assignments</span></a></li>
+                <li><a href="#backlog-tasks"><span class="lang-ru">🧪 Задания из Backlog (TDD)</span><span class="lang-en" style="display: none;">🧪 Backlog Tasks (TDD)</span></a></li>
+                <li><a href="#resources"><span class="lang-ru">Ресурсы</span><span class="lang-en" style="display: none;">Resources</span></a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="lang-ru">
+            <section id="intro">
+                <h2>Введение: Netflix DGS для Life Goals Dashboard</h2>
+                <p>
+                    <strong>Netflix DGS 11.1.0 (Domain Graph Service)</strong> — это Java фреймворк для построения GraphQL API,
+                    который тесно интегрируется с Spring Boot. В Life Goals Dashboard мы используем DGS для реализации
+                    всех GraphQL resolver'ов, которые служат "мостом" между клиентом (React) и backend сервисами (Kotlin).
+                </p>
+                <p>
+                    За 3 дня вы освоите:
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Schema-first подход: писание `.graphqls` файлов, генерация типов через `./gradlew generateJava`</li>
+                    <li>Resolver'ы: `@DgsQuery`, `@DgsMutation`, `@DgsData` для распределения логики</li>
+                    <li>DataLoaders для предотвращения N+1 проблем</li>
+                    <li>Subscriptions и WebSocket для real-time уведомлений</li>
+                    <li>Обработка ошибок через `Payload` типы с массивом `[UserError!]!`</li>
+                </ul>
+
+                <div class="tip">
+                    <strong>Совет:</strong> DGS упрощает работу с GraphQL в Spring Boot благодаря аннотациям.
+                    Код становится чище и более декларативным.
+                </div>
+
+                <div class="warning">
+                    <strong>DGS 11 + Spring Boot 4:</strong> DGS 11.1.0 встроен на Spring Boot 4.0.5 — аннотации `@DgsComponent`, `@DgsQuery`, `@DgsMutation` остаются без изменений; новое: улучшенная поддержка JSpecify nullability и Virtual Threads-aware dispatchers.
+                </div>
+            </section>
+
+            <section id="schema-first">
+                <h2>Schema-first подход</h2>
+
+                <h3>Основной принцип: .graphqls → Kotlin типы</h3>
+                <p>
+                    В Life Goals Dashboard мы следуем <strong>schema-first</strong> подходу:
+                </p>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Пишете GraphQL схему в `.graphqls` файл (в `src/main/resources/schema/`)</li>
+                    <li>Запускаете `./gradlew generateJava` — DGS генерирует Kotlin типы</li>
+                    <li>Реализуете resolver'ы, которые возвращают эти типы</li>
+                    <li>Сохраняете сгенерированные файлы в `.gitignore` в папке `__generated__/`</li>
+                </ol>
+
+                <p>
+                    <strong>Преимущества:</strong> Schema это истина. Типы всегда синхронизированы. Клиент и сервер говорят на одном языке.
+                </p>
+
+                <h3>Пример: Fitness Widget Schema</h3>
+                <p>Создайте файл `src/main/resources/schema/fitness.graphqls`:</p>
+
+                <pre><code class="language-graphql">
+type Workout {
+    id: ID!
+    userId: ID!
+    exerciseName: String!
+    durationMinutes: Int!
+    caloriesBurned: Int!
+    createdAt: DateTime!
+}
+
+type ExerciseSet {
+    id: ID!
+    workoutId: ID!
+    exerciseName: String!
+    reps: Int!
+    weight: Float
+    note: String
+}
+
+type BodyMeasurement {
+    id: ID!
+    userId: ID!
+    date: Date!
+    weightKg: Float!
+    bodyFatPct: Float
+}
+
+extend type Query {
+    myWorkouts(first: Int!, after: String): WorkoutConnection!
+    workoutDetail(id: ID!): Workout
+    recentMeasurements: [BodyMeasurement!]!
+}
+
+extend type Mutation {
+    logWorkout(input: LogWorkoutInput!): LogWorkoutPayload!
+    recordMeasurement(input: RecordMeasurementInput!): RecordMeasurementPayload!
+}
+
+input LogWorkoutInput {
+    exerciseName: String!
+    durationMinutes: Int!
+    caloriesBurned: Int!
+    sets: [ExerciseSetInput!]
+}
+
+input ExerciseSetInput {
+    exerciseName: String!
+    reps: Int!
+    weight: Float
+    note: String
+}
+
+input RecordMeasurementInput {
+    weightKg: Float!
+    bodyFatPct: Float
+}
+
+type LogWorkoutPayload {
+    workout: Workout
+    errors: [UserError!]!
+}
+
+type RecordMeasurementPayload {
+    measurement: BodyMeasurement
+    errors: [UserError!]!
+}
+                </code></pre>
+
+                <h3>Генерация типов</h3>
+                <p>После написания схемы запустите:</p>
+
+                <pre><code class="language-bash">
+./gradlew generateJava
+                </code></pre>
+
+                <p>
+                    DGS генерирует файлы в `build/generated/sources/dgs/` — например, `Workout.kt`, `ExerciseSet.kt` и т.д.
+                    Эти файлы содержат data-классы, которые используются в resolver'ах.
+                </p>
+
+                <div class="warning">
+                    <strong>Важно:</strong> Никогда не редактируйте сгенерированные файлы вручную.
+                    Измените схему и перегенерируйте.
+                </div>
+            </section>
+
+            <section id="resolvers">
+                <h2>Resolvers: @DgsQuery, @DgsMutation, @DgsData</h2>
+
+                <h3>Основная концепция</h3>
+                <p>
+                    Resolver — это функция, которая "решает" (resolve) поле в GraphQL типе.
+                    Она принимает входные аргументы и возвращает значение.
+                </p>
+
+                <h3>@DgsQuery и @DgsMutation</h3>
+                <p>
+                    Это resolvers для корневых типов Query и Mutation. Каждый resolver — это метод в `@DgsComponent` классе.
+                </p>
+
+                <pre><code class="language-kotlin">
+import com.netflix.graphql.dgs.DgsComponent
+import com.netflix.graphql.dgs.DgsQuery
+import com.netflix.graphql.dgs.DgsMutation
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment
+import com.mrurec.lifegoals.fitness.model.Workout
+import com.mrurec.lifegoals.fitness.service.WorkoutService
+import com.mrurec.lifegoals.common.auth.ViewerContext
+import org.springframework.beans.factory.annotation.Autowired
+
+@DgsComponent
+class FitnessResolver(
+    @Autowired val workoutService: WorkoutService
+) {
+
+    @DgsQuery
+    fun myWorkouts(
+        dfe: DgsDataFetchingEnvironment,
+        first: Int,
+        after: String?
+    ): WorkoutConnection {
+        val viewer = dfe.getLocalContext<ViewerContext>()
+        return workoutService.getWorkoutsForUser(
+            userId = viewer.userId,
+            first = first,
+            after = after
+        )
+    }
+
+    @DgsQuery
+    fun workoutDetail(
+        dfe: DgsDataFetchingEnvironment,
+        id: String
+    ): Workout? {
+        val viewer = dfe.getLocalContext<ViewerContext>()
+        return workoutService.getWorkout(viewer.userId, id)
+    }
+
+    @DgsMutation
+    fun logWorkout(
+        dfe: DgsDataFetchingEnvironment,
+        input: LogWorkoutInput
+    ): LogWorkoutPayload {
+        val viewer = dfe.getLocalContext<ViewerContext>()
+
+        // Валидация
+        val errors = mutableListOf<UserError>()
+        if (input.durationMinutes <= 0) {
+            errors.add(UserError(
+                field = "durationMinutes",
+                message = "Duration must be positive",
+                code = ErrorCode.VALIDATION_ERROR
+            ))
+        }
+
+        if (errors.isNotEmpty()) {
+            return LogWorkoutPayload(workout = null, errors = errors)
+        }
+
+        try {
+            val workout = workoutService.createWorkout(
+                userId = viewer.userId,
+                exerciseName = input.exerciseName,
+                durationMinutes = input.durationMinutes,
+                caloriesBurned = input.caloriesBurned
+            )
+            return LogWorkoutPayload(workout = workout, errors = emptyList())
+        } catch (e: Exception) {
+            return LogWorkoutPayload(
+                workout = null,
+                errors = listOf(UserError(
+                    field = null,
+                    message = "Failed to log workout: ${e.message}",
+                    code = ErrorCode.INTERNAL_ERROR
+                ))
+            )
+        }
+    }
+}
+                </code></pre>
+
+                <h3>@DgsData для child resolvers</h3>
+                <p>
+                    Когда нужно resolve поля, которое не является Query или Mutation, используйте `@DgsData`.
+                    Это для вложенных типов.
+                </p>
+
+                <pre><code class="language-kotlin">
+@DgsComponent
+class WorkoutResolver(
+    @Autowired val exerciseService: ExerciseService
+) {
+
+    // Resolve поле "sets" у типа Workout
+    @DgsData(parentType = "Workout", field = "sets")
+    fun exerciseSets(
+        dfe: DgsDataFetchingEnvironment
+    ): CompletableFuture<List<ExerciseSet>> {
+        val workout = dfe.getSource<Workout>()
+
+        // Используйте DataLoader для batching (см. секция ниже)
+        val loader = dfe.getDataLoader<UUID, List<ExerciseSet>>("exerciseSetsLoader")
+        return loader.load(workout.id)
+    }
+}
+                </code></pre>
+
+                <h3>DgsDataFetchingEnvironment</h3>
+                <p>
+                    Это объект, который содержит всю информацию о текущем запросе:
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>`getLocalContext<T>()` — получить пользовательский контекст (ViewerContext)</li>
+                    <li>`getSource<T>()` — получить родительский объект (для child resolvers)</li>
+                    <li>`getArgument<T>("name")` — получить аргумент запроса</li>
+                    <li>`getDataLoader<K, V>("name")` — получить DataLoader для batching</li>
+                </ul>
+            </section>
+
+            <section id="dataloaders">
+                <h2>DataLoaders — N+1 Prevention</h2>
+
+                <h3>Проблема N+1</h3>
+                <p>
+                    Представьте запрос: "Дайте мне 20 тренировок, и для каждой все упражнения (sets)".
+                    Наивный resolver может сделать 1 запрос для тренировок + 20 запросов для упражнений = 21 SQL запрос (N+1 проблема).
+                </p>
+
+                <p>
+                    DataLoader батчит (объединяет) запросы: 1 запрос для тренировок + 1 запрос для всех упражнений = 2 запроса.
+                </p>
+
+                <h3>Реализация DataLoader</h3>
+                <p>Создайте `ExerciseSetsDataLoader.kt`:</p>
+
+                <pre><code class="language-kotlin">
+import com.netflix.graphql.dgs.DgsComponent
+import com.netflix.graphql.dgs.DgsDataLoader
+import com.mrurec.lifegoals.fitness.model.ExerciseSet
+import com.mrurec.lifegoals.fitness.repository.ExerciseSetRepository
+import org.dataloader.MappedBatchLoader
+import java.util.*
+import java.util.concurrent.CompletableFuture
+
+@DgsComponent
+class ExerciseSetsDataLoader(
+    val repository: ExerciseSetRepository
+) {
+
+    @DgsDataLoader(name = "exerciseSetsLoader")
+    fun batchLoader(): MappedBatchLoader<UUID, List<ExerciseSet>> {
+        return MappedBatchLoader { workoutIds, _ ->
+            // Один SQL запрос для всех workout ID'ов
+            val sets = repository.findByWorkoutIdIn(workoutIds)
+
+            // Результат: Map<workoutId, List<ExerciseSet>>
+            val result = mutableMapOf<UUID, List<ExerciseSet>>()
+            workoutIds.forEach { workoutId ->
+                result[workoutId] = sets.filter { it.workoutId == workoutId }
+            }
+
+            CompletableFuture.completedFuture(result)
+        }
+    }
+}
+                </code></pre>
+
+                <h3>Использование DataLoader в resolver'е</h3>
+
+                <pre><code class="language-kotlin">
+@DgsComponent
+class WorkoutResolver(
+    @Autowired val exerciseService: ExerciseService
+) {
+
+    @DgsData(parentType = "Workout", field = "sets")
+    fun exerciseSets(
+        dfe: DgsDataFetchingEnvironment
+    ): CompletableFuture<List<ExerciseSet>> {
+        val workout = dfe.getSource<Workout>()
+
+        // Получите DataLoader и загрузите данные
+        val loader = dfe.getDataLoader<UUID, List<ExerciseSet>>("exerciseSetsLoader")
+        return loader.load(workout.id)
+    }
+}
+                </code></pre>
+
+                <h3>Регистрация DataLoader'ов</h3>
+                <p>
+                    В Spring Boot приложении DataLoader'ы регистрируются автоматически через `@DgsDataLoader` аннотацию.
+                    DGS сканирует класс пути и находит все такие компоненты.
+                </p>
+
+                <div class="tip">
+                    <strong>Совет:</strong> DataLoader'ы существуют только на время одного GraphQL запроса.
+                    Это гарантирует, что батчинг работает корректно, но разные запросы используют разные экземпляры.
+                </div>
+            </section>
+
+            <section id="subscriptions">
+                <h2>Subscriptions: WebSocket и Real-time</h2>
+
+                <h3>Что такое Subscription?</h3>
+                <p>
+                    В отличие от Query (единовременный запрос) и Mutation (изменение + ответ),
+                    Subscription — это долгоживущая связь, где сервер может отправлять данные клиенту в реальном времени.
+                </p>
+
+                <p>
+                    В Life Goals Dashboard используем Subscription'ы для:
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Уведомлений о достижениях (achievements)</li>
+                    <li>Обновлений о новых записях (workouts, meals, transactions)</li>
+                    <li>Статус изменений виджетов</li>
+                </ul>
+
+                <h3>Schema для Subscription</h3>
+
+                <pre><code class="language-graphql">
+type Subscription {
+    # Подписка на уведомления пользователя
+    notificationReceived: Notification!
+
+    # Подписка на обновления виджета
+    widgetDataUpdated(widgetId: ID!): WidgetData!
+}
+
+type Notification {
+    id: ID!
+    type: NotificationType!
+    title: String!
+    body: String!
+    createdAt: DateTime!
+}
+
+enum NotificationType {
+    ACHIEVEMENT
+    REMINDER
+    WARNING
+    MILESTONE
+}
+                </code></pre>
+
+                <h3>Реализация Subscription resolver'а</h3>
+
+                <pre><code class="language-kotlin">
+import com.netflix.graphql.dgs.DgsSubscription
+import com.netflix.graphql.dgs.DgsComponent
+import com.mrurec.lifegoals.notification.model.Notification
+import com.mrurec.lifegoals.notification.publisher.NotificationPublisher
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
+
+@DgsComponent
+class NotificationSubscription(
+    val notificationPublisher: NotificationPublisher
+) {
+
+    @DgsSubscription
+    fun notificationReceived(): Publisher<Notification> {
+        // Возвращает Flux — stream уведомлений
+        return notificationPublisher.getNotificationStream()
+    }
+}
+                </code></pre>
+
+                <h3>NotificationPublisher (Redis pub/sub backed)</h3>
+
+                <pre><code class="language-kotlin">
+import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Sinks
+import com.mrurec.lifegoals.common.auth.ViewerContext
+import com.mrurec.lifegoals.notification.model.Notification
+
+@Service
+class NotificationPublisher(
+    val redisTemplate: StringRedisTemplate
+) {
+
+    private val sinks = mutableMapOf<String, Sinks.Many<Notification>>()
+
+    fun publishNotification(userId: String, notification: Notification) {
+        // Публикуем в Redis канал
+        val channel = "lifegoals:notifications:$userId"
+        redisTemplate.convertAndSend(channel, notification)
+
+        // Также отправляем в Flux для WebSocket подключений
+        sinks[userId]?.tryEmitNext(notification)
+    }
+
+    fun getNotificationStream(): Flux<Notification> {
+        // Создаём Flux, который отправляет уведомления
+        val sink = Sinks.many().multicast().onBackpressureBuffer()
+        // Код упрощён; в реальности нужна подписка на Redis канал
+        return sink.asFlux()
+    }
+}
+                </code></pre>
+
+                <h3>Настройка WebSocket в GraphQLConfig</h3>
+
+                <pre><code class="language-kotlin">
+import com.netflix.graphql.dgs.DgsConfiguration
+import com.netflix.graphql.dgs.DgsGraphQLConfiguration
+import org.springframework.context.annotation.Bean
+
+@DgsConfiguration
+class GraphQLConfig {
+
+    @Bean
+    fun dgsGraphQLConfiguration(): DgsGraphQLConfiguration {
+        return DgsGraphQLConfiguration()
+    }
+
+    // WebSocket endpoint автоматически доступен на /subscriptions
+    // Клиент подключается через: ws://localhost:8080/subscriptions
+}
+                </code></pre>
+            </section>
+
+            <section id="best-practices">
+                <h2>Best Practices: Обработка ошибок и валидация</h2>
+
+                <h3>Принцип: Ошибки в Payload, не в GraphQL errors</h3>
+                <p>
+                    В Meta системах (и в этом проекте) бизнес-логические ошибки возвращаются в `Payload` объекте,
+                    а не выбрасываются как GraphQL ошибки. Это позволяет фронтенду обрабатывать ошибки элегантно.
+                </p>
+
+                <pre><code class="language-graphql">
+# ПРАВИЛЬНО
+type LogWorkoutPayload {
+    workout: Workout
+    errors: [UserError!]!
+}
+
+type UserError {
+    field: String
+    message: String!
+    code: ErrorCode!
+}
+
+enum ErrorCode {
+    VALIDATION_ERROR
+    NOT_FOUND
+    UNAUTHORIZED
+    INTERNAL_ERROR
+}
+                </code></pre>
+
+                <p>
+                    Фронтенд проверяет `payload.errors` и отображает их:
+                </p>
+
+                <pre><code class="language-typescript">
+const [logWorkout, isLoading] = useMutation(LogWorkoutMutation);
+
+const handleLogWorkout = async (input) => {
+    const response = await logWorkout({ variables: { input } });
+
+    if (response.data.logWorkout.errors.length > 0) {
+        // Показать ошибки пользователю
+        response.data.logWorkout.errors.forEach(err => {
+            console.error(err.message);
+        });
+    } else {
+        // Успешно добавлена тренировка
+        console.log("Workout logged:", response.data.logWorkout.workout);
+    }
+};
+                </code></pre>
+
+                <h3>Валидация на сервере</h3>
+
+                <pre><code class="language-kotlin">
+@DgsMutation
+fun createRecipe(
+    dfe: DgsDataFetchingEnvironment,
+    input: CreateRecipeInput
+): CreateRecipePayload {
+    val viewer = dfe.getLocalContext<ViewerContext>()
+    val errors = mutableListOf<UserError>()
+
+    // Валидация 1: name не пустое
+    if (input.name.trim().isEmpty()) {
+        errors.add(UserError(
+            field = "name",
+            message = "Recipe name cannot be empty",
+            code = ErrorCode.VALIDATION_ERROR
+        ))
+    }
+
+    // Валидация 2: минимум 1 ингредиент
+    if (input.ingredients.isEmpty()) {
+        errors.add(UserError(
+            field = "ingredients",
+            message = "Recipe must have at least one ingredient",
+            code = ErrorCode.VALIDATION_ERROR
+        ))
+    }
+
+    // Валидация 3: проверка существования ингредиентов
+    val invalidIngredients = input.ingredients.filter {
+        !recipeService.productExists(viewer.userId, it.productId)
+    }
+    if (invalidIngredients.isNotEmpty()) {
+        errors.add(UserError(
+            field = "ingredients",
+            message = "Some products not found",
+            code = ErrorCode.NOT_FOUND
+        ))
+    }
+
+    if (errors.isNotEmpty()) {
+        return CreateRecipePayload(recipe = null, errors = errors)
+    }
+
+    // Создание рецепта если валидация прошла
+    val recipe = recipeService.createRecipe(viewer.userId, input)
+    return CreateRecipePayload(recipe = recipe, errors = emptyList())
+}
+                </code></pre>
+            </section>
+
+            <section class="assignments">
+                <h2>Практические задания</h2>
+
+                <div class="assignment">
+                    <h4>Задание 1: Написание GraphQL схемы (День 1, 1 час)</h4>
+                    <p>
+                        Создайте `src/main/resources/schema/interview-prep.graphqls` с типами для Модуля Interview Prep.
+                        Включите:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>CodingProblem (id, title, difficulty, categories, isTargetCompanyTagged)</li>
+                        <li>SystemDesignTopic (id, title, description)</li>
+                        <li>Query: getProblems(filter), getProblemDetail(id)</li>
+                        <li>Mutation: logProblemAttempt, markProblemSolved</li>
+                        <li>Payload типы с [UserError!]!</li>
+                    </ul>
+                    <p><strong>Результат:</strong> `.graphqls` файл с полной схемой, готовый к генерации типов.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Задание 2: Реализация Resolver'ов (День 1-2, 1.5 часа)</h4>
+                    <p>
+                        Создайте `InterviewPrepResolver.kt` с `@DgsComponent` и реализуйте:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>@DgsQuery getProblems(first, after) с Relay connection</li>
+                        <li>@DgsQuery getProblemDetail(id) с валидацией ViewerContext</li>
+                        <li>@DgsMutation logProblemAttempt(input) с обработкой ошибок</li>
+                        <li>@DgsData для child resolver Difficulty enum</li>
+                    </ul>
+                    <p><strong>Результат:</strong> Работающие resolver'ы, все Query и Mutation доступны в GraphQL Playground.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Задание 3: DataLoader для проблем (День 2, 1 час)</h4>
+                    <p>
+                        Реализуйте `CodingProblemDataLoader` для батчинга при загрузке categories и tags.
+                        Убедитесь, что 100 проблем загружаются за 1 запрос, не 100.
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Создайте DataLoader для categories</li>
+                        <li>Зарегистрируйте его через @DgsDataLoader</li>
+                        <li>Используйте в resolver'е через dfe.getDataLoader()</li>
+                        <li>Проверьте количество SQL запросов (должно быть 2-3, не 100)</li>
+                    </ul>
+                    <p><strong>Результат:</strong> Отсутствие N+1 проблем, оптимальная производительность.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Задание 4: Notification Subscription (День 3, 1.5 часа)</h4>
+                    <p>
+                        Создайте `NotificationSubscription` и `NotificationPublisher`:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Напишите Subscription schema (notificationReceived)</li>
+                        <li>Реализуйте @DgsSubscription resolver</li>
+                        <li>Создайте NotificationPublisher с Redis pub/sub</li>
+                        <li>Тестируйте через GraphQL Playground WebSocket вкладку</li>
+                    </ul>
+                    <p><strong>Результат:</strong> Работающая real-time подписка на уведомления, видны через WebSocket.</p>
+                </div>
+            </section>
+
+            <section class="assignments" id="backlog-tasks" style="border-top-color: #f5c2e7;">
+                <h2>🧪 Задания из Backlog проекта (TDD)</h2>
+                <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                    Эти задания — реальные задачи из бэклога проекта Life Goals Dashboard.
+                    Для каждого задания предоставлены тесты, которые нужно сделать зелёными, написав реализацию.
+                    <strong>Подход TDD:</strong> сначала изучи тесты → пойми что от тебя ожидается → напиши код → запусти тесты.
+                </p>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #13: GraphQL Exception Handler (8 SP)</h4>
+                    <p>Реализуйте обработчик ошибок для DGS, который не выставляет stack traces в ответ и правильно обрабатывает UNAUTHENTICATED ошибки.</p>
+                    <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                    <pre><code class="language-kotlin">
+package com.mrurec.lifegoals.common.graphql
+
+import com.netflix.graphql.dgs.DgsQueryExecutor
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+
+@SpringBootTest
+class GraphQLExceptionHandlerTest {
+
+    @Autowired
+    lateinit var dgsQueryExecutor: DgsQueryExecutor
+
+    @Test
+    fun `unauthenticated request should return UNAUTHENTICATED error code`() {
+        // Execute a query without auth token
+        val result = dgsQueryExecutor.execute("{ myDashboard { widgets { id } } }")
+
+        assertTrue(result.errors.isNotEmpty())
+        val errorCode = result.errors[0].extensions?.get("errorType")
+        assertEquals("UNAUTHENTICATED", errorCode)
+    }
+
+    @Test
+    fun `should not expose stack traces in error response`() {
+        val result = dgsQueryExecutor.execute("{ myDashboard { widgets { id } } }")
+
+        for (error in result.errors) {
+            assertNull(error.extensions?.get("stackTrace"),
+                "Stack traces should not be exposed to clients")
+        }
+    }
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/test/kotlin/com/mrurec/lifegoals/common/graphql/GraphQLExceptionHandlerTest.kt</em></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #15: Relay Connection Utils (3 SP)</h4>
+                    <p>Реализуйте утилиты для работы с Relay Connection паттерном: toConnection(), CursorCodec.encode(), CursorCodec.decode().</p>
+                    <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                    <pre><code class="language-kotlin">
+package com.mrurec.lifegoals.common.graphql
+
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import java.util.UUID
+
+class ConnectionUtilsTest {
+
+    @Test
+    fun `toConnection should create valid Relay connection from list`() {
+        val items = (1..5).map { TestEntity(UUID.randomUUID(), "Item $it") }
+
+        val connection = ConnectionUtils.toConnection(
+            items = items,
+            first = 3,
+            after = null,
+            cursorFor = { CursorCodec.encode(it.id.toString()) }
+        )
+
+        assertEquals(3, connection.edges.size)
+        assertTrue(connection.pageInfo.hasNextPage)
+        assertFalse(connection.pageInfo.hasPreviousPage)
+        assertEquals(5, connection.totalCount)
+    }
+
+    @Test
+    fun `toConnection with after cursor should return next page`() {
+        val items = (1..5).map { TestEntity(UUID.randomUUID(), "Item $it") }
+        val afterCursor = CursorCodec.encode(items[1].id.toString())
+
+        val connection = ConnectionUtils.toConnection(
+            items = items,
+            first = 2,
+            after = afterCursor,
+            cursorFor = { CursorCodec.encode(it.id.toString()) }
+        )
+
+        assertEquals(2, connection.edges.size)
+        assertEquals("Item 3", connection.edges[0].node.name)
+    }
+
+    @Test
+    fun `CursorCodec should encode and decode Base64 cursors`() {
+        val original = "some-uuid-value"
+        val encoded = CursorCodec.encode(original)
+        val decoded = CursorCodec.decode(encoded)
+
+        assertNotEquals(original, encoded) // Should be encoded
+        assertEquals(original, decoded)   // Should decode back
+    }
+
+    @Test
+    fun `CursorCodec decode should throw on invalid cursor`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            CursorCodec.decode("not-valid-base64!!!")
+        }
+    }
+
+    data class TestEntity(val id: UUID, val name: String)
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/test/kotlin/com/mrurec/lifegoals/common/graphql/ConnectionUtilsTest.kt</em></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #16: DataLoader Registry (3 SP)</h4>
+                    <p>Реализуйте централизованный реестр DataLoader'ов с возможностью регистрации и получения батч-загрузчиков.</p>
+                    <p><strong>Тесты (напиши код, чтобы они прошли):</strong></p>
+                    <pre><code class="language-kotlin">
+package com.mrurec.lifegoals.common.graphql
+
+import org.dataloader.DataLoaderRegistry
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+
+@SpringBootTest
+class DataLoaderRegistrarTest {
+
+    @Autowired
+    lateinit var registrar: DataLoaderRegistrar
+
+    @Test
+    fun `should register all required DataLoaders`() {
+        val registry = DataLoaderRegistry()
+        registrar.provide(registry)
+
+        // After implementing all loaders, these should be present:
+        assertNotNull(registry.getDataLoader&lt;Any, Any&gt;("codingProblemLoader"),
+            "codingProblemLoader should be registered")
+    }
+
+    @Test
+    fun `mappedBatchLoader helper should batch requests`() {
+        // Test the generic helper function
+        var batchCallCount = 0
+        val loader = DataLoaderRegistrar.mappedBatchLoader&lt;String, String&gt; { keys -&gt;
+            batchCallCount++
+            keys.associateWith { "value-for-$it" }
+        }
+
+        // Verify the loader returns correct mappings
+        assertNotNull(loader)
+    }
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>Файл: src/test/kotlin/com/mrurec/lifegoals/common/graphql/DataLoaderRegistrarTest.kt</em></p>
+                </div>
+            </section>
+
+            <section class="resources">
+                <h2>Дополнительные ресурсы</h2>
+
+                <a href="https://netflix-dgs.dev/" class="resource-link">
+                    Netflix DGS — Официальная документация
+                </a>
+
+                <a href="https://netflix-dgs.dev/docs/getting-started" class="resource-link">
+                    DGS Getting Started
+                </a>
+
+                <a href="https://netflix-dgs.dev/docs/data-loaders" class="resource-link">
+                    DGS DataLoaders Documentation
+                </a>
+
+                <a href="https://github.com/graphql-java/graphql-java-dataloader" class="resource-link">
+                    GraphQL Java DataLoader
+                </a>
+
+                <a href="https://spec.graphql.org/June2018/#sec-Scalars" class="resource-link">
+                    GraphQL Specification (Scalars, Types)
+                </a>
+
+                <a href="https://relay.dev/docs/guides/graphql-server/" class="resource-link">
+                    Relay Server Specification
+                </a>
+            </section>
+
+            <footer class="nav-footer">
+                <a href="08-spring-security.html" class="nav-link prev">← <span class="lang-ru">Модуль 8: Spring Security</span><span class="lang-en" style="display: none;">Module 8: Spring Security</span></a>
+                <a href="10-react.html" class="nav-link next"><span class="lang-ru">Модуль 10: React 18+</span><span class="lang-en" style="display: none;">Module 10: React 18+</span> →</a>
+            </footer>
+            </div>
+
+            <div class="lang-en" style="display: none;">
+            <section id="intro">
+                <h2>Introduction: Netflix DGS for Life Goals Dashboard</h2>
+                <p>
+                    <strong>Netflix DGS 11.1.0 (Domain Graph Service)</strong> is a Java framework for building GraphQL APIs
+                    that integrates tightly with Spring Boot. In Life Goals Dashboard, we use DGS to implement
+                    all GraphQL resolvers, which serve as a "bridge" between the client (React) and backend services (Kotlin).
+                </p>
+                <p>
+                    Over 3 days you will master:
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Schema-first approach: writing `.graphqls` files, generating types via `./gradlew generateJava`</li>
+                    <li>Resolvers: `@DgsQuery`, `@DgsMutation`, `@DgsData` for logic distribution</li>
+                    <li>DataLoaders to prevent N+1 problems</li>
+                    <li>Subscriptions and WebSocket for real-time notifications</li>
+                    <li>Error handling via `Payload` types with `[UserError!]!` array</li>
+                </ul>
+
+                <div class="tip">
+                    <strong>Tip:</strong> DGS simplifies GraphQL work in Spring Boot through annotations.
+                    Code becomes cleaner and more declarative.
+                </div>
+
+                <div class="warning">
+                    <strong>DGS 11 + Spring Boot 4:</strong> DGS 11.1.0 is built on Spring Boot 4.0.5 — `@DgsComponent`, `@DgsQuery`, `@DgsMutation` remain unchanged; new features include better JSpecify nullability support and Virtual Threads-aware dispatchers.
+                </div>
+            </section>
+
+            <section id="schema-first">
+                <h2>Schema-first Approach</h2>
+
+                <h3>Core principle: .graphqls → Kotlin types</h3>
+                <p>
+                    In Life Goals Dashboard we follow the <strong>schema-first</strong> approach:
+                </p>
+                <ol style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Write GraphQL schema in `.graphqls` file (in `src/main/resources/schema/`)</li>
+                    <li>Run `./gradlew generateJava` — DGS generates Kotlin types</li>
+                    <li>Implement resolvers that return these types</li>
+                    <li>Keep generated files in `.gitignore` in `__generated__/` folder</li>
+                </ol>
+
+                <p>
+                    <strong>Benefits:</strong> Schema is the source of truth. Types are always synchronized. Client and server speak the same language.
+                </p>
+
+                <h3>Example: Fitness Widget Schema</h3>
+                <p>Create file `src/main/resources/schema/fitness.graphqls`:</p>
+
+                <pre><code class="language-graphql">
+type Workout {
+    id: ID!
+    userId: ID!
+    exerciseName: String!
+    durationMinutes: Int!
+    caloriesBurned: Int!
+    createdAt: DateTime!
+}
+
+type ExerciseSet {
+    id: ID!
+    workoutId: ID!
+    exerciseName: String!
+    reps: Int!
+    weight: Float
+    note: String
+}
+
+type BodyMeasurement {
+    id: ID!
+    userId: ID!
+    date: Date!
+    weightKg: Float!
+    bodyFatPct: Float
+}
+
+extend type Query {
+    myWorkouts(first: Int!, after: String): WorkoutConnection!
+    workoutDetail(id: ID!): Workout
+    recentMeasurements: [BodyMeasurement!]!
+}
+
+extend type Mutation {
+    logWorkout(input: LogWorkoutInput!): LogWorkoutPayload!
+    recordMeasurement(input: RecordMeasurementInput!): RecordMeasurementPayload!
+}
+
+input LogWorkoutInput {
+    exerciseName: String!
+    durationMinutes: Int!
+    caloriesBurned: Int!
+    sets: [ExerciseSetInput!]
+}
+
+input ExerciseSetInput {
+    exerciseName: String!
+    reps: Int!
+    weight: Float
+    note: String
+}
+
+input RecordMeasurementInput {
+    weightKg: Float!
+    bodyFatPct: Float
+}
+
+type LogWorkoutPayload {
+    workout: Workout
+    errors: [UserError!]!
+}
+
+type RecordMeasurementPayload {
+    measurement: BodyMeasurement
+    errors: [UserError!]!
+}
+                </code></pre>
+
+                <h3>Type Generation</h3>
+                <p>After writing the schema, run:</p>
+
+                <pre><code class="language-bash">
+./gradlew generateJava
+                </code></pre>
+
+                <p>
+                    DGS generates files in `build/generated/sources/dgs/` — for example, `Workout.kt`, `ExerciseSet.kt`, etc.
+                    These files contain data classes used in resolvers.
+                </p>
+
+                <div class="warning">
+                    <strong>Important:</strong> Never manually edit generated files.
+                    Change the schema and regenerate.
+                </div>
+            </section>
+
+            <section id="resolvers">
+                <h2>Resolvers: @DgsQuery, @DgsMutation, @DgsData</h2>
+
+                <h3>Core concept</h3>
+                <p>
+                    A resolver is a function that "resolves" (fetches) a field in a GraphQL type.
+                    It takes input arguments and returns a value.
+                </p>
+
+                <h3>@DgsQuery and @DgsMutation</h3>
+                <p>
+                    These are resolvers for the root Query and Mutation types. Each resolver is a method in a `@DgsComponent` class.
+                </p>
+
+                <pre><code class="language-kotlin">
+import com.netflix.graphql.dgs.DgsComponent
+import com.netflix.graphql.dgs.DgsQuery
+import com.netflix.graphql.dgs.DgsMutation
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment
+import com.mrurec.lifegoals.fitness.model.Workout
+import com.mrurec.lifegoals.fitness.service.WorkoutService
+import com.mrurec.lifegoals.common.auth.ViewerContext
+import org.springframework.beans.factory.annotation.Autowired
+
+@DgsComponent
+class FitnessResolver(
+    @Autowired val workoutService: WorkoutService
+) {
+
+    @DgsQuery
+    fun myWorkouts(
+        dfe: DgsDataFetchingEnvironment,
+        first: Int,
+        after: String?
+    ): WorkoutConnection {
+        val viewer = dfe.getLocalContext<ViewerContext>()
+        return workoutService.getWorkoutsForUser(
+            userId = viewer.userId,
+            first = first,
+            after = after
+        )
+    }
+
+    @DgsQuery
+    fun workoutDetail(
+        dfe: DgsDataFetchingEnvironment,
+        id: String
+    ): Workout? {
+        val viewer = dfe.getLocalContext<ViewerContext>()
+        return workoutService.getWorkout(viewer.userId, id)
+    }
+
+    @DgsMutation
+    fun logWorkout(
+        dfe: DgsDataFetchingEnvironment,
+        input: LogWorkoutInput
+    ): LogWorkoutPayload {
+        val viewer = dfe.getLocalContext<ViewerContext>()
+
+        // Validation
+        val errors = mutableListOf<UserError>()
+        if (input.durationMinutes <= 0) {
+            errors.add(UserError(
+                field = "durationMinutes",
+                message = "Duration must be positive",
+                code = ErrorCode.VALIDATION_ERROR
+            ))
+        }
+
+        if (errors.isNotEmpty()) {
+            return LogWorkoutPayload(workout = null, errors = errors)
+        }
+
+        try {
+            val workout = workoutService.createWorkout(
+                userId = viewer.userId,
+                exerciseName = input.exerciseName,
+                durationMinutes = input.durationMinutes,
+                caloriesBurned = input.caloriesBurned
+            )
+            return LogWorkoutPayload(workout = workout, errors = emptyList())
+        } catch (e: Exception) {
+            return LogWorkoutPayload(
+                workout = null,
+                errors = listOf(UserError(
+                    field = null,
+                    message = "Failed to log workout: ${e.message}",
+                    code = ErrorCode.INTERNAL_ERROR
+                ))
+            )
+        }
+    }
+}
+                </code></pre>
+
+                <h3>@DgsData for child resolvers</h3>
+                <p>
+                    When you need to resolve a field that is not Query or Mutation, use `@DgsData`.
+                    This is for nested types.
+                </p>
+
+                <pre><code class="language-kotlin">
+@DgsComponent
+class WorkoutResolver(
+    @Autowired val exerciseService: ExerciseService
+) {
+
+    // Resolve "sets" field of Workout type
+    @DgsData(parentType = "Workout", field = "sets")
+    fun exerciseSets(
+        dfe: DgsDataFetchingEnvironment
+    ): CompletableFuture<List<ExerciseSet>> {
+        val workout = dfe.getSource<Workout>()
+
+        // Use DataLoader for batching (see section below)
+        val loader = dfe.getDataLoader<UUID, List<ExerciseSet>>("exerciseSetsLoader")
+        return loader.load(workout.id)
+    }
+}
+                </code></pre>
+
+                <h3>DgsDataFetchingEnvironment</h3>
+                <p>
+                    This object contains all information about the current request:
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>`getLocalContext<T>()` — get user context (ViewerContext)</li>
+                    <li>`getSource<T>()` — get parent object (for child resolvers)</li>
+                    <li>`getArgument<T>("name")` — get request argument</li>
+                    <li>`getDataLoader<K, V>("name")` — get DataLoader for batching</li>
+                </ul>
+            </section>
+
+            <section id="dataloaders">
+                <h2>DataLoaders — N+1 Prevention</h2>
+
+                <h3>The N+1 Problem</h3>
+                <p>
+                    Imagine a query: "Give me 20 workouts, and for each one all exercises (sets)".
+                    A naive resolver might make 1 query for workouts + 20 queries for exercises = 21 SQL queries (N+1 problem).
+                </p>
+
+                <p>
+                    DataLoader batches (combines) queries: 1 query for workouts + 1 query for all exercises = 2 queries.
+                </p>
+
+                <h3>DataLoader Implementation</h3>
+                <p>Create `ExerciseSetsDataLoader.kt`:</p>
+
+                <pre><code class="language-kotlin">
+import com.netflix.graphql.dgs.DgsComponent
+import com.netflix.graphql.dgs.DgsDataLoader
+import com.mrurec.lifegoals.fitness.model.ExerciseSet
+import com.mrurec.lifegoals.fitness.repository.ExerciseSetRepository
+import org.dataloader.MappedBatchLoader
+import java.util.*
+import java.util.concurrent.CompletableFuture
+
+@DgsComponent
+class ExerciseSetsDataLoader(
+    val repository: ExerciseSetRepository
+) {
+
+    @DgsDataLoader(name = "exerciseSetsLoader")
+    fun batchLoader(): MappedBatchLoader<UUID, List<ExerciseSet>> {
+        return MappedBatchLoader { workoutIds, _ ->
+            // Single SQL query for all workout IDs
+            val sets = repository.findByWorkoutIdIn(workoutIds)
+
+            // Result: Map<workoutId, List<ExerciseSet>>
+            val result = mutableMapOf<UUID, List<ExerciseSet>>()
+            workoutIds.forEach { workoutId ->
+                result[workoutId] = sets.filter { it.workoutId == workoutId }
+            }
+
+            CompletableFuture.completedFuture(result)
+        }
+    }
+}
+                </code></pre>
+
+                <h3>Using DataLoader in resolver</h3>
+
+                <pre><code class="language-kotlin">
+@DgsComponent
+class WorkoutResolver(
+    @Autowired val exerciseService: ExerciseService
+) {
+
+    @DgsData(parentType = "Workout", field = "sets")
+    fun exerciseSets(
+        dfe: DgsDataFetchingEnvironment
+    ): CompletableFuture<List<ExerciseSet>> {
+        val workout = dfe.getSource<Workout>()
+
+        // Get DataLoader and load data
+        val loader = dfe.getDataLoader<UUID, List<ExerciseSet>>("exerciseSetsLoader")
+        return loader.load(workout.id)
+    }
+}
+                </code></pre>
+
+                <h3>DataLoader Registration</h3>
+                <p>
+                    In a Spring Boot application, DataLoaders are automatically registered via the `@DgsDataLoader` annotation.
+                    DGS scans the classpath and finds all such components.
+                </p>
+
+                <div class="tip">
+                    <strong>Tip:</strong> DataLoaders exist only for the duration of one GraphQL request.
+                    This ensures batching works correctly, but different requests use different instances.
+                </div>
+            </section>
+
+            <section id="subscriptions">
+                <h2>Subscriptions: WebSocket and Real-time</h2>
+
+                <h3>What is a Subscription?</h3>
+                <p>
+                    Unlike Query (one-time request) and Mutation (change + response),
+                    Subscription is a long-lived connection where the server can send data to the client in real-time.
+                </p>
+
+                <p>
+                    In Life Goals Dashboard we use Subscriptions for:
+                </p>
+                <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+                    <li>Achievement notifications</li>
+                    <li>Updates about new records (workouts, meals, transactions)</li>
+                    <li>Widget status changes</li>
+                </ul>
+
+                <h3>Schema for Subscription</h3>
+
+                <pre><code class="language-graphql">
+type Subscription {
+    # Subscribe to user notifications
+    notificationReceived: Notification!
+
+    # Subscribe to widget updates
+    widgetDataUpdated(widgetId: ID!): WidgetData!
+}
+
+type Notification {
+    id: ID!
+    type: NotificationType!
+    title: String!
+    body: String!
+    createdAt: DateTime!
+}
+
+enum NotificationType {
+    ACHIEVEMENT
+    REMINDER
+    WARNING
+    MILESTONE
+}
+                </code></pre>
+
+                <h3>Subscription Resolver Implementation</h3>
+
+                <pre><code class="language-kotlin">
+import com.netflix.graphql.dgs.DgsSubscription
+import com.netflix.graphql.dgs.DgsComponent
+import com.mrurec.lifegoals.notification.model.Notification
+import com.mrurec.lifegoals.notification.publisher.NotificationPublisher
+import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
+
+@DgsComponent
+class NotificationSubscription(
+    val notificationPublisher: NotificationPublisher
+) {
+
+    @DgsSubscription
+    fun notificationReceived(): Publisher<Notification> {
+        // Returns Flux — stream of notifications
+        return notificationPublisher.getNotificationStream()
+    }
+}
+                </code></pre>
+
+                <h3>NotificationPublisher (Redis pub/sub backed)</h3>
+
+                <pre><code class="language-kotlin">
+import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.stereotype.Service
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Sinks
+import com.mrurec.lifegoals.common.auth.ViewerContext
+import com.mrurec.lifegoals.notification.model.Notification
+
+@Service
+class NotificationPublisher(
+    val redisTemplate: StringRedisTemplate
+) {
+
+    private val sinks = mutableMapOf<String, Sinks.Many<Notification>>()
+
+    fun publishNotification(userId: String, notification: Notification) {
+        // Publish to Redis channel
+        val channel = "lifegoals:notifications:$userId"
+        redisTemplate.convertAndSend(channel, notification)
+
+        // Also send to Flux for WebSocket connections
+        sinks[userId]?.tryEmitNext(notification)
+    }
+
+    fun getNotificationStream(): Flux<Notification> {
+        // Create Flux that sends notifications
+        val sink = Sinks.many().multicast().onBackpressureBuffer()
+        // Code simplified; in reality you need Redis channel subscription
+        return sink.asFlux()
+    }
+}
+                </code></pre>
+
+                <h3>WebSocket Configuration in GraphQLConfig</h3>
+
+                <pre><code class="language-kotlin">
+import com.netflix.graphql.dgs.DgsConfiguration
+import com.netflix.graphql.dgs.DgsGraphQLConfiguration
+import org.springframework.context.annotation.Bean
+
+@DgsConfiguration
+class GraphQLConfig {
+
+    @Bean
+    fun dgsGraphQLConfiguration(): DgsGraphQLConfiguration {
+        return DgsGraphQLConfiguration()
+    }
+
+    // WebSocket endpoint automatically available at /subscriptions
+    // Client connects via: ws://localhost:8080/subscriptions
+}
+                </code></pre>
+            </section>
+
+            <section id="best-practices">
+                <h2>Best Practices: Error Handling and Validation</h2>
+
+                <h3>Principle: Errors in Payload, not in GraphQL errors</h3>
+                <p>
+                    In Meta systems (and in this project), business logic errors are returned in the `Payload` object,
+                    not thrown as GraphQL errors. This allows the frontend to handle errors elegantly.
+                </p>
+
+                <pre><code class="language-graphql">
+# CORRECT
+type LogWorkoutPayload {
+    workout: Workout
+    errors: [UserError!]!
+}
+
+type UserError {
+    field: String
+    message: String!
+    code: ErrorCode!
+}
+
+enum ErrorCode {
+    VALIDATION_ERROR
+    NOT_FOUND
+    UNAUTHORIZED
+    INTERNAL_ERROR
+}
+                </code></pre>
+
+                <p>
+                    The frontend checks `payload.errors` and displays them:
+                </p>
+
+                <pre><code class="language-typescript">
+const [logWorkout, isLoading] = useMutation(LogWorkoutMutation);
+
+const handleLogWorkout = async (input) => {
+    const response = await logWorkout({ variables: { input } });
+
+    if (response.data.logWorkout.errors.length > 0) {
+        // Show errors to user
+        response.data.logWorkout.errors.forEach(err => {
+            console.error(err.message);
+        });
+    } else {
+        // Workout logged successfully
+        console.log("Workout logged:", response.data.logWorkout.workout);
+    }
+};
+                </code></pre>
+
+                <h3>Server-side Validation</h3>
+
+                <pre><code class="language-kotlin">
+@DgsMutation
+fun createRecipe(
+    dfe: DgsDataFetchingEnvironment,
+    input: CreateRecipeInput
+): CreateRecipePayload {
+    val viewer = dfe.getLocalContext<ViewerContext>()
+    val errors = mutableListOf<UserError>()
+
+    // Validation 1: name is not empty
+    if (input.name.trim().isEmpty()) {
+        errors.add(UserError(
+            field = "name",
+            message = "Recipe name cannot be empty",
+            code = ErrorCode.VALIDATION_ERROR
+        ))
+    }
+
+    // Validation 2: at least 1 ingredient
+    if (input.ingredients.isEmpty()) {
+        errors.add(UserError(
+            field = "ingredients",
+            message = "Recipe must have at least one ingredient",
+            code = ErrorCode.VALIDATION_ERROR
+        ))
+    }
+
+    // Validation 3: check ingredient existence
+    val invalidIngredients = input.ingredients.filter {
+        !recipeService.productExists(viewer.userId, it.productId)
+    }
+    if (invalidIngredients.isNotEmpty()) {
+        errors.add(UserError(
+            field = "ingredients",
+            message = "Some products not found",
+            code = ErrorCode.NOT_FOUND
+        ))
+    }
+
+    if (errors.isNotEmpty()) {
+        return CreateRecipePayload(recipe = null, errors = errors)
+    }
+
+    // Create recipe if validation passed
+    val recipe = recipeService.createRecipe(viewer.userId, input)
+    return CreateRecipePayload(recipe = recipe, errors = emptyList())
+}
+                </code></pre>
+            </section>
+
+            <section class="assignments">
+                <h2>Practical Assignments</h2>
+
+                <div class="assignment">
+                    <h4>Assignment 1: Writing GraphQL Schema (Day 1, 1 hour)</h4>
+                    <p>
+                        Create `src/main/resources/schema/interview-prep.graphqls` with types for Interview Prep Module.
+                        Include:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>CodingProblem (id, title, difficulty, categories, isTargetCompanyTagged)</li>
+                        <li>SystemDesignTopic (id, title, description)</li>
+                        <li>Query: getProblems(filter), getProblemDetail(id)</li>
+                        <li>Mutation: logProblemAttempt, markProblemSolved</li>
+                        <li>Payload types with [UserError!]!</li>
+                    </ul>
+                    <p><strong>Result:</strong> `.graphqls` file with complete schema, ready for type generation.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Assignment 2: Implementing Resolvers (Day 1-2, 1.5 hours)</h4>
+                    <p>
+                        Create `InterviewPrepResolver.kt` with `@DgsComponent` and implement:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>@DgsQuery getProblems(first, after) with Relay connection</li>
+                        <li>@DgsQuery getProblemDetail(id) with ViewerContext validation</li>
+                        <li>@DgsMutation logProblemAttempt(input) with error handling</li>
+                        <li>@DgsData for child resolver Difficulty enum</li>
+                    </ul>
+                    <p><strong>Result:</strong> Working resolvers, all Query and Mutation available in GraphQL Playground.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Assignment 3: DataLoader for Problems (Day 2, 1 hour)</h4>
+                    <p>
+                        Implement `CodingProblemDataLoader` for batching when loading categories and tags.
+                        Ensure 100 problems load in 1 query, not 100.
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Create DataLoader for categories</li>
+                        <li>Register it via @DgsDataLoader</li>
+                        <li>Use in resolver via dfe.getDataLoader()</li>
+                        <li>Check SQL query count (should be 2-3, not 100)</li>
+                    </ul>
+                    <p><strong>Result:</strong> No N+1 problems, optimal performance.</p>
+                </div>
+
+                <div class="assignment">
+                    <h4>Assignment 4: Notification Subscription (Day 3, 1.5 hours)</h4>
+                    <p>
+                        Create `NotificationSubscription` and `NotificationPublisher`:
+                    </p>
+                    <ul style="margin-left: 2rem;">
+                        <li>Write Subscription schema (notificationReceived)</li>
+                        <li>Implement @DgsSubscription resolver</li>
+                        <li>Create NotificationPublisher with Redis pub/sub</li>
+                        <li>Test via GraphQL Playground WebSocket tab</li>
+                    </ul>
+                    <p><strong>Result:</strong> Working real-time subscription to notifications, visible via WebSocket.</p>
+                </div>
+            </section>
+
+            <section class="assignments" id="backlog-tasks" style="border-top-color: #f5c2e7;">
+                <h2>🧪 Backlog Project Tasks (TDD)</h2>
+                <p style="color: #a6adc7; margin-bottom: 1.5rem;">
+                    These tasks are real issues from the Life Goals Dashboard backlog.
+                    For each task, tests are provided — make them green by writing the implementation.
+                    <strong>TDD approach:</strong> study the tests → understand what's expected → write code → run tests.
+                </p>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #13: GraphQL Exception Handler (8 SP)</h4>
+                    <p>Implement error handler for DGS that doesn't expose stack traces and correctly handles UNAUTHENTICATED errors.</p>
+                    <p><strong>Tests (write code to make them pass):</strong></p>
+                    <pre><code class="language-kotlin">
+package com.mrurec.lifegoals.common.graphql
+
+import com.netflix.graphql.dgs.DgsQueryExecutor
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+
+@SpringBootTest
+class GraphQLExceptionHandlerTest {
+
+    @Autowired
+    lateinit var dgsQueryExecutor: DgsQueryExecutor
+
+    @Test
+    fun `unauthenticated request should return UNAUTHENTICATED error code`() {
+        // Execute a query without auth token
+        val result = dgsQueryExecutor.execute("{ myDashboard { widgets { id } } }")
+
+        assertTrue(result.errors.isNotEmpty())
+        val errorCode = result.errors[0].extensions?.get("errorType")
+        assertEquals("UNAUTHENTICATED", errorCode)
+    }
+
+    @Test
+    fun `should not expose stack traces in error response`() {
+        val result = dgsQueryExecutor.execute("{ myDashboard { widgets { id } } }")
+
+        for (error in result.errors) {
+            assertNull(error.extensions?.get("stackTrace"),
+                "Stack traces should not be exposed to clients")
+        }
+    }
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/test/kotlin/com/mrurec/lifegoals/common/graphql/GraphQLExceptionHandlerTest.kt</em></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #15: Relay Connection Utils (3 SP)</h4>
+                    <p>Implement utilities for Relay Connection pattern: toConnection(), CursorCodec.encode(), CursorCodec.decode().</p>
+                    <p><strong>Tests (write code to make them pass):</strong></p>
+                    <pre><code class="language-kotlin">
+package com.mrurec.lifegoals.common.graphql
+
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import java.util.UUID
+
+class ConnectionUtilsTest {
+
+    @Test
+    fun `toConnection should create valid Relay connection from list`() {
+        val items = (1..5).map { TestEntity(UUID.randomUUID(), "Item $it") }
+
+        val connection = ConnectionUtils.toConnection(
+            items = items,
+            first = 3,
+            after = null,
+            cursorFor = { CursorCodec.encode(it.id.toString()) }
+        )
+
+        assertEquals(3, connection.edges.size)
+        assertTrue(connection.pageInfo.hasNextPage)
+        assertFalse(connection.pageInfo.hasPreviousPage)
+        assertEquals(5, connection.totalCount)
+    }
+
+    @Test
+    fun `toConnection with after cursor should return next page`() {
+        val items = (1..5).map { TestEntity(UUID.randomUUID(), "Item $it") }
+        val afterCursor = CursorCodec.encode(items[1].id.toString())
+
+        val connection = ConnectionUtils.toConnection(
+            items = items,
+            first = 2,
+            after = afterCursor,
+            cursorFor = { CursorCodec.encode(it.id.toString()) }
+        )
+
+        assertEquals(2, connection.edges.size)
+        assertEquals("Item 3", connection.edges[0].node.name)
+    }
+
+    @Test
+    fun `CursorCodec should encode and decode Base64 cursors`() {
+        val original = "some-uuid-value"
+        val encoded = CursorCodec.encode(original)
+        val decoded = CursorCodec.decode(encoded)
+
+        assertNotEquals(original, encoded) // Should be encoded
+        assertEquals(original, decoded)   // Should decode back
+    }
+
+    @Test
+    fun `CursorCodec decode should throw on invalid cursor`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            CursorCodec.decode("not-valid-base64!!!")
+        }
+    }
+
+    data class TestEntity(val id: UUID, val name: String)
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/test/kotlin/com/mrurec/lifegoals/common/graphql/ConnectionUtilsTest.kt</em></p>
+                </div>
+
+                <div class="assignment" style="border-left-color: #f5c2e7;">
+                    <h4>Backlog #16: DataLoader Registry (3 SP)</h4>
+                    <p>Implement centralized DataLoader registry with registration and batch loader retrieval capabilities.</p>
+                    <p><strong>Tests (write code to make them pass):</strong></p>
+                    <pre><code class="language-kotlin">
+package com.mrurec.lifegoals.common.graphql
+
+import org.dataloader.DataLoaderRegistry
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+
+@SpringBootTest
+class DataLoaderRegistrarTest {
+
+    @Autowired
+    lateinit var registrar: DataLoaderRegistrar
+
+    @Test
+    fun `should register all required DataLoaders`() {
+        val registry = DataLoaderRegistry()
+        registrar.provide(registry)
+
+        // After implementing all loaders, these should be present:
+        assertNotNull(registry.getDataLoader&lt;Any, Any&gt;("codingProblemLoader"),
+            "codingProblemLoader should be registered")
+    }
+
+    @Test
+    fun `mappedBatchLoader helper should batch requests`() {
+        // Test the generic helper function
+        var batchCallCount = 0
+        val loader = DataLoaderRegistrar.mappedBatchLoader&lt;String, String&gt; { keys -&gt;
+            batchCallCount++
+            keys.associateWith { "value-for-$it" }
+        }
+
+        // Verify the loader returns correct mappings
+        assertNotNull(loader)
+    }
+}
+                    </code></pre>
+                    <p style="color: #a6adc7; font-size: 0.85rem; margin-top: 0.5rem;"><em>File: src/test/kotlin/com/mrurec/lifegoals/common/graphql/DataLoaderRegistrarTest.kt</em></p>
+                </div>
+            </section>
+
+            <section class="resources">
+                <h2>Additional Resources</h2>
+
+                <a href="https://netflix-dgs.dev/" class="resource-link">
+                    Netflix DGS — Official Documentation
+                </a>
+
+                <a href="https://netflix-dgs.dev/docs/getting-started" class="resource-link">
+                    DGS Getting Started
+                </a>
+
+                <a href="https://netflix-dgs.dev/docs/data-loaders" class="resource-link">
+                    DGS DataLoaders Documentation
+                </a>
+
+                <a href="https://github.com/graphql-java/graphql-java-dataloader" class="resource-link">
+                    GraphQL Java DataLoader
+                </a>
+
+                <a href="https://spec.graphql.org/June2018/#sec-Scalars" class="resource-link">
+                    GraphQL Specification (Scalars, Types)
+                </a>
+
+                <a href="https://relay.dev/docs/guides/graphql-server/" class="resource-link">
+                    Relay Server Specification
+                </a>
+            </section>
+
+            <footer class="nav-footer">
+                <a href="08-spring-security.html" class="nav-link prev">← <span class="lang-ru">Модуль 8: Spring Security</span><span class="lang-en" style="display: none;">Module 8: Spring Security</span></a>
+                <a href="10-react.html" class="nav-link next"><span class="lang-ru">Модуль 10: React 18+</span><span class="lang-en" style="display: none;">Module 10: React 18+</span> →</a>
+            </footer>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-graphql.min.js"></script>
+    <script>
+        function setLang(lang) {
+            document.body.classList.toggle('show-en', lang === 'en');
+            document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            try { localStorage.setItem('study-lang', lang); } catch(e) {}
+        }
+        try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+    </script>
+</body>
+</html>

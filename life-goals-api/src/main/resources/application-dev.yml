@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/lifegoals}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: 5
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
+  jpa:
+    hibernate:
+      # TODO: switch to 'validate' and set flyway.enabled=true once the first Flyway migration is added
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,beans,env,mappings
+  endpoint:
+    health:
+      show-details: always
+
+app:
+  security:
+    jwt-secret: ${JWT_SECRET:dev-insecure-secret-change-me-0000000000000000}
+  oauth:
+    client-id: ${OAUTH_CLIENT_ID:dev-client-id}
+    client-secret: ${OAUTH_CLIENT_SECRET:dev-client-secret}
+  exchange-rate:
+    api-key: ${EXCHANGE_RATE_API_KEY:dev-exchange-rate-key}
