@@ -478,7 +478,23 @@
             font-weight: 600;
         }
     
-    </style>
+    
+        /* Home link */
+        .home-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.75rem;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        .home-link:hover {
+            background: rgba(243, 139, 168, 0.1);
+        }
+</style>
 </head>
 <body>
     <header>
@@ -498,6 +514,9 @@
 
     <div class="container">
         <aside class="sidebar">
+            <a href="index.html" class="home-link">&#8592; <span class="lang-ru">Все модули</span><span class="lang-en">All Modules</span>
+            </a>
+
             <div class="lang-ru"><h3>Содержание</h3></div><div class="lang-en"><h3>Contents</h3></div>
             <ul>
                 <div class="lang-ru"><li><a href="#intro">Введение</a></li></div><div class="lang-en"><li><a href="#intro">Introduction</a></li></div>
@@ -1563,5 +1582,37 @@ describe('Backlog #45: TransactionList', () =&gt; {
         }
         try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
     </script>
-    </body>
+    
+    <script>
+    /* hide-on-scroll */
+    (function () {
+        var header  = document.querySelector('header');
+        var sidebar = document.querySelector('.sidebar');
+        if (!header) return;
+
+        // Inject CSS transitions once
+        var s = document.createElement('style');
+        s.textContent = 'header { transition: top 0.3s ease; } .sidebar { transition: top 0.3s ease; }';
+        document.head.appendChild(s);
+
+        var lastY = 0;
+
+        window.addEventListener('scroll', function () {
+            var y = window.scrollY;
+            var h = header.offsetHeight;
+
+            if (y > lastY && y > 80) {
+                // scrolling down — hide
+                header.style.top = '-' + (h + 2) + 'px';
+                if (sidebar) sidebar.style.top = '0';
+            } else {
+                // scrolling up — show
+                header.style.top = '0';
+                if (sidebar) sidebar.style.top = h + 'px';
+            }
+            lastY = y;
+        }, { passive: true });
+    })();
+    </script>
+</body>
 </html>
