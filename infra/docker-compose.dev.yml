@@ -1,8 +1,8 @@
-# Dev API service. Postgres + Redis are started separately via life-goals-api/docker-compose.yml.
+# Dev API service. Postgres + Redis are started separately via infra/local/docker-compose.yml.
 #
 # Usage (from repo root):
-#   docker-compose -f life-goals-api/docker-compose.yml up -d
-#   docker-compose -f deploy/docker-compose.dev.yml up -d
+#   docker-compose -f infra/local/docker-compose.yml up -d
+#   docker-compose -f infra/docker-compose.dev.yml up -d
 #
 # NOTE: When the API runs inside Docker it reaches Postgres and Redis by their
 # service names ("postgres", "redis"), not "localhost". The DB_URL and REDIS_URL
@@ -12,7 +12,7 @@
 services:
   life-goals-api:
     build:
-      context: ../life-goals-api
+      context: ../apps/api
       dockerfile: Dockerfile
     image: life-goals-api:latest
     ports:
