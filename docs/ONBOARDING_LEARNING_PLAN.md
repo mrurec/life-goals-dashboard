@@ -6,11 +6,11 @@
 
 > **Цель:** После прохождения всех модулей junior-разработчик сможет самостоятельно решать задачи в проекте Life Goals Dashboard — от написания GraphQL-резолверов на Kotlin до создания React-компонентов с Relay.
 >
-> **Формат:** 17 модулей, ~9-10 недель при 4-6 часов/день. Каждый модуль содержит теорию, привязанную к проекту, практические задания и ссылки на дополнительные источники.
+> **Формат:** 19 модулей, ~10-12 недель при 4-6 часов/день для core-стэка (1–17). Модули 18–19 (React Native + Mobile Distribution) добавляются при работе над M8. Каждый модуль содержит теорию, привязанную к проекту, практические задания и ссылки на дополнительные источники.
 >
-> **Порядок модулей выстроен по зависимостям:** сначала фундамент (Git, языки), затем хранилища данных, потом фреймворки, и наконец инфраструктура и тестирование.
+> **Порядок модулей выстроен по зависимостям:** сначала фундамент (Git, языки), затем хранилища данных, потом фреймворки, инфраструктура и тестирование. Мобильные модули 18–19 проходятся после core-стека (зависимости: 10, 12, 13, 15).
 >
-> **🧪 TDD из реального Backlog:** В каждом модуле есть задания из [GitHub Issues Backlog](BACKLOG.md) (91 задача, 7 milestones — включая M7 Budget Accounts Aggregation) с готовыми тестами. Подход: сначала изучи тесты → пойми ожидания → напиши реализацию → запусти тесты. Полные TDD-задания доступны в [интерактивных HTML study plans](study-plans/index.html).
+> **🧪 TDD из реального Backlog:** В каждом модуле есть задания из [GitHub Issues Backlog](BACKLOG.md) (116 задач, 8 milestones — включая M7 Budget Accounts Aggregation и M8 Mobile App) с готовыми тестами. Подход: сначала изучи тесты → пойми ожидания → напиши реализацию → запусти тесты. Полные TDD-задания доступны в [интерактивных HTML study plans](study-plans/index.html).
 >
 > **Детальные HTML-модули:** Каждый модуль доступен в виде отдельной HTML-страницы с подсветкой синтаксиса, навигацией и TDD-заданиями: [`docs/study-plans/`](study-plans/index.html)
 
@@ -36,6 +36,8 @@
 Модуль 15: GitHub Actions ────────────────────────────────────────┘│  │
 Модуль 16: Тестирование (полный стек) ─────────────────────────────┤──┘
 Модуль 17: Интеграция + Meta Interview Prep ───────────────────────┘
+Модуль 18: React Native (M8 mobile client) ────────── ← 10, 12, 13
+Модуль 19: Mobile Distribution (fastlane, stores) ──── ← 15, 18
 ```
 
 ---
@@ -3518,4 +3520,50 @@ test.describe('Meal Logging', () => {
 | phase-3 | #91 Docs + onboarding guide | — |
 
 Для каждой задачи breakdown содержит готовые Acceptance-критерии — они играют роль TDD-тестов: сначала пишутся тесты (integration в Testcontainers, contract-тесты на `AccountProvider`, WireMock для HTTP, Playwright для E2E), затем реализация, пока все Acceptance-пункты не станут зелёными.
+
+---
+
+## Capstone-фича: Mobile App (M8)
+
+После прохождения core-модулей 1–17 (или параллельно, начиная с фазы 1) берите M8 — 25 задач (#98–#122), которые выносят весь продукт на мобильные платформы через React Native.
+
+**Источники правды:** [`BACKLOG.md → Milestone 8`](BACKLOG.md#milestone-8-mobile-app), [`superpowers/specs/2026-04-14-mobile-backlog-and-m8-design.md`](superpowers/specs/2026-04-14-mobile-backlog-and-m8-design.md).
+
+**Длительность:** 7 недель (6 фаз × ~1 неделя, phase 2 и phase 3 идут параллельно с M3–M4 web).
+
+**Порядок старта:** Phase 0 + Phase 1 можно начинать после M2 web. Phase 2+ требует соответствующих web-фич (Dashboard/Interview Prep готов → Phase 2 mobile; Fitness/Budget web готов → Phase 3 mobile). Phase 5 (Distribution) делается в самом конце.
+
+**Новые темы (появляются именно в M8):** React Native примитивы (`View`/`Text`/`StyleSheet`), React Navigation вместо React Router, `AsyncStorage` + Keychain / EncryptedSharedPreferences для токенов, `packages/shared` с storage-adapter для Jotai atoms, Relay на RN с `graphql-ws`, FCM + APNS через `@react-native-firebase/messaging`, биометрия и AppState-lock, offline-first Relay store + mutation queue на `AsyncStorage`, Universal Links / App Links, `fastlane match` для code signing, TestFlight, Play Console Internal, GitHub Actions matrix (macOS + Ubuntu), store metadata + privacy policy.
+
+### Маппинг задач M8 на модули
+
+| Фаза | Задача | Модули для повторения |
+|------|--------|------------------------|
+| phase-mobile-0 | #98 Init React Native + workspaces | 1, 18 |
+| phase-mobile-0 | #99 Wire Relay с shared schema | 12, 18 |
+| phase-mobile-0 | #100 RelayEnvironment (RN fetch + WebSocket) | 12, 18 |
+| phase-mobile-0 | #101 React Navigation skeleton | 10, 18 |
+| phase-mobile-0 | #102 OAuth + Keychain | 2, 18 |
+| phase-mobile-0 | #103 Mobile app shell (tabs + header) | 10, 13, 18 |
+| phase-mobile-1 | #104 Extract Jotai atoms → shared | 13, 18 |
+| phase-mobile-1 | #105 Extract platform-agnostic hooks → shared | 2, 10, 18 |
+| phase-mobile-1 | #106 Extract domain TS interfaces → shared | 2 |
+| phase-mobile-1 | #107 Shared Relay network base | 2, 12, 18 |
+| phase-mobile-1 | #108 Design tokens (light/dark) | 11, 18 |
+| phase-mobile-2 | #109 Mobile Dashboard + pull-to-refresh | 10, 12, 18 |
+| phase-mobile-2 | #110 Mobile Interview Prep widget UI | 10, 12, 18 |
+| phase-mobile-2 | #111 Mobile "Add Widget" flow | 10, 12, 18 |
+| phase-mobile-3 | #112 Mobile Fitness widget | 10, 12, 18 |
+| phase-mobile-3 | #113 Mobile Budget widget | 10, 12, 18 |
+| phase-mobile-3 | #114 Camera integration | 18 |
+| phase-mobile-4 | #115 Push: FCM + APNS | 5, 9, 18 |
+| phase-mobile-4 | #116 Biometric auth | 18 |
+| phase-mobile-4 | #117 Offline-first + mutation queue | 12, 16, 18 |
+| phase-mobile-4 | #118 Deep linking из push | 18 |
+| phase-mobile-5 | #119 iOS build pipeline + TestFlight | 15, 19 |
+| phase-mobile-5 | #120 Android pipeline + Play Console | 15, 19 |
+| phase-mobile-5 | #121 GH Actions matrix (mobile) | 15, 19 |
+| phase-mobile-5 | #122 App Store + Play Store metadata | 19 |
+
+Как и в M7, Acceptance-критерии каждой задачи играют роль TDD-тестов: сначала пишется тест (unit на `createNetwork`, integration на Keychain, RTL для экранов, Maestro/Playwright для e2e flows, fastlane dry-run для CI), затем реализация до зелёного прогона.
 

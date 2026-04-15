@@ -6,11 +6,11 @@
 
 > **Goal:** After completing all modules, a junior developer will be able to independently solve tasks in the Life Goals Dashboard project — from writing GraphQL resolvers in Kotlin to creating React components with Relay.
 >
-> **Format:** 17 modules, ~9-10 weeks at 4-6 hours/day. Each module contains theory tied to the project, practical assignments, and supplementary resources.
+> **Format:** 19 modules, ~10-12 weeks at 4-6 hours/day for the core stack (1–17). Modules 18–19 (React Native + Mobile Distribution) are added when working on M8. Each module contains theory tied to the project, practical assignments, and supplementary resources.
 >
-> **Module order is structured by dependencies:** first foundation (Git, languages), then databases, then frameworks, and finally infrastructure and testing.
+> **Module order is structured by dependencies:** first foundation (Git, languages), then databases, frameworks, infrastructure, and testing. Mobile modules 18–19 come after the core stack (dependencies: 10, 12, 13, 15).
 >
-> **🧪 TDD from real Backlog:** Each module includes assignments from [GitHub Issues Backlog](BACKLOG.md) (91 tasks, 7 milestones — including M7 Budget Accounts Aggregation) with ready-made tests. Approach: first read the tests → understand expectations → write implementation → run tests. Complete TDD assignments available in [interactive HTML study plans](study-plans/index.html).
+> **🧪 TDD from real Backlog:** Each module includes assignments from [GitHub Issues Backlog](BACKLOG.md) (116 tasks, 8 milestones — including M7 Budget Accounts Aggregation and M8 Mobile App) with ready-made tests. Approach: first read the tests → understand expectations → write implementation → run tests. Complete TDD assignments available in [interactive HTML study plans](study-plans/index.html).
 >
 > **Detailed HTML modules:** Each module is available as a separate HTML page with syntax highlighting, navigation, and TDD assignments: [`docs/study-plans/`](study-plans/index.html)
 
@@ -36,6 +36,8 @@ Module 14: Docker + Docker Compose ───────────────
 Module 15: GitHub Actions ────────────────────────────────────────┘│  │
 Module 16: Testing (full stack) ─────────────────────────────────────┤──┘
 Module 17: Integration + Meta Interview Prep ───────────────────────┘
+Module 18: React Native (M8 mobile client) ────────── ← 10, 12, 13
+Module 19: Mobile Distribution (fastlane, stores) ──── ← 15, 18
 ```
 
 ---
@@ -3518,3 +3520,49 @@ After modules 1–17, tackle M7 as a capstone — 23 issues (#69–#91) that loc
 | phase-3 | #91 Docs + onboarding guide | — |
 
 Each breakdown task ships with acceptance criteria that act as TDD tests: write tests first (Testcontainers integration, `AccountProvider` contract tests, WireMock for HTTP, Playwright E2E), then implement until every acceptance item is green.
+
+---
+
+## Capstone feature: Mobile App (M8)
+
+After the core modules (1–17), or in parallel starting from Phase 1, take on M8 — 25 tasks (#98–#122) that lift the entire product onto mobile platforms via React Native.
+
+**Sources of truth:** [`BACKLOG.md → Milestone 8`](BACKLOG.md#milestone-8-mobile-app), [`superpowers/specs/2026-04-14-mobile-backlog-and-m8-design.md`](superpowers/specs/2026-04-14-mobile-backlog-and-m8-design.md).
+
+**Duration:** 7 weeks (6 phases, ~1 week each; phases 2 and 3 run in parallel with web M3–M4).
+
+**Starting order:** Phase 0 + Phase 1 can begin once web M2 is complete. Phase 2+ depends on matching web features (Dashboard/Interview Prep ready → mobile Phase 2; Fitness/Budget web ready → mobile Phase 3). Phase 5 (Distribution) closes the milestone.
+
+**New topics introduced in M8:** React Native primitives (`View`/`Text`/`StyleSheet`), React Navigation instead of React Router, `AsyncStorage` + Keychain / EncryptedSharedPreferences for tokens, `packages/shared` with storage adapter for Jotai atoms, Relay on RN with `graphql-ws`, FCM + APNS through `@react-native-firebase/messaging`, biometrics and AppState lock, offline-first Relay store + mutation queue over `AsyncStorage`, Universal Links / App Links, `fastlane match` for code signing, TestFlight, Play Console Internal, GitHub Actions matrix (macOS + Ubuntu), store metadata + privacy policy.
+
+### M8 task-to-module mapping
+
+| Phase | Task | Modules to revisit |
+|-------|------|--------------------|
+| phase-mobile-0 | #98 Init React Native + workspaces | 1, 18 |
+| phase-mobile-0 | #99 Wire Relay with shared schema | 12, 18 |
+| phase-mobile-0 | #100 RelayEnvironment (RN fetch + WebSocket) | 12, 18 |
+| phase-mobile-0 | #101 React Navigation skeleton | 10, 18 |
+| phase-mobile-0 | #102 OAuth + Keychain | 2, 18 |
+| phase-mobile-0 | #103 Mobile app shell (tabs + header) | 10, 13, 18 |
+| phase-mobile-1 | #104 Extract Jotai atoms → shared | 13, 18 |
+| phase-mobile-1 | #105 Extract platform-agnostic hooks → shared | 2, 10, 18 |
+| phase-mobile-1 | #106 Extract domain TS interfaces → shared | 2 |
+| phase-mobile-1 | #107 Shared Relay network base | 2, 12, 18 |
+| phase-mobile-1 | #108 Design tokens (light/dark) | 11, 18 |
+| phase-mobile-2 | #109 Mobile Dashboard + pull-to-refresh | 10, 12, 18 |
+| phase-mobile-2 | #110 Mobile Interview Prep widget UI | 10, 12, 18 |
+| phase-mobile-2 | #111 Mobile "Add Widget" flow | 10, 12, 18 |
+| phase-mobile-3 | #112 Mobile Fitness widget | 10, 12, 18 |
+| phase-mobile-3 | #113 Mobile Budget widget | 10, 12, 18 |
+| phase-mobile-3 | #114 Camera integration | 18 |
+| phase-mobile-4 | #115 Push: FCM + APNS | 5, 9, 18 |
+| phase-mobile-4 | #116 Biometric auth | 18 |
+| phase-mobile-4 | #117 Offline-first + mutation queue | 12, 16, 18 |
+| phase-mobile-4 | #118 Deep linking from push | 18 |
+| phase-mobile-5 | #119 iOS build pipeline + TestFlight | 15, 19 |
+| phase-mobile-5 | #120 Android pipeline + Play Console | 15, 19 |
+| phase-mobile-5 | #121 GH Actions matrix (mobile) | 15, 19 |
+| phase-mobile-5 | #122 App Store + Play Store metadata | 19 |
+
+As with M7, each task's acceptance criteria act as TDD tests: write the test first (unit on `createNetwork`, integration on Keychain, RTL for screens, Maestro/Playwright for e2e flows, fastlane dry-run for CI), then implement until the suite goes green.

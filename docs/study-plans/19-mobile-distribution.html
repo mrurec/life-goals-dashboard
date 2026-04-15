@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 19: Mobile Distribution - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --mauve: #cba6f7;
+            --code-bg: #181825;
+        }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; }
+        header { position: sticky; top: 0; background: var(--bg-secondary); border-bottom: 2px solid var(--header); padding: 1.5rem 2rem; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .header-left h1 { color: var(--header); font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .progress-bar { width: 100%; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-top: 0.5rem; }
+        .progress-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--success), var(--header)); }
+        .module-number { color: var(--accent); font-size: 0.9rem; font-weight: bold; }
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button { padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px; cursor: pointer; font-size: 0.85rem; background: transparent; color: var(--text-secondary); transition: all 0.2s; }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+        .container { display: flex; max-width: 1400px; margin: 0 auto; }
+        .sidebar { width: 280px; background: var(--bg-secondary); padding: 2rem 1.5rem; border-right: 1px solid var(--text-secondary); max-height: calc(100vh - 100px); overflow-y: auto; position: sticky; top: 100px; }
+        .sidebar h3 { color: var(--header); font-size: 1rem; margin-bottom: 1rem; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin-bottom: 0.5rem; }
+        .sidebar a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; display: block; padding: 0.5rem 0.75rem; border-radius: 4px; transition: all 0.2s; }
+        .sidebar a:hover { background: var(--bg); color: var(--header); border-left: 3px solid var(--accent); }
+        .main-content { flex: 1; padding: 2rem; overflow-x: hidden; }
+        h2 { color: var(--header); font-size: 1.8rem; margin-top: 2.5rem; margin-bottom: 1rem; border-left: 4px solid var(--accent); padding-left: 1rem; }
+        h3 { color: var(--header); font-size: 1.3rem; margin-top: 1.8rem; margin-bottom: 0.8rem; }
+        p { margin-bottom: 1rem; color: var(--text); line-height: 1.7; }
+        strong { color: var(--accent); }
+        pre { background: var(--code-bg); border-left: 4px solid var(--accent); border-radius: 4px; padding: 1rem; margin: 1.5rem 0; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Fira Code', 'Courier New', monospace; }
+        .tip { background: rgba(166, 227, 161, 0.1); border-left: 4px solid var(--success); padding: 1rem; border-radius: 4px; margin: 1.5rem 0; }
+        .tip strong { color: var(--success); }
+        .warning { background: rgba(250, 179, 135, 0.1); border-left: 4px solid var(--warning); padding: 1rem; border-radius: 4px; margin: 1.5rem 0; }
+        .warning strong { color: var(--warning); }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        thead { background: var(--code-bg); }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--text-secondary); }
+        th { color: var(--header); font-weight: bold; }
+        tbody tr:hover { background: rgba(243, 139, 168, 0.05); }
+        .assignments { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--accent); }
+        .assignment { background: var(--code-bg); padding: 1.5rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid var(--warning); }
+        .assignment h4 { color: var(--header); margin-bottom: 0.5rem; }
+        .tdd-badge { display: inline-block; background: #f5c2e7; color: #1e1e2e; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem; vertical-align: middle; }
+        .resources { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--accent); }
+        .resource-link { display: block; color: var(--header); text-decoration: none; margin-bottom: 0.5rem; padding: 0.75rem; background: var(--code-bg); border-radius: 4px; border-left: 3px solid var(--accent); transition: all 0.2s; }
+        .resource-link:hover { background: var(--bg-secondary); transform: translateX(4px); }
+        .nav-footer { display: flex; justify-content: space-between; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--text-secondary); }
+        .nav-link { color: var(--header); text-decoration: none; transition: all 0.2s; }
+        .nav-link:hover { color: var(--accent); }
+        .nav-link.next { text-align: right; }
+        @media (max-width: 900px) { .container { flex-direction: column; } .sidebar { width: 100%; max-height: none; position: relative; top: 0; border-right: none; border-bottom: 1px solid var(--text-secondary); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1><span class="lang-ru">Модуль 19: Mobile Distribution</span><span class="lang-en">Module 19: Mobile Distribution</span></h1>
+        <p class="module-number"><span class="lang-ru">3 дня • fastlane • App Store + Play Store • Milestone 8 Phase 5</span><span class="lang-en">3 days • fastlane • App Store + Play Store • Milestone 8 Phase 5</span></p>
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+    <div class="lang-switcher">
+        <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+        <button id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+</header>
+
+<div class="container">
+    <aside class="sidebar">
+        <h3><span class="lang-ru">Разделы</span><span class="lang-en">Sections</span></h3>
+        <ul>
+            <li><a href="#intro"><span class="lang-ru">Зачем отдельный модуль</span><span class="lang-en">Why a separate module</span></a></li>
+            <li><a href="#fastlane"><span class="lang-ru">fastlane 101</span><span class="lang-en">fastlane 101</span></a></li>
+            <li><a href="#ios"><span class="lang-ru">iOS: match + TestFlight</span><span class="lang-en">iOS: match + TestFlight</span></a></li>
+            <li><a href="#android"><span class="lang-ru">Android: supply + Play Console</span><span class="lang-en">Android: supply + Play Console</span></a></li>
+            <li><a href="#ci"><span class="lang-ru">GH Actions matrix</span><span class="lang-en">GH Actions matrix</span></a></li>
+            <li><a href="#secrets"><span class="lang-ru">Секреты и сертификаты</span><span class="lang-en">Secrets and certificates</span></a></li>
+            <li><a href="#metadata"><span class="lang-ru">Store metadata</span><span class="lang-en">Store metadata</span></a></li>
+            <li><a href="#assignments"><span class="lang-ru">TDD-задания M8 Phase 5</span><span class="lang-en">M8 Phase 5 TDD Assignments</span></a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <h1><span class="lang-ru">Mobile Distribution: публикация LGD в App Store и Play Store</span><span class="lang-en">Mobile Distribution: shipping LGD to the App Store and Play Store</span></h1>
+
+        <section id="intro">
+            <div class="lang-ru">
+                <h2>Зачем отдельный модуль</h2>
+                <p>Разработка RN-клиента (модуль 18) ≠ публикация. Подписание кода, TestFlight, Play Console, скриншоты, политика приватности, review workflow — это целый пласт инфры, который отсутствует в веб-деплое на Vercel. Этот модуль закрывает фазу 5 M8: задачи <code>#119</code>–<code>#122</code>.</p>
+                <p>Задача не в том, чтобы «собрать релиз один раз», а в том, чтобы <strong>push на tag</strong> автоматически публиковал bump в TestFlight / Internal Testing без ручных шагов. Это требует secrets-менеджмента, code signing через <code>match</code>, fastlane lanes и GitHub Actions matrix workflow.</p>
+            </div>
+            <div class="lang-en">
+                <h2>Why a separate module</h2>
+                <p>Building the RN client (Module 18) is not the same as shipping it. Code signing, TestFlight, Play Console, screenshots, privacy policy, review workflow — this is a whole layer of infra that doesn't exist in a Vercel web deploy. This module closes M8 Phase 5: tasks <code>#119</code>–<code>#122</code>.</p>
+                <p>The goal is not to "cut a release once" but to <strong>push a tag</strong> and have TestFlight / Internal Testing updated automatically, with no manual steps. That requires secrets management, <code>match</code>-based code signing, fastlane lanes, and a GitHub Actions matrix workflow.</p>
+            </div>
+        </section>
+
+        <section id="fastlane">
+            <div class="lang-ru">
+                <h2>fastlane 101</h2>
+                <p><code>fastlane</code> — Ruby-тулчейн от Google, который унифицирует сборку, подпись и загрузку iOS + Android билдов. Основная единица — <strong>lane</strong> (цепочка action'ов). LGD использует 4 lane: <code>ios beta</code>, <code>ios release</code>, <code>android beta</code>, <code>android release</code>.</p>
+            </div>
+            <div class="lang-en">
+                <h2>fastlane 101</h2>
+                <p><code>fastlane</code> is Google's Ruby toolchain that unifies building, signing, and uploading iOS + Android builds. The core unit is a <strong>lane</strong> (a chain of actions). LGD uses 4 lanes: <code>ios beta</code>, <code>ios release</code>, <code>android beta</code>, <code>android release</code>.</p>
+            </div>
+
+<pre><code class="language-ruby"># apps/mobile/fastlane/Fastfile
+default_platform(:ios)
+
+platform :ios do
+  desc "Build + upload to TestFlight"
+  lane :beta do
+    match(type: "appstore", readonly: is_ci)        # #119 code signing
+    increment_build_number(xcodeproj: "LifeGoals.xcodeproj")
+    build_app(scheme: "LifeGoals", export_method: "app-store")
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      apple_id: ENV["APPLE_ID"],
+      api_key_path: "fastlane/api_key.json"
+    )
+  end
+end
+
+platform :android do
+  desc "Build + upload to Play Console Internal Testing"
+  lane :beta do
+    gradle(task: "bundle", build_type: "Release")   # #120
+    upload_to_play_store(
+      track: "internal",
+      aab: "android/app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_apk: true,
+      json_key: ENV["PLAY_STORE_JSON_KEY"]
+    )
+  end
+end</code></pre>
+        </section>
+
+        <section id="ios">
+            <div class="lang-ru">
+                <h2>iOS: match + TestFlight (#119)</h2>
+                <p><code>fastlane match</code> — канонический способ хранить и раздавать сертификаты/провижины между разработчиками и CI. Сертификаты шифруются и коммитятся в <strong>отдельный приватный Git-репо</strong> (например, <code>mrurec/life-goals-certificates</code>), расшифровываются на машине только при наличии <code>MATCH_PASSWORD</code>.</p>
+                <p>Поток публикации: tag <code>mobile-v0.3.0</code> → CI job на <code>macos-latest</code> → <code>bundle exec fastlane ios beta</code> → TestFlight build processing → email тестерам через 10-15 минут.</p>
+            </div>
+            <div class="lang-en">
+                <h2>iOS: match + TestFlight (#119)</h2>
+                <p><code>fastlane match</code> is the canonical way to store and share certificates/provisioning profiles across developers and CI. Certificates are encrypted and committed into a <strong>separate private Git repo</strong> (e.g. <code>mrurec/life-goals-certificates</code>) and are only decrypted with the <code>MATCH_PASSWORD</code> secret.</p>
+                <p>Release flow: tag <code>mobile-v0.3.0</code> → <code>macos-latest</code> CI job → <code>bundle exec fastlane ios beta</code> → TestFlight processes the build → testers get an email 10–15 minutes later.</p>
+            </div>
+
+            <table>
+                <thead><tr><th><span class="lang-ru">Артефакт</span><span class="lang-en">Artifact</span></th><th><span class="lang-ru">Где лежит</span><span class="lang-en">Where it lives</span></th><th><span class="lang-ru">Кто создаёт</span><span class="lang-en">Who creates it</span></th></tr></thead>
+                <tbody>
+                    <tr><td>Distribution certificate (.p12)</td><td>Certificates repo (encrypted)</td><td><code>match appstore</code></td></tr>
+                    <tr><td>Provisioning profile</td><td>Certificates repo (encrypted)</td><td><code>match appstore</code></td></tr>
+                    <tr><td>App Store Connect API Key (.json)</td><td>GH Actions secret <code>APP_STORE_CONNECT_KEY</code></td><td>App Store Connect → Users &amp; Access</td></tr>
+                    <tr><td>Bundle ID</td><td>Apple Developer portal</td><td><span class="lang-ru">Вручную 1 раз</span><span class="lang-en">Manually once</span></td></tr>
+                </tbody>
+            </table>
+
+            <div class="warning lang-ru"><strong>Каждая</strong> рабочая машина и CI-runner скачивают сертификат через <code>match</code>. НИКОГДА не комиттьте <code>.p12</code> в репозиторий приложения — только в специальный certificates-репо, и только в зашифрованном виде.</div>
+            <div class="warning lang-en"><strong>Every</strong> dev machine and CI runner downloads the cert through <code>match</code>. NEVER commit <code>.p12</code> files to the app repo — only to the dedicated certificates repo, and only encrypted.</div>
+        </section>
+
+        <section id="android">
+            <div class="lang-ru">
+                <h2>Android: supply + Play Console (#120)</h2>
+                <p>Android проще, чем iOS: <strong>один</strong> upload keystore (генерируется 1 раз, хранится как base64 в GH secret) + Play Console service account JSON. <code>fastlane supply</code> (подмодуль <code>upload_to_play_store</code>) загружает <code>.aab</code> в Internal Testing track.</p>
+                <p>Треки Play Console: <code>internal</code> (до 100 тестеров, немедленно) → <code>closed</code> (alpha/beta, до 10000) → <code>open</code> (публичная бета) → <code>production</code>. LGD автоматизирует только <code>internal</code>; промоушены делаются вручную после ручного QA.</p>
+            </div>
+            <div class="lang-en">
+                <h2>Android: supply + Play Console (#120)</h2>
+                <p>Android is simpler than iOS: <strong>one</strong> upload keystore (generated once, stored as base64 in a GH secret) + a Play Console service account JSON. <code>fastlane supply</code> (alias <code>upload_to_play_store</code>) uploads the <code>.aab</code> to the Internal Testing track.</p>
+                <p>Play Console tracks: <code>internal</code> (up to 100 testers, instant) → <code>closed</code> (alpha/beta, up to 10 000) → <code>open</code> (public beta) → <code>production</code>. LGD only automates <code>internal</code>; promotions happen manually after manual QA.</p>
+            </div>
+
+<pre><code class="language-bash"># Generate the upload keystore once:
+keytool -genkey -v -keystore upload.keystore -alias lifegoals \
+  -keyalg RSA -keysize 2048 -validity 10000
+
+# Encode for GitHub secret:
+base64 -i upload.keystore | pbcopy
+# gh secret set ANDROID_KEYSTORE_BASE64 < clipboard</code></pre>
+        </section>
+
+        <section id="ci">
+            <div class="lang-ru">
+                <h2>GitHub Actions matrix workflow (#121)</h2>
+                <p>Матрица по платформам: <code>ios</code> на <code>macos-latest</code> (нужен Xcode), <code>android</code> на <code>ubuntu-latest</code>. Кэш: CocoaPods (<code>~/Library/Caches/CocoaPods</code>), Gradle (<code>~/.gradle/caches</code>), Metro (<code>node_modules/.cache</code>), Ruby gems (<code>vendor/bundle</code>).</p>
+            </div>
+            <div class="lang-en">
+                <h2>GitHub Actions matrix workflow (#121)</h2>
+                <p>Matrix by platform: <code>ios</code> on <code>macos-latest</code> (Xcode required), <code>android</code> on <code>ubuntu-latest</code>. Caches: CocoaPods (<code>~/Library/Caches/CocoaPods</code>), Gradle (<code>~/.gradle/caches</code>), Metro (<code>node_modules/.cache</code>), Ruby gems (<code>vendor/bundle</code>).</p>
+            </div>
+
+<pre><code class="language-yaml"># .github/workflows/mobile.yml
+name: Mobile build + distribute
+on:
+  push:
+    tags: ['mobile-v*']
+jobs:
+  distribute:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            platform: ios
+            lane: 'ios beta'
+          - os: ubuntu-latest
+            platform: android
+            lane: 'android beta'
+    runs-on: ${{ matrix.os }}
+    defaults: { run: { working-directory: apps/mobile } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci
+      - name: Cache Pods
+        if: matrix.platform == 'ios'
+        uses: actions/cache@v4
+        with:
+          path: apps/mobile/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('apps/mobile/ios/Podfile.lock') }}
+      - name: Cache Gradle
+        if: matrix.platform == 'android'
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('apps/mobile/android/**/*.gradle*') }}
+      - uses: ruby/setup-ruby@v1
+        with: { bundler-cache: true, working-directory: apps/mobile }
+      - name: Run fastlane
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APP_STORE_CONNECT_KEY: ${{ secrets.APP_STORE_CONNECT_KEY }}
+          PLAY_STORE_JSON_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: bundle exec fastlane ${{ matrix.lane }}</code></pre>
+        </section>
+
+        <section id="secrets">
+            <div class="lang-ru">
+                <h2>Секреты и сертификаты</h2>
+                <p>Чёткий список того, что должно быть в <code>gh secret list</code> репозитория:</p>
+            </div>
+            <div class="lang-en">
+                <h2>Secrets and certificates</h2>
+                <p>The exact list that must appear in the repo's <code>gh secret list</code>:</p>
+            </div>
+
+            <table>
+                <thead><tr><th>Secret</th><th><span class="lang-ru">Назначение</span><span class="lang-en">Purpose</span></th><th><span class="lang-ru">Ротация</span><span class="lang-en">Rotation</span></th></tr></thead>
+                <tbody>
+                    <tr><td><code>MATCH_PASSWORD</code></td><td><span class="lang-ru">Расшифровка <code>.p12</code> в certificates-репо.</span><span class="lang-en">Decrypt <code>.p12</code> in the certificates repo.</span></td><td><span class="lang-ru">При смене команды.</span><span class="lang-en">On team change.</span></td></tr>
+                    <tr><td><code>APP_STORE_CONNECT_KEY</code></td><td><span class="lang-ru">JSON API-ключ App Store Connect для <code>pilot</code>/<code>deliver</code>.</span><span class="lang-en">App Store Connect JSON API key for <code>pilot</code>/<code>deliver</code>.</span></td><td>12 <span class="lang-ru">мес.</span><span class="lang-en">months</span></td></tr>
+                    <tr><td><code>PLAY_STORE_JSON_KEY</code></td><td><span class="lang-ru">Service account для Play Console API.</span><span class="lang-en">Service account for Play Console API.</span></td><td>—</td></tr>
+                    <tr><td><code>ANDROID_KEYSTORE_BASE64</code></td><td><span class="lang-ru">Upload keystore (base64).</span><span class="lang-en">Upload keystore (base64).</span></td><td><span class="lang-ru">Никогда (иначе потеряешь приложение).</span><span class="lang-en">Never (or you lose the app listing).</span></td></tr>
+                    <tr><td><code>ANDROID_KEYSTORE_PASSWORD</code></td><td>—</td><td>—</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="metadata">
+            <div class="lang-ru">
+                <h2>Store metadata (#122)</h2>
+                <p>Скриншоты, privacy policy, app icon, описание, категория — всё управляется через <code>fastlane/metadata/</code> (iOS) и <code>fastlane/metadata/android/</code>. Каждый локаль — отдельная подпапка. Скриншоты генерируются автоматически через <code>fastlane snapshot</code> (iOS, использует UI-тесты) или <code>Maestro</code>.</p>
+                <ul style="margin: 1rem 0 1rem 2rem;">
+                    <li><strong>Privacy policy</strong> — обязательный URL, размещается на <code>lifegoals.app/privacy</code>. Должна честно перечислить, что приложение читает Keychain, FCM-токен, камеру.</li>
+                    <li><strong>App Privacy (iOS)</strong> + <strong>Data safety (Android)</strong> — декларативные формы в сторе. Должны соответствовать фактическому сбору данных (widget config, device token, no third-party trackers).</li>
+                    <li><strong>Screenshots</strong> — минимум 3 размера для iOS (6.9″, 6.5″, 5.5″), 2 для Android (phone + 7″ tablet).</li>
+                    <li><strong>Feature graphic</strong> — Android-only, 1024×500.</li>
+                </ul>
+            </div>
+            <div class="lang-en">
+                <h2>Store metadata (#122)</h2>
+                <p>Screenshots, privacy policy, app icon, description, category — everything is managed via <code>fastlane/metadata/</code> (iOS) and <code>fastlane/metadata/android/</code>. Each locale is its own subfolder. Screenshots are auto-generated via <code>fastlane snapshot</code> (iOS, backed by UI tests) or <code>Maestro</code>.</p>
+                <ul style="margin: 1rem 0 1rem 2rem;">
+                    <li><strong>Privacy policy</strong> — mandatory URL, hosted at <code>lifegoals.app/privacy</code>. Must honestly list that the app reads Keychain, FCM token, camera.</li>
+                    <li><strong>App Privacy (iOS)</strong> + <strong>Data safety (Android)</strong> — declarative store forms. Must match actual data collection (widget config, device token, no third-party trackers).</li>
+                    <li><strong>Screenshots</strong> — at least 3 sizes for iOS (6.9″, 6.5″, 5.5″), 2 for Android (phone + 7″ tablet).</li>
+                    <li><strong>Feature graphic</strong> — Android-only, 1024×500.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="assignments" class="assignments">
+            <div class="lang-ru"><h2>TDD-задания (M8 Phase 5: #119–#122)</h2></div>
+            <div class="lang-en"><h2>TDD Assignments (M8 Phase 5: #119–#122)</h2></div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#119 iOS build pipeline + TestFlight</span><span class="lang-en">#119 iOS build pipeline + TestFlight</span> <span class="tdd-badge">8 SP</span></h4>
+                <p class="lang-ru"><strong>Acceptance-тесты:</strong> (1) <code>bundle exec fastlane ios beta</code> в локальной macOS-среде собирает .ipa и пушит в TestFlight. (2) Тестеры приглашаются через TestFlight group. (3) CI dry-run (<code>match --readonly</code>) проходит без <code>write</code>-прав к certificates-репо. (4) <code>pilot</code> лог не содержит plain-text пароля.</p>
+                <p class="lang-en"><strong>Acceptance tests:</strong> (1) <code>bundle exec fastlane ios beta</code> on a local macOS machine builds the .ipa and uploads to TestFlight. (2) Testers are invited through a TestFlight group. (3) CI dry-run (<code>match --readonly</code>) passes without <code>write</code> access to the certificates repo. (4) The <code>pilot</code> log contains no plain-text password.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#120 Android build pipeline + Play Console Internal</span><span class="lang-en">#120 Android build pipeline + Play Console Internal</span> <span class="tdd-badge">8 SP</span></h4>
+                <p class="lang-ru"><strong>Acceptance-тесты:</strong> (1) <code>./gradlew bundleRelease</code> генерирует подписанный <code>app-release.aab</code>. (2) <code>fastlane android beta</code> загружает в Internal Testing без ручных шагов. (3) Попытка загрузить с другим keystore отклоняется Play Console. (4) <code>versionCode</code> автоматически инкрементируется.</p>
+                <p class="lang-en"><strong>Acceptance tests:</strong> (1) <code>./gradlew bundleRelease</code> produces a signed <code>app-release.aab</code>. (2) <code>fastlane android beta</code> uploads to Internal Testing with no manual steps. (3) An upload with a different keystore is rejected by the Play Console. (4) <code>versionCode</code> auto-increments.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#121 GitHub Actions matrix mobile workflow</span><span class="lang-en">#121 GitHub Actions matrix mobile workflow</span> <span class="tdd-badge">5 SP</span></h4>
+                <p class="lang-ru"><strong>Acceptance-тесты:</strong> (1) <code>git tag mobile-v0.1.0 && git push --tags</code> запускает <strong>оба</strong> job'а (ios + android) в matrix. (2) CocoaPods/Gradle/Metro cache hit после первого запуска (&gt; 50% экономии времени на втором запуске). (3) При падении одного job другой не отменяется (<code>fail-fast: false</code>). (4) Secrets маскируются в логах (GitHub делает это автоматически — но <code>echo $MATCH_PASSWORD</code> должен быть <code>***</code>).</p>
+                <p class="lang-en"><strong>Acceptance tests:</strong> (1) <code>git tag mobile-v0.1.0 && git push --tags</code> triggers <strong>both</strong> jobs (ios + android) in the matrix. (2) CocoaPods/Gradle/Metro cache hits on the second run (&gt;50% speedup). (3) One job failing does not cancel the other (<code>fail-fast: false</code>). (4) Secrets are masked in logs (GitHub does this automatically — but <code>echo $MATCH_PASSWORD</code> must render as <code>***</code>).</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#122 Store metadata</span><span class="lang-en">#122 Store metadata</span> <span class="tdd-badge">8 SP</span></h4>
+                <p class="lang-ru"><strong>Acceptance-тесты:</strong> (1) <code>fastlane deliver</code> заливает metadata в App Store Connect; diff-превью показывается перед upload. (2) Privacy policy доступна по <code>https://lifegoals.app/privacy</code> и проходит review. (3) Скриншоты в 3 размерах iOS + phone/tablet Android сгенерированы из UI-тестов (<code>fastlane snapshot</code> / Maestro). (4) Data safety (Android) и App Privacy (iOS) декларации соответствуют фактическому <code>networkRequestsAudit.log</code>.</p>
+                <p class="lang-en"><strong>Acceptance tests:</strong> (1) <code>fastlane deliver</code> pushes metadata to App Store Connect; a diff preview is shown before upload. (2) The privacy policy is reachable at <code>https://lifegoals.app/privacy</code> and passes review. (3) Screenshots for 3 iOS sizes + Android phone/tablet are generated from UI tests (<code>fastlane snapshot</code> / Maestro). (4) The Data safety (Android) and App Privacy (iOS) declarations match an actual <code>networkRequestsAudit.log</code>.</p>
+            </div>
+        </section>
+
+        <section class="resources">
+            <div class="lang-ru"><h2>Дополнительные ресурсы</h2></div>
+            <div class="lang-en"><h2>Additional Resources</h2></div>
+
+            <a href="https://docs.fastlane.tools/" class="resource-link lang-ru">fastlane: официальная документация</a>
+            <a href="https://docs.fastlane.tools/" class="resource-link lang-en">fastlane Official Docs</a>
+            <a href="https://docs.fastlane.tools/actions/match/" class="resource-link lang-ru">match: code signing без боли</a>
+            <a href="https://docs.fastlane.tools/actions/match/" class="resource-link lang-en">match: painless code signing</a>
+            <a href="https://developer.apple.com/testflight/" class="resource-link lang-ru">Apple TestFlight</a>
+            <a href="https://developer.apple.com/testflight/" class="resource-link lang-en">Apple TestFlight</a>
+            <a href="https://play.google.com/console/about/internal-testing/" class="resource-link lang-ru">Play Console Internal Testing</a>
+            <a href="https://play.google.com/console/about/internal-testing/" class="resource-link lang-en">Play Console Internal Testing</a>
+            <a href="https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs" class="resource-link lang-ru">GitHub Actions: matrix strategy</a>
+            <a href="https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs" class="resource-link lang-en">GitHub Actions: matrix strategy</a>
+            <a href="https://maestro.mobile.dev/" class="resource-link lang-ru">Maestro: UI-тесты + снимки скриншотов</a>
+            <a href="https://maestro.mobile.dev/" class="resource-link lang-en">Maestro: UI testing + screenshots</a>
+            <a href="../superpowers/specs/2026-04-14-mobile-backlog-and-m8-design.md" class="resource-link lang-ru">M8 design spec (задачи #119–#122)</a>
+            <a href="../superpowers/specs/2026-04-14-mobile-backlog-and-m8-design.md" class="resource-link lang-en">M8 design spec (tasks #119–#122)</a>
+        </section>
+
+        <footer class="nav-footer">
+            <a href="18-react-native.html" class="nav-link prev lang-ru">← Модуль 18: React Native</a>
+            <a href="18-react-native.html" class="nav-link prev lang-en">← Module 18: React Native</a>
+            <a href="index.html" class="nav-link next lang-ru">Обратно в индекс →</a>
+            <a href="index.html" class="nav-link next lang-en">Back to index →</a>
+        </footer>
+    </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-ruby.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script>
+    function setLang(lang) {
+        document.body.classList.toggle('show-en', lang === 'en');
+        document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+        document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+        try { localStorage.setItem('study-lang', lang); } catch(e) {}
+    }
+    try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+</script>
+</body>
+</html>

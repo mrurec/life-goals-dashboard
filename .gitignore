@@ -78,6 +78,7 @@ ehthumbs.db
 # ============================================================
 *.omc/
 .omc/
+docs/superpowers
 
 # ============================================================
 # Relay / DGS codegen — keep __generated__ tracked
