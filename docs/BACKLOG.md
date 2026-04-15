@@ -77,6 +77,28 @@
 
 ---
 
+## Monorepo Layout
+
+The frontend is an **npm workspace monorepo** to support web and future React Native mobile without changing existing configs.
+
+```
+life-goals-dashboard/
+├── packages/
+│   └── shared/                # @life-goals/shared — cross-platform code
+│       ├── schema.graphql     # Single source of truth for all relay.config.json
+│       └── src/{relay,store,hooks,types}/   # placeholder dirs, populated as work progresses
+├── apps/web/                  # React + Vite web app
+│   └── relay.config.json      # schema: "../packages/shared/schema.graphql"
+├── apps/mobile/               # [PLANNED — M8] React Native app
+└── apps/api/                  # Kotlin/Spring Boot backend
+```
+
+**Rule:** Platform-specific code (CSS Modules, DOM, StyleSheet, Metro) lives in the platform package. Cross-platform code (Jotai atoms, hooks, types, GraphQL schema, network base) goes in `packages/shared`. Mobile shipping in M8 reuses everything in `packages/shared` without changes.
+
+See `CLAUDE.md` → *File Structure Rules — Monorepo Layout* and `docs/ARCHITECTURE.md` § 4.3 for full details.
+
+---
+
 ## Milestone 1: Foundation
 
 ### Epic: Project Scaffolding & Infrastructure
@@ -101,19 +123,19 @@
 
 ---
 
-#### `#2` Initialize React/TypeScript frontend project
+#### `#2` Initialize React/TypeScript frontend project (monorepo + workspaces)
 **Labels:** `story` `common` `frontend` `P0-critical`
 **Milestone:** M1 — Foundation
 **Story Points:** 8
 
-Vite 8 (Rolldown) + React 19.2 + TypeScript 6.0 + Relay 20.1 + Jotai 2.x + CSS Modules.
+Vite 8 (Rolldown) + React 19.2 + TypeScript 6.0 + Relay 20.1 + Jotai 2.x + CSS Modules. Inside an **npm workspace monorepo** (`apps/web` + `packages/shared`), so M8 mobile reuses atoms/hooks/types/schema without changes.
 
 **Checklist:**
-- [ ] Vite 8 project: `react-ts` template (Rolldown bundler) **(1 SP)**
-- [ ] Relay compiler + `RelayEnvironment.ts` (fetchFunction + subscriptionFunction) **(3 SP)**
-- [ ] Jotai: `<Provider>` (optional), atoms — `currentUserAtom`, `themeAtom` (`atomWithStorage`), `notificationsAtom` **(2 SP)**
-- [ ] ESLint + Prettier + CSS Modules config **(1 SP)**
-- [ ] Project structure: `src/{components,features,hooks,jotai,relay,styles}` **(1 SP)**
+- [x] npm workspace setup at root + `packages/shared` scaffold (schema.graphql moved there, placeholder dirs `src/{relay,store,hooks,types}`) **(1 SP)**
+- [x] Vite 8 project: `react-ts` template (Rolldown bundler) in `apps/web/` **(1 SP)**
+- [ ] Relay compiler + `apps/web/src/relay/RelayEnvironment.ts` (fetchFunction + subscriptionFunction) — references `../packages/shared/schema.graphql` **(3 SP)**
+- [ ] Jotai atoms in `packages/shared/src/store/` — `currentUserAtom`, `themeAtom` (`atomWithStorage`), `notificationsAtom`. `<Provider>` mounted in `apps/web/src/main.tsx` **(2 SP)**
+- [ ] ESLint + Prettier + CSS Modules config in `apps/web/` **(1 SP)**
 
 ---
 
@@ -135,8 +157,10 @@ Vite 8 (Rolldown) + React 19.2 + TypeScript 6.0 + Relay 20.1 + Jotai 2.x + CSS M
 
 **Checklist:**
 - [ ] Backend workflow: cache → ktlint → test (Testcontainers) → build **(2 SP)**
-- [ ] Frontend workflow: npm ci → ESLint → tsc → Relay compiler → test → build **(2 SP)**
+- [ ] Frontend workflow: root `npm ci` (installs all workspaces) → `npm --workspace apps/web run {lint,typecheck,relay,test,build}` → upload `apps/web/dist` **(2 SP)**
 - [ ] `.env.example` с полным списком переменных **(1 SP)**
+
+> Mobile CI workflow (`mobile.yml`) is added separately in M8 Phase 5 — out of scope here.
 
 ---
 
@@ -984,12 +1008,18 @@ Countdown timer, auto-stop, bind to problem attempt.
 
 ---
 
-#### `#61` Deploy frontend to Vercel
+#### `#61` Deploy frontend to Vercel (monorepo-aware)
 **Labels:** `story` `infra` `frontend` `P2-medium`
 **Milestone:** M6 — Polish + Deploy
 **Story Points:** 2
 
 Vite 8 (Rolldown) build → Vercel. Env variables, preview deployments.
+
+**Checklist:**
+- [ ] Vercel Project Settings → **Root Directory** = `apps/web` (Vercel runs `npm install` at the monorepo root, then builds the workspace) **(1 SP)**
+- [ ] Env vars: `VITE_GRAPHQL_ENDPOINT`, `VITE_GRAPHQL_WS_ENDPOINT`, `VITE_OAUTH_CLIENT_ID` + SPA fallback rewrite to `/index.html` **(1 SP)**
+
+> Mobile (M8) ships to App Store / Play Store via separate workflows — Vercel is web-only.
 
 ---
 
@@ -1362,6 +1392,275 @@ Structured logs → log aggregator, `/health` endpoint, basic alerts on error ra
 
 ---
 
+## Milestone 8: Mobile App
+
+> **Source of truth:** [`docs/superpowers/specs/2026-04-14-mobile-backlog-and-m8-design.md`](superpowers/specs/2026-04-14-mobile-backlog-and-m8-design.md)
+>
+> React Native приложение. Phased delivery (mirrors M7 pattern). Reuses `packages/shared` (schema, atoms, hooks, types). Starts after M2 web complete; mobile work runs in parallel with M3-M6 web work.
+>
+> **Phases:** Phase 0 — Foundation; Phase 1 — Shared Code Extraction; Phase 2 — Dashboard + Interview Prep; Phase 3 — Fitness + Budget; Phase 4 — Mobile-Specific Features; Phase 5 — Distribution.
+
+### Epic: Phase 0 — Mobile Foundation
+
+> Init RN project, wire Relay, navigation, auth, app shell. Depends on M2 web complete.
+
+---
+
+#### `#98` Init React Native project + add to workspaces
+**Labels:** `story` `mobile` `frontend` `common` `P1-high` `phase-mobile-0`
+**Milestone:** M8 — Mobile App
+**Story Points:** 5
+
+`npx react-native@latest init apps/mobile`. Register as workspace. Add `@life-goals/shared` dep. Verify iOS Simulator + Android Emulator launch.
+
+---
+
+#### `#99` Wire Relay with shared schema (mobile)
+**Labels:** `story` `mobile` `frontend` `graphql` `P1-high` `phase-mobile-0`
+**Milestone:** M8 — Mobile App
+**Story Points:** 3
+
+`relay.config.json` schema → `../packages/shared/schema.graphql`. `react-relay` matching web version. `npm run relay` succeeds.
+
+---
+
+#### `#100` Mobile RelayEnvironment with RN fetch + WebSocket
+**Labels:** `story` `mobile` `frontend` `graphql` `P1-high` `phase-mobile-0`
+**Milestone:** M8 — Mobile App
+**Story Points:** 3
+
+`apps/mobile/src/relay/RelayEnvironment.ts` using RN fetch + `graphql-ws`. Reuses `createNetwork()` from `packages/shared/src/relay/` (#107).
+
+---
+
+#### `#101` React Navigation skeleton (bottom tabs + stack)
+**Labels:** `story` `mobile` `frontend` `P1-high` `phase-mobile-0`
+**Milestone:** M8 — Mobile App
+**Story Points:** 3
+
+`@react-navigation/native` + bottom-tabs + stack. Three placeholder tabs (Dashboard, Notifications, Settings).
+
+---
+
+#### `#102` Mobile auth: OAuth + secure JWT storage
+**Labels:** `story` `mobile` `frontend` `common` `security` `P1-high` `phase-mobile-0`
+**Milestone:** M8 — Mobile App
+**Story Points:** 5
+
+`react-native-app-auth` (Google + GitHub) + `react-native-keychain` (iOS Keychain / Android EncryptedSharedPreferences). JWT injected into Relay Authorization header.
+
+---
+
+#### `#103` Mobile app shell: bottom tabs + header
+**Labels:** `story` `mobile` `frontend` `common` `P1-high` `phase-mobile-0`
+**Milestone:** M8 — Mobile App
+**Story Points:** 3
+
+Header with avatar/menu + notifications bell badge. Safe-area handling (`react-native-safe-area-context`).
+
+---
+
+### Epic: Phase 1 — Shared Code Extraction
+
+> Move atoms / hooks / types / Relay base from `apps/web` to `packages/shared`. Behavior on web unchanged. Runs in parallel with Phase 0.
+
+---
+
+#### `#104` Extract Jotai atoms to packages/shared/src/store/
+**Labels:** `story` `mobile` `common` `frontend` `P1-high` `phase-mobile-1`
+**Milestone:** M8 — Mobile App
+**Story Points:** 3
+
+`themeAtom`, `currentUserAtom`, `notificationsAtom` move to `packages/shared`. `themeAtom` accepts a storage adapter (web → `localStorage`, mobile → `AsyncStorage`).
+
+---
+
+#### `#105` Extract platform-agnostic hooks to packages/shared/src/hooks/
+**Labels:** `story` `mobile` `common` `frontend` `P2-medium` `phase-mobile-1`
+**Milestone:** M8 — Mobile App
+**Story Points:** 3
+
+Audit `apps/web/src/hooks/`; move every DOM-free hook. Add Jest tests.
+
+---
+
+#### `#106` Extract domain TypeScript interfaces to packages/shared/src/types/
+**Labels:** `story` `mobile` `common` `frontend` `P2-medium` `phase-mobile-1`
+**Milestone:** M8 — Mobile App
+**Story Points:** 2
+
+One file per domain area: `widget.ts`, `interviewprep.ts`, `fitness.ts`, `budget.ts`. Generated Relay types stay per-app.
+
+---
+
+#### `#107` Build shared Relay network base in packages/shared/src/relay/
+**Labels:** `story` `mobile` `common` `frontend` `graphql` `P1-high` `phase-mobile-1`
+**Milestone:** M8 — Mobile App
+**Story Points:** 3
+
+`createNetwork(transport)` factory + auth header injection + error normalization. Web `RelayEnvironment` refactored to use it; mobile (#100) unblocked.
+
+---
+
+#### `#108` Define design tokens in packages/shared
+**Labels:** `story` `mobile` `common` `frontend` `P2-medium` `phase-mobile-1`
+**Milestone:** M8 — Mobile App
+**Story Points:** 3
+
+`packages/shared/src/types/theme.ts` exports light/dark presets. Web emits CSS vars; mobile uses constants in `StyleSheet.create`. Port from `docs/mockups/_theme.css`.
+
+---
+
+### Epic: Phase 2 — Mobile UI: Dashboard + Interview Prep
+
+> First mobile widget UIs. Depends on Phases 0+1 done.
+
+---
+
+#### `#109` Mobile Dashboard screen (widget grid + add button)
+**Labels:** `story` `mobile` `frontend` `dashboard` `P1-high` `phase-mobile-2`
+**Milestone:** M8 — Mobile App
+**Story Points:** 5
+
+Vertical scrolling list of widgets. Mobile WidgetRegistry. Empty state + 'Add your first widget' CTA. Pull-to-refresh.
+
+---
+
+#### `#110` Mobile Interview Prep widget UI
+**Labels:** `story` `mobile` `frontend` `interviewprep` `P1-high` `phase-mobile-2`
+**Milestone:** M8 — Mobile App
+**Story Points:** 8
+
+Summary widget + ProblemList (FlatList paginated) + ProblemDetail + heat map (`react-native-svg`).
+
+---
+
+#### `#111` Mobile 'Add Widget' flow (type picker + config form)
+**Labels:** `story` `mobile` `frontend` `dashboard` `P1-high` `phase-mobile-2`
+**Milestone:** M8 — Mobile App
+**Story Points:** 5
+
+AvailableWidgets query + form generated from `configSchema` (react-hook-form + JSON schema). `addWidgetToDashboard` mutation.
+
+---
+
+### Epic: Phase 3 — Mobile UI: Fitness + Budget
+
+> Depends on Phase 2, M3 web (Fitness) + M4 web (Budget) complete.
+
+---
+
+#### `#112` Mobile Fitness widget UI (workout log, body progress, food/meal diary)
+**Labels:** `story` `mobile` `frontend` `fitness` `P1-high` `phase-mobile-3`
+**Milestone:** M8 — Mobile App
+**Story Points:** 13
+
+WorkoutLog, BodyProgress chart (`victory-native`), FoodSearch (debounced), MealDiary with day picker + macro totals.
+
+---
+
+#### `#113` Mobile Budget widget UI (transactions, savings, exchange rate)
+**Labels:** `story` `mobile` `frontend` `budget` `P1-high` `phase-mobile-3`
+**Milestone:** M8 — Mobile App
+**Story Points:** 10
+
+TransactionList + add modal, SavingsGoal screen, exchange rate display, forecast chart.
+
+---
+
+#### `#114` Camera integration for food/progress photos
+**Labels:** `story` `mobile` `frontend` `fitness` `P3-low` `phase-mobile-3`
+**Milestone:** M8 — Mobile App
+**Story Points:** 5
+
+`react-native-image-picker` + permission handling + upload + thumbnail grid in MealEntry/BodyMeasurement.
+
+---
+
+### Epic: Phase 4 — Mobile-Specific Features
+
+> Push, biometrics, offline-first, deep linking. Depends on M5 web (Notifications) complete.
+
+---
+
+#### `#115` Push notifications: FCM (Android) + APNS (iOS)
+**Labels:** `story` `mobile` `frontend` `notification` `P1-high` `phase-mobile-4`
+**Milestone:** M8 — Mobile App
+**Story Points:** 8
+
+`@react-native-firebase/messaging`. Device token registration mutation. Backend dispatch coordination. Settings toggle per category.
+
+---
+
+#### `#116` Biometric auth (Face ID / Touch ID / Fingerprint)
+**Labels:** `story` `mobile` `frontend` `security` `P2-medium` `phase-mobile-4`
+**Milestone:** M8 — Mobile App
+**Story Points:** 5
+
+`react-native-biometrics`. AppState listener + 5-min timeout. Fallback to PIN or full re-login.
+
+---
+
+#### `#117` Offline-first: Relay store persist + background sync
+**Labels:** `story` `mobile` `frontend` `P2-medium` `phase-mobile-4`
+**Milestone:** M8 — Mobile App
+**Story Points:** 8
+
+Relay store → `AsyncStorage`. Mutation queue + replay on reconnect (`@react-native-community/netinfo`). Conflict UX.
+
+---
+
+#### `#118` Deep linking: open widget instance from notification tap
+**Labels:** `story` `mobile` `frontend` `P2-medium` `phase-mobile-4`
+**Milestone:** M8 — Mobile App
+**Story Points:** 5
+
+React Navigation linking config. Universal Links (iOS) + App Links (Android). Notification payload contract.
+
+---
+
+### Epic: Phase 5 — Distribution
+
+> iOS + Android pipelines, store metadata, mobile CI. Runs alongside M6 web deploy.
+
+---
+
+#### `#119` iOS build pipeline + TestFlight deployment
+**Labels:** `story` `mobile` `infra` `P0-critical` `phase-mobile-5`
+**Milestone:** M8 — Mobile App
+**Story Points:** 8
+
+`fastlane` + `match` for code signing. App Store Connect API key in secrets. Tag push → TestFlight upload.
+
+---
+
+#### `#120` Android build pipeline + Play Store internal testing
+**Labels:** `story` `mobile` `infra` `P0-critical` `phase-mobile-5`
+**Milestone:** M8 — Mobile App
+**Story Points:** 8
+
+`fastlane supply`. Play Console service account. Tag push → Internal Testing track.
+
+---
+
+#### `#121` GitHub Actions matrix workflow for mobile builds
+**Labels:** `story` `mobile` `infra` `P1-high` `phase-mobile-5`
+**Milestone:** M8 — Mobile App
+**Story Points:** 5
+
+`.github/workflows/mobile.yml`. Matrix: macos-latest (iOS), ubuntu-latest (Android). CocoaPods + Gradle + Metro caches.
+
+---
+
+#### `#122` App Store + Play Store metadata
+**Labels:** `story` `mobile` `docs` `P1-high` `phase-mobile-5`
+**Milestone:** M8 — Mobile App
+**Story Points:** 8
+
+Copy, screenshots (Maestro / `fastlane snapshot`), privacy policy at lifegoals.app/privacy, icon + feature graphic, `fastlane deliver`/`supply` from `fastlane/metadata/`.
+
+---
+
 ## Summary
 
 | Milestone | Issues | Total SP | Focus |
@@ -1373,7 +1672,8 @@ Structured logs → log aggregator, `/health` endpoint, basic alerts on error ra
 | M5 — Notifications + Testing | #47 – #56, #66, #67, #68 | ~89 SP | Real-time, achievements, audit, coverage |
 | M6 — Polish + Deploy | #57 – #62, #65 | ~28 SP | Export, settings, deploy, monitoring |
 | M7 — Budget Accounts Aggregation | #69 – #91 (+ #92–#97 parking) | ~118 SP | Account providers (manual/crypto/Open Banking), vault, aggregation UI |
-| **Total** | **91 issues** (+ 6 parking) | **~481 SP** | |
+| M8 — Mobile App | #98 – #122 | ~144 SP | React Native app: foundation, shared extraction, mobile UIs, push/biometric/offline, distribution |
+| **Total** | **116 issues** (+ 6 parking) | **~625 SP** | |
 
 ---
 
@@ -1421,6 +1721,18 @@ gh label create "observability" --color "1D76DB" --description "Logging, metrics
 gh label create "docs" --color "FEF2C0" --description "Documentation"
 gh label create "type:spike" --color "FBCA04" --description "Time-boxed investigation"
 gh label create "widget:budget" --color "FEF2C0" --description "Budget widget tag"
+
+# Дополнительные labels для M8
+gh label create "mobile" --color "A855F7" --description "React Native mobile app (M8)"
+gh label create "phase-mobile-0" --color "EDE9FE" --description "M8 Phase 0 — Mobile Foundation"
+gh label create "phase-mobile-1" --color "DDD6FE" --description "M8 Phase 1 — Shared Code Extraction"
+gh label create "phase-mobile-2" --color "C4B5FD" --description "M8 Phase 2 — Mobile UI Dashboard + Interview Prep"
+gh label create "phase-mobile-3" --color "A78BFA" --description "M8 Phase 3 — Mobile UI Fitness + Budget"
+gh label create "phase-mobile-4" --color "8B5CF6" --description "M8 Phase 4 — Mobile-Specific Features"
+gh label create "phase-mobile-5" --color "7C3AED" --description "M8 Phase 5 — Distribution"
+
+# M8 milestone
+gh api repos/{owner}/{repo}/milestones -f title="M8 — Mobile App" -f description="React Native mobile application. Phased delivery (mirrors M7 pattern). Reuses packages/shared. Starts after M2 web complete."
 
 # 3. Создать issues (пример для #1)
 gh issue create \

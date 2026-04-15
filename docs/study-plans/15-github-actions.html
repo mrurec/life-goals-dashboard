@@ -712,30 +712,30 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-          cache-dependency-path: life-goals-web/package-lock.json
+          cache-dependency-path: apps/web/package-lock.json
 
       - name: Install Dependencies
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm ci
 
       - name: Relay Compiler
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm run relay
 
       - name: TypeScript Check
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm run typecheck
 
       - name: ESLint
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm run lint
 
       - name: Unit Tests
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm test -- --coverage
 
       - name: Build Bundle
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm run build
                 </code></pre>
 
@@ -752,7 +752,7 @@ jobs:
                     <tbody>
                         <tr>
                             <td><code>working-directory</code></td>
-                            <td><code>life-goals-web</code></td>
+                            <td><code>apps/web</code></td>
                             <td>Папка фронтенда (если не в корне)</td>
                         </tr>
                         <tr>
@@ -813,10 +813,10 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: life-goals-web/package-lock.json
+          cache-dependency-path: apps/web/package-lock.json
 
       - name: Install & Build
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: |
           npm ci
           npm run relay
@@ -933,7 +933,7 @@ jobs:
                         <li>Добавьте второй job `frontend-test` в `ci.yml`</li>
                         <li>Используйте `actions/setup-node@v4`</li>
                         <li>Добавьте steps: checkout, setup-node, npm ci, relay, typecheck, lint, test, build</li>
-                        <li>Используйте `working-directory: life-goals-web`</li>
+                        <li>Используйте `working-directory: apps/web`</li>
                         <li>Запушьте изменения и проверьте GitHub Actions</li>
                     </ol>
                 </div>
@@ -1312,30 +1312,30 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-          cache-dependency-path: life-goals-web/package-lock.json
+          cache-dependency-path: apps/web/package-lock.json
 
       - name: Install Dependencies
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm ci
 
       - name: Relay Compiler
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm run relay
 
       - name: TypeScript Check
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm run typecheck
 
       - name: ESLint
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm run lint
 
       - name: Unit Tests
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm test -- --coverage
 
       - name: Build Bundle
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: npm run build
                 </code></pre>
 
@@ -1352,7 +1352,7 @@ jobs:
                     <tbody>
                         <tr>
                             <td><code>working-directory</code></td>
-                            <td><code>life-goals-web</code></td>
+                            <td><code>apps/web</code></td>
                             <td>Frontend directory (if not at root)</td>
                         </tr>
                         <tr>
@@ -1413,10 +1413,10 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-          cache-dependency-path: life-goals-web/package-lock.json
+          cache-dependency-path: apps/web/package-lock.json
 
       - name: Install & Build
-        working-directory: life-goals-web
+        working-directory: apps/web
         run: |
           npm ci
           npm run relay
@@ -1533,7 +1533,7 @@ jobs:
                         <li>Add second job `frontend-test` to `ci.yml`</li>
                         <li>Use `actions/setup-node@v4`</li>
                         <li>Add steps: checkout, setup-node, npm ci, relay, typecheck, lint, test, build</li>
-                        <li>Use `working-directory: life-goals-web`</li>
+                        <li>Use `working-directory: apps/web`</li>
                         <li>Push changes and check GitHub Actions</li>
                     </ol>
                 </div>

@@ -3067,7 +3067,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: life-goals-web
+        working-directory: apps/web
     
     steps:
       - uses: actions/checkout@v4
@@ -3075,7 +3075,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: life-goals-web/package-lock.json
+          cache-dependency-path: apps/web/package-lock.json
       
       - run: npm ci
       - run: npm run relay
@@ -3116,7 +3116,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: life-goals-web
+          working-directory: apps/web
 ```
 
 ### Практические задания

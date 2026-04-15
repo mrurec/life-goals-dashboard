@@ -23,7 +23,7 @@ Without automated enforcement this rule is a gentlemen's agreement that survives
 4. Allows modules to be tested in isolation — the testing strategy in `CLAUDE.md` does not currently describe this layer.
 5. Provides a path to proper cross-module communication (example from CLAUDE.md: `AchievementChecker` — when `fitness` logs a workout, `notification` reacts with an achievement, without a direct call).
 
-Originally, issue #1 introduced **ArchUnit** as a "scaffold" for a single rule — the choice was made "by habit", without comparing alternatives and without a mention in `CLAUDE.md`/`docs/ARCHITECTURE.md`. The dependency is already added to `life-goals-api/build.gradle.kts` (`testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")`), but no test has been written against it yet — switching direction is cheap.
+Originally, issue #1 introduced **ArchUnit** as a "scaffold" for a single rule — the choice was made "by habit", without comparing alternatives and without a mention in `CLAUDE.md`/`docs/ARCHITECTURE.md`. The dependency is already added to `apps/api/build.gradle.kts` (`testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")`), but no test has been written against it yet — switching direction is cheap.
 
 ## Options Considered
 
