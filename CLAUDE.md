@@ -3,6 +3,14 @@
 > This file is the single source of truth for any AI agent working on this project.
 > Read it fully before writing any code.
 
+TDD Framework Template — Clean Architecture backend (multi-module) + frontend + E2E acceptance tests.
+
+Technology stack and commands are declared in `ProductSpecification/technology.md`. Read that file for build commands, test commands, and framework-specific conventions.
+
+## Interaction Rules
+
+- **Never block longer than 30 seconds.** No `sleep 60`, no `TaskOutput` with 5-minute timeouts. Use `run_in_background: true` for long commands, then poll with short separate calls (≤30s each) so the user sees progress between each check.
+
 ## Project Identity
 
 **Life Goals Dashboard** is a **universal, widget-based** full-stack platform for tracking any personal goals through a dynamic, configurable dashboard. The platform ships with three built-in widget types — Interview Prep, Fitness Tracker, and Budget Planner — but is designed to be extended with any new widget type without touching core code.
