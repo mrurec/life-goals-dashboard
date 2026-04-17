@@ -8,5 +8,8 @@
   ],
   "scripts": {
     "schema:sync": "graphql-inspector introspect http://localhost:8080/graphql --write packages/shared/schema.graphql"
+  },
+  "devDependencies": {
+    "@graphql-inspector/cli": "6.0.7"
   }
 }
