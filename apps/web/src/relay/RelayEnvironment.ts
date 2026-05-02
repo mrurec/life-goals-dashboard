@@ -1,6 +1,6 @@
-import type {FetchFunction, GraphQLResponse, SubscribeFunction,} from 'relay-runtime'
-import {Environment, Network, Observable, RecordSource, Store,} from 'relay-runtime'
-import {createClient} from 'graphql-ws'
+import type { FetchFunction, GraphQLResponse, SubscribeFunction } from 'relay-runtime'
+import { Environment, Network, Observable, RecordSource, Store } from 'relay-runtime'
+import { createClient } from 'graphql-ws'
 
 const HTTP_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT ?? ''
 const WS_ENDPOINT = import.meta.env.VITE_GRAPHQL_WS_ENDPOINT ?? ''
@@ -37,8 +37,7 @@ const subscribeFunction: SubscribeFunction = (params, variables) =>
       },
       {
         next: (value) => sink.next(value as GraphQLResponse),
-        error: (err) =>
-          sink.error(err instanceof Error ? err : new Error(String(err))),
+        error: (err) => sink.error(err instanceof Error ? err : new Error(String(err))),
         complete: () => sink.complete(),
       },
     )
