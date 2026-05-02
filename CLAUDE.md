@@ -3,6 +3,14 @@
 > This file is the single source of truth for any AI agent working on this project.
 > Read it fully before writing any code.
 
+TDD Framework Template — Clean Architecture backend (multi-module) + frontend + E2E acceptance tests.
+
+Technology stack and commands are declared in `ProductSpecification/technology.md`. Read that file for build commands, test commands, and framework-specific conventions.
+
+## Interaction Rules
+
+- **Never block longer than 30 seconds.** No `sleep 60`, no `TaskOutput` with 5-minute timeouts. Use `run_in_background: true` for long commands, then poll with short separate calls (≤30s each) so the user sees progress between each check.
+
 ## Project Identity
 
 **Life Goals Dashboard** is a **universal, widget-based** full-stack platform for tracking any personal goals through a dynamic, configurable dashboard. The platform ships with three built-in widget types — Interview Prep, Fitness Tracker, and Budget Planner — but is designed to be extended with any new widget type without touching core code.
@@ -51,7 +59,7 @@ The widget types are generic. Here are examples of how different users might con
 | Auth | OAuth2 + JWT (Spring Security 7) | — |
 | Build | Gradle (Kotlin DSL) | 9.4.1 |
 
-### Frontend
+### Frontend — Web (`apps/web`)
 | Component | Technology | Version |
 |-----------|-----------|---------|
 | Language | TypeScript | 6.0.2 |
@@ -60,6 +68,23 @@ The widget types are generic. Here are examples of how different users might con
 | State management | Jotai | 2.x (replaces Recoil — Recoil is archived and no longer maintained; Jotai is the atom-based successor with full React 19 concurrent support) |
 | Styling | CSS Modules | — |
 | Build | Vite | 8.0.8 (Rolldown/Rust bundler, 10-30× faster builds) |
+
+### Frontend — Shared (`packages/shared`)
+| Component | Technology | Notes |
+|-----------|-----------|-------|
+| GraphQL schema | `schema.graphql` | Single source of truth for all relay.config.json (web + future mobile) |
+| Jotai atoms | `src/store/` | Shared global state (theme, user, notifications) |
+| Cross-platform hooks | `src/hooks/` | Platform-agnostic logic (useDebounce, usePersistedCallback, etc.) |
+| TypeScript interfaces | `src/types/` | Domain types shared between web and mobile |
+| Relay network base | `src/relay/` | Shared fetch logic; each platform wraps it with platform-specific transport |
+
+### Frontend — Mobile (`apps/mobile`) — _planned_
+| Component | Technology | Notes |
+|-----------|-----------|-------|
+| UI | React Native | Components use `View`/`Text`/`StyleSheet`, not CSS Modules |
+| Navigation | React Navigation | Replaces React Router DOM |
+| Build | Metro bundler | Replaces Vite |
+| Styling | NativeWind or StyleSheet API | Design tokens from `packages/shared/src/types/` |
 
 ### Infrastructure
 | Component | Technology |
@@ -302,6 +327,34 @@ No Redux. Use Jotai atoms for global state (theme, user, notifications). Keep at
 - Maximum directory nesting: 3 levels from `src/`
 - Backend tests mirror source structure: `src/test/kotlin/.../interviewprep/`
 
+### Monorepo Layout
+
+```
+life-goals-dashboard/          # root npm workspace
+├── apps/
+│   ├── web/                   # React + Vite web app
+│   │   └── relay.config.json  # schema: "../../packages/shared/schema.graphql"
+│   ├── mobile/                # [PLANNED] React Native app
+│   │   └── relay.config.json  # will reference same shared schema
+│   └── api/                   # Kotlin/Spring Boot backend
+├── packages/
+│   └── shared/                # @life-goals/shared — cross-platform code
+│       ├── schema.graphql     # Single source of truth for all relay.config.json
+│       └── src/
+│           ├── relay/         # Shared Relay network base
+│           ├── store/         # Jotai atoms (theme, user, notifications)
+│           ├── hooks/         # Platform-agnostic hooks
+│           └── types/         # Shared TypeScript interfaces
+├── infra/
+│   ├── local/
+│   │   └── docker-compose.yml # PostgreSQL + Redis for local dev
+│   ├── docker-compose.dev.yml # API app in dev container
+│   └── docker-compose.prod.yml# API app in prod container
+└── docs/
+```
+
+**Rule:** Platform-specific code (CSS Modules, DOM APIs, StyleSheet, Metro config) lives in the platform package. Cross-platform logic goes in `packages/shared`.
+
 ---
 
 ## GraphQL Schema Files
@@ -433,17 +486,20 @@ npm run relay                           # Re-run Relay compiler after schema cha
 ## Development Commands
 
 ```bash
+# Install all workspace dependencies (run from root)
+npm install                                                  # installs apps/web + packages/shared
+
 # Start everything locally
-docker-compose -f life-goals-api/docker-compose.yml up -d   # PostgreSQL + Redis
+docker-compose -f infra/local/docker-compose.yml up -d    # PostgreSQL + Redis
 ./gradlew bootRun                                            # Backend on :8080
-cd life-goals-web && npm run dev                             # Frontend on :5173
+cd apps/web && npm run dev                                   # Frontend on :5173
 
 # Run the backend as a Docker container (dev — builds image from source)
-docker-compose -f deploy/docker-compose.dev.yml up -d
+docker-compose -f infra/docker-compose.dev.yml up -d
 
 # Run the backend as a Docker container (prod — uses pre-built image)
 export API_IMAGE=ghcr.io/mrurec/life-goals-api:0.0.1-SNAPSHOT
-docker-compose -f deploy/docker-compose.prod.yml up -d
+docker-compose -f infra/docker-compose.prod.yml up -d
 
 # Database
 ./gradlew flywayMigrate                 # Run migrations
@@ -452,19 +508,19 @@ docker-compose -f deploy/docker-compose.prod.yml up -d
 # GraphQL
 # After changing any .graphqls file:
 ./gradlew generateJava                  # DGS codegen (backend types)
-cd life-goals-web && npm run relay      # Relay compiler (frontend types)
+cd apps/web && npm run relay            # Relay compiler (frontend types)
 
 # GraphQL Playground available at http://localhost:8080/graphiql
 
 # Lint & Format
 ./gradlew ktlintCheck                   # Kotlin lint
-cd life-goals-web && npm run lint       # ESLint
-cd life-goals-web && npm run typecheck  # TypeScript
+cd apps/web && npm run lint             # ESLint
+cd apps/web && npm run typecheck        # TypeScript
 
 # Build
 ./gradlew build                         # Backend JAR
-cd life-goals-web && npm run build      # Frontend bundle
-cd life-goals-api && docker build -t life-goals-api .  # Backend Docker image
+cd apps/web && npm run build            # Frontend bundle
+cd apps/api && docker build -t life-goals-api .  # Backend Docker image
 ```
 
 ---
@@ -644,11 +700,43 @@ Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `perf`
 
 ---
 
+## Mobile Frontend (Future Plans)
+
+The project is structured as an npm workspace monorepo from day one so that adding a React Native app later requires **zero changes to existing code or configuration**.
+
+### What's already in place for mobile
+
+| Artifact | Location | Why it's ready |
+|----------|----------|----------------|
+| `schema.graphql` | `packages/shared/schema.graphql` | Both web and future mobile `relay.config.json` reference this single file |
+| Jotai atoms directory | `packages/shared/src/store/` | Atoms will be implemented here; mobile imports from `@life-goals/shared` |
+| Cross-platform hooks | `packages/shared/src/hooks/` | Any hook without DOM dependencies goes here |
+| TypeScript interfaces | `packages/shared/src/types/` | Domain types available to all platforms |
+| Relay network base | `packages/shared/src/relay/` | Shared fetch logic; each platform wraps with its own transport |
+
+### When adding apps/mobile
+
+1. Create `apps/mobile/` as a React Native project
+2. Add `"apps/mobile"` to root `package.json` workspaces array (the only change to existing files)
+3. Set `relay.config.json` schema to `../../packages/shared/schema.graphql`
+4. Add `"@life-goals/shared": "*"` to dependencies — get atoms, hooks, and types for free
+
+### Platform-specific rules
+
+- **CSS Modules** → web only (`apps/web/src/`)
+- **DOM APIs** (`document`, `window`, `localStorage`) → web only
+- **StyleSheet API / NativeWind** → mobile only (`apps/mobile/src/`)
+- **Vite config** → web only; Metro config → mobile only
+- **React Router DOM** → web only; React Navigation → mobile only
+- **Anything without platform dependencies** → `packages/shared/`
+
+---
+
 ## Deployment Checklist
 
 Before deploying to production:
 
-1. All tests green (`./gradlew test && cd life-goals-web && npm test`)
+1. All tests green (`./gradlew test && cd apps/web && npm test`)
 2. Relay compiler succeeds (`npm run relay`)
 3. Flyway migrations are sequential and non-destructive
 4. No secrets in code (check `.env.example` for required vars)

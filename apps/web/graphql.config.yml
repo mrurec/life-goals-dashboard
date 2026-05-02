@@ -1,0 +1,2 @@
+schema: ../../packages/shared/schema.graphql
+documents: '**/*.graphql'

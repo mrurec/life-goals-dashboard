@@ -1,0 +1,10 @@
+# Placeholder schema — replace with real introspection once backend is ready.
+# Relay compiler requires at minimum the Node interface and a root Query type.
+
+interface Node {
+  id: ID!
+}
+
+type Query {
+  node(id: ID!): Node
+}

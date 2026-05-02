@@ -189,7 +189,7 @@ graph TB
 #### Backend (Kotlin + Spring Boot + Netflix DGS)
 
 ```
-life-goals-api/
+apps/api/
 ├── src/main/kotlin/com/mrurec/lifegoals/
 │   ├── LifeGoalsApplication.kt
 │   ├── common/
@@ -315,92 +315,103 @@ life-goals-api/
     └── common/
 ```
 
-#### Frontend (React + Relay + Jotai + TypeScript)
+#### Frontend — Монорепо (npm workspaces)
+
+Проект организован как npm workspace монорепо для поддержки web и будущего mobile без изменения существующих конфигов.
 
 ```
-life-goals-web/
-├── src/
-│   ├── index.tsx
-│   ├── App.tsx
-│   ├── RelayEnvironment.ts              # Relay network + store config
-│   ├── jotai/
-│   │   ├── atoms/
-│   │   │   ├── themeAtom.ts
-│   │   │   ├── userAtom.ts
-│   │   │   └── notificationsAtom.ts
-│   │   └── derived/
-│   │       └── dashboardAtom.ts          # derived atoms (replace Recoil selectors)
-│   │
-│   ├── components/                       # Shared UI components
-│   │   ├── Button/
-│   │   │   ├── Button.tsx
-│   │   │   ├── Button.module.css
-│   │   │   └── Button.test.tsx           # Colocated test (Meta pattern)
-│   │   ├── Card/
-│   │   ├── ProgressBar/
-│   │   ├── Chart/
-│   │   ├── ErrorBoundary.tsx
-│   │   └── SuspenseFallback.tsx
-│   │
-│   ├── features/
-│   │   ├── dashboard/
-│   │   │   ├── DashboardPage.tsx
-│   │   │   ├── DashboardPage.test.tsx
-│   │   │   ├── widgets/
-│   │   │   │   ├── InterviewWidget.tsx   # Contains its own GraphQL fragment
-│   │   │   │   ├── FitnessWidget.tsx
-│   │   │   │   └── BudgetWidget.tsx
-│   │   │   └── __generated__/            # Relay compiler output
-│   │   │
-│   │   ├── interviewPrep/
-│   │   │   ├── ProblemList.tsx           # Fragment: ProblemList_problems
-│   │   │   ├── ProblemDetail.tsx         # Fragment: ProblemDetail_problem
-│   │   │   ├── ProblemForm.tsx
-│   │   │   ├── StatsHeatMap.tsx
-│   │   │   ├── WeakAreasChart.tsx
-│   │   │   ├── Timer.tsx
-│   │   │   └── __generated__/
-│   │   │
-│   │   ├── fitness/
-│   │   │   ├── WorkoutLog.tsx
-│   │   │   ├── WorkoutForm.tsx
-│   │   │   ├── BodyProgress.tsx
-│   │   │   ├── food/                     # Food sub-feature
-│   │   │   │   ├── FoodSearch.tsx        # Поиск продуктов
-│   │   │   │   ├── FoodProductCard.tsx   # Fragment: FoodProductCard_product
-│   │   │   │   ├── AddCustomFood.tsx
-│   │   │   │   ├── RecipeBuilder.tsx     # Конструктор блюд
-│   │   │   │   ├── RecipeCard.tsx
-│   │   │   │   └── __generated__/
-│   │   │   ├── meals/
-│   │   │   │   ├── MealDiary.tsx         # Дневник питания
-│   │   │   │   ├── MealEntry.tsx
-│   │   │   │   ├── DailySummary.tsx      # Сводка калорий/макросов за день
-│   │   │   │   └── __generated__/
-│   │   │   └── __generated__/
-│   │   │
-│   │   └── budget/
-│   │       ├── TransactionList.tsx
-│   │       ├── TransactionForm.tsx
-│   │       ├── SavingsProgress.tsx
-│   │       ├── ForecastChart.tsx
-│   │       ├── ExchangeRateWidget.tsx    # Exchange rate display (configured currency pair)
-│   │       ├── BudgetBreakdown.tsx        # Breakdown of savings goal budget (configurable)
-│   │       └── __generated__/
-│   │
-│   ├── hooks/
-│   │   ├── useAuth.ts
-│   │   ├── useDebounce.ts
-│   │   └── usePersistedCallback.ts
-│   │
-│   └── relay/
-│       ├── fetchGraphQL.ts              # Network layer
-│       └── persistedQueries.json        # Hash → query mapping
+life-goals-dashboard/              # корень npm workspace
 │
-├── relay.config.js
-├── package.json
-└── tsconfig.json
+├── packages/
+│   └── shared/                    # @life-goals/shared — кросс-платформенный код
+│       ├── schema.graphql         # Единственный источник правды для всех relay.config.json
+│       ├── package.json
+│       ├── tsconfig.json
+│       └── src/
+│           ├── relay/             # Базовый сетевой слой (fetch-логика без платформ. зависим.)
+│           ├── store/             # Jotai atoms: themeAtom, userAtom, notificationsAtom
+│           ├── hooks/             # Платформ-агностичные хуки: useDebounce, usePersistedCallback
+│           └── types/             # Общие TypeScript-интерфейсы домена
+│
+├── apps/web/                      # React + Vite веб-приложение
+│   ├── relay.config.json          # schema: "../packages/shared/schema.graphql"
+│   ├── src/
+│   │   ├── index.tsx
+│   │   ├── App.tsx
+│   │   ├── relay/
+│   │   │   ├── RelayEnvironment.ts      # Relay network + store config (web transport)
+│   │   │   └── persistedQueries.json   # Hash → query mapping
+│   │   │
+│   │   ├── components/                  # Web UI компоненты (CSS Modules)
+│   │   │   ├── Button/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Button.module.css
+│   │   │   │   └── Button.test.tsx      # Colocated test (Meta pattern)
+│   │   │   ├── Card/
+│   │   │   ├── ProgressBar/
+│   │   │   ├── Chart/
+│   │   │   ├── ErrorBoundary.tsx
+│   │   │   └── SuspenseFallback.tsx
+│   │   │
+│   │   ├── features/
+│   │   │   ├── dashboard/
+│   │   │   │   ├── DashboardPage.tsx
+│   │   │   │   ├── DashboardPage.test.tsx
+│   │   │   │   ├── widgets/
+│   │   │   │   │   ├── InterviewWidget.tsx   # Contains its own GraphQL fragment
+│   │   │   │   │   ├── FitnessWidget.tsx
+│   │   │   │   │   └── BudgetWidget.tsx
+│   │   │   │   └── __generated__/            # Relay compiler output
+│   │   │   │
+│   │   │   ├── interviewPrep/
+│   │   │   │   ├── ProblemList.tsx           # Fragment: ProblemList_problems
+│   │   │   │   ├── ProblemDetail.tsx         # Fragment: ProblemDetail_problem
+│   │   │   │   ├── ProblemForm.tsx
+│   │   │   │   ├── StatsHeatMap.tsx
+│   │   │   │   ├── WeakAreasChart.tsx
+│   │   │   │   ├── Timer.tsx
+│   │   │   │   └── __generated__/
+│   │   │   │
+│   │   │   ├── fitness/
+│   │   │   │   ├── WorkoutLog.tsx
+│   │   │   │   ├── WorkoutForm.tsx
+│   │   │   │   ├── BodyProgress.tsx
+│   │   │   │   ├── food/                     # Food sub-feature
+│   │   │   │   │   ├── FoodSearch.tsx        # Поиск продуктов
+│   │   │   │   │   ├── FoodProductCard.tsx   # Fragment: FoodProductCard_product
+│   │   │   │   │   ├── AddCustomFood.tsx
+│   │   │   │   │   ├── RecipeBuilder.tsx     # Конструктор блюд
+│   │   │   │   │   ├── RecipeCard.tsx
+│   │   │   │   │   └── __generated__/
+│   │   │   │   ├── meals/
+│   │   │   │   │   ├── MealDiary.tsx         # Дневник питания
+│   │   │   │   │   ├── MealEntry.tsx
+│   │   │   │   │   ├── DailySummary.tsx      # Сводка калорий/макросов за день
+│   │   │   │   │   └── __generated__/
+│   │   │   │   └── __generated__/
+│   │   │   │
+│   │   │   └── budget/
+│   │   │       ├── TransactionList.tsx
+│   │   │       ├── TransactionForm.tsx
+│   │   │       ├── SavingsProgress.tsx
+│   │   │       ├── ForecastChart.tsx
+│   │   │       ├── ExchangeRateWidget.tsx    # Exchange rate display (configured currency pair)
+│   │   │       ├── BudgetBreakdown.tsx       # Breakdown of savings goal budget (configurable)
+│   │   │       └── __generated__/
+│   │   │
+│   │   └── __generated__/               # Relay compiler output (root-level)
+│   │
+│   ├── package.json                     # dep: "@life-goals/shared": "*"
+│   ├── vite.config.ts
+│   └── tsconfig.json
+│
+└── apps/mobile/                         # [ПЛАН] React Native приложение
+    ├── relay.config.json                # schema: "../packages/shared/schema.graphql"
+    ├── src/                             # RN компоненты (View/Text/StyleSheet)
+    └── README.md
 ```
+
+**Правило:** Платформ-специфичный код (CSS Modules, DOM APIs, StyleSheet, Metro config) — в пакете платформы. Кросс-платформенная логика — в `packages/shared`.
 
 ---
 
@@ -2259,6 +2270,16 @@ Life Goals Dashboard — Full-stack modular application
 - Deploy на free tier (Vercel + Railway + Neon + Upstash)
 - Playwright E2E tests
 - GraphQL Playground + README
+
+### Фаза 6 — Mobile App (Будущее)
+- Создать `apps/mobile/` как React Native проект
+- Добавить `"apps/mobile"` в массив `workspaces` корневого `package.json` — единственное изменение существующих файлов
+- `relay.config.json` → schema: `../packages/shared/schema.graphql` (уже готово)
+- Подключить `@life-goals/shared` → получить atoms, хуки и типы бесплатно
+- Реализовать `RelayEnvironment.ts` с React Native fetch transport
+- Заменить CSS Modules на NativeWind или StyleSheet API
+- Добавить React Navigation вместо React Router DOM
+- Всё, что уже написано в `packages/shared`, работает сразу без изменений
 
 ---
 

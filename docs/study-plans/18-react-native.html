@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модуль 18: React Native - Life Goals Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-dark.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #1e1e2e;
+            --bg-secondary: #181825;
+            --text: #cdd6f4;
+            --text-secondary: #a6adc7;
+            --header: #89b4fa;
+            --accent: #f38ba8;
+            --success: #a6e3a1;
+            --warning: #fab387;
+            --mauve: #cba6f7;
+            --code-bg: #181825;
+        }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; }
+        header { position: sticky; top: 0; background: var(--bg-secondary); border-bottom: 2px solid var(--header); padding: 1.5rem 2rem; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .header-left h1 { color: var(--header); font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .progress-bar { width: 100%; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-top: 0.5rem; }
+        .progress-fill { width: 94%; height: 100%; background: linear-gradient(90deg, var(--mauve), var(--accent)); transition: width 0.3s ease; }
+        .module-number { color: var(--accent); font-size: 0.9rem; font-weight: bold; }
+        .lang-en { display: none; }
+        body.show-en .lang-ru { display: none; }
+        body.show-en .lang-en { display: block; }
+        .lang-switcher { display: inline-flex; gap: 6px; align-items: center; margin-left: 1rem; }
+        .lang-switcher button { padding: 4px 12px; border: 1px solid var(--header); border-radius: 4px; cursor: pointer; font-size: 0.85rem; background: transparent; color: var(--text-secondary); transition: all 0.2s; }
+        .lang-switcher button.active { background: var(--header); color: var(--bg); font-weight: 600; }
+        .container { display: flex; max-width: 1400px; margin: 0 auto; }
+        .sidebar { width: 280px; background: var(--bg-secondary); padding: 2rem 1.5rem; border-right: 1px solid var(--text-secondary); max-height: calc(100vh - 100px); overflow-y: auto; position: sticky; top: 100px; }
+        .sidebar h3 { color: var(--header); font-size: 1rem; margin-bottom: 1rem; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin-bottom: 0.5rem; }
+        .sidebar a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; display: block; padding: 0.5rem 0.75rem; border-radius: 4px; transition: all 0.2s; }
+        .sidebar a:hover { background: var(--bg); color: var(--header); border-left: 3px solid var(--accent); }
+        .main-content { flex: 1; padding: 2rem; overflow-x: hidden; }
+        h2 { color: var(--header); font-size: 1.8rem; margin-top: 2.5rem; margin-bottom: 1rem; border-left: 4px solid var(--accent); padding-left: 1rem; }
+        h3 { color: var(--header); font-size: 1.3rem; margin-top: 1.8rem; margin-bottom: 0.8rem; }
+        p { margin-bottom: 1rem; color: var(--text); line-height: 1.7; }
+        strong { color: var(--accent); }
+        pre { background: var(--code-bg); border-left: 4px solid var(--accent); border-radius: 4px; padding: 1rem; margin: 1.5rem 0; overflow-x: auto; font-size: 0.9rem; }
+        code { font-family: 'Fira Code', 'Courier New', monospace; }
+        .tip { background: rgba(166, 227, 161, 0.1); border-left: 4px solid var(--success); padding: 1rem; border-radius: 4px; margin: 1.5rem 0; }
+        .tip strong { color: var(--success); }
+        .warning { background: rgba(250, 179, 135, 0.1); border-left: 4px solid var(--warning); padding: 1rem; border-radius: 4px; margin: 1.5rem 0; }
+        .warning strong { color: var(--warning); }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        thead { background: var(--code-bg); }
+        th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--text-secondary); }
+        th { color: var(--header); font-weight: bold; }
+        tbody tr:hover { background: rgba(243, 139, 168, 0.05); }
+        .assignments { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--accent); }
+        .assignment { background: var(--code-bg); padding: 1.5rem; border-radius: 4px; margin-bottom: 1.5rem; border-left: 4px solid var(--warning); }
+        .assignment h4 { color: var(--header); margin-bottom: 0.5rem; }
+        .tdd-badge { display: inline-block; background: #f5c2e7; color: #1e1e2e; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem; vertical-align: middle; }
+        .resources { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--accent); }
+        .resource-link { display: block; color: var(--header); text-decoration: none; margin-bottom: 0.5rem; padding: 0.75rem; background: var(--code-bg); border-radius: 4px; border-left: 3px solid var(--accent); transition: all 0.2s; }
+        .resource-link:hover { background: var(--bg-secondary); transform: translateX(4px); }
+        .nav-footer { display: flex; justify-content: space-between; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--text-secondary); }
+        .nav-link { color: var(--header); text-decoration: none; transition: all 0.2s; }
+        .nav-link:hover { color: var(--accent); }
+        .nav-link.next { text-align: right; }
+        @media (max-width: 900px) { .container { flex-direction: column; } .sidebar { width: 100%; max-height: none; position: relative; top: 0; border-right: none; border-bottom: 1px solid var(--text-secondary); } }
+    
+        /* Home link */
+        .home-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.75rem;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        .home-link:hover {
+            background: rgba(243, 139, 168, 0.1);
+        }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1><span class="lang-ru">Модуль 18: React Native</span><span class="lang-en">Module 18: React Native</span></h1>
+        <p class="module-number"><span class="lang-ru">5 дней • React Native • Milestone 8 (Mobile App)</span><span class="lang-en">5 days • React Native • Milestone 8 (Mobile App)</span></p>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+    <div class="lang-switcher">
+        <button id="btn-ru" onclick="setLang('ru')" class="active">RU</button>
+        <button id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+</header>
+
+<div class="container">
+    <aside class="sidebar">
+            <a href="index.html" class="home-link">&#8592; <span class="lang-ru">Все модули</span><span class="lang-en">All Modules</span>
+            </a>
+
+        <h3><span class="lang-ru">Разделы</span><span class="lang-en">Sections</span></h3>
+        <ul>
+            <li><a href="#intro"><span class="lang-ru">Введение: зачем RN для LGD</span><span class="lang-en">Introduction: Why RN for LGD</span></a></li>
+            <li><a href="#workspace"><span class="lang-ru">apps/mobile в monorepo</span><span class="lang-en">apps/mobile in monorepo</span></a></li>
+            <li><a href="#primitives"><span class="lang-ru">View, Text, StyleSheet vs DOM</span><span class="lang-en">View, Text, StyleSheet vs DOM</span></a></li>
+            <li><a href="#navigation"><span class="lang-ru">React Navigation</span><span class="lang-en">React Navigation</span></a></li>
+            <li><a href="#relay"><span class="lang-ru">Relay + WebSocket</span><span class="lang-en">Relay + WebSocket</span></a></li>
+            <li><a href="#shared"><span class="lang-ru">packages/shared (atoms, hooks, tokens)</span><span class="lang-en">packages/shared (atoms, hooks, tokens)</span></a></li>
+            <li><a href="#auth"><span class="lang-ru">OAuth + Keychain</span><span class="lang-en">OAuth + Keychain</span></a></li>
+            <li><a href="#push"><span class="lang-ru">Push: FCM + APNS</span><span class="lang-en">Push: FCM + APNS</span></a></li>
+            <li><a href="#biometrics"><span class="lang-ru">Биометрия</span><span class="lang-en">Biometrics</span></a></li>
+            <li><a href="#offline"><span class="lang-ru">Offline-first + mutation queue</span><span class="lang-en">Offline-first + mutation queue</span></a></li>
+            <li><a href="#deep-links"><span class="lang-ru">Deep linking</span><span class="lang-en">Deep linking</span></a></li>
+            <li><a href="#assignments"><span class="lang-ru">TDD-задания M8</span><span class="lang-en">M8 TDD Assignments</span></a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <h1><span class="lang-ru">React Native: мобильный клиент для Life Goals Dashboard</span><span class="lang-en">React Native: the Mobile Client for Life Goals Dashboard</span></h1>
+
+        <section id="intro">
+            <div class="lang-ru">
+                <h2>Введение: зачем React Native для LGD</h2>
+                <p><strong>Milestone 8</strong> — мобильное приложение <code>apps/mobile</code>. Оно разделяет GraphQL-схему, Jotai-атомы, hooks и типы с веб-клиентом через <code>packages/shared</code>. Всё, что завязано на DOM (<code>document</code>, <code>window</code>, <code>localStorage</code>, CSS Modules), остаётся на вебе. Всё, что завязано на нативные API (<code>AsyncStorage</code>, <code>Keychain</code>, <code>FCM</code>, <code>StyleSheet</code>), живёт в <code>apps/mobile</code>.</p>
+                <p>RN использует тот же React 19.2, те же хуки, те же фрагменты Relay — отличие только в примитивах (<code>View</code> вместо <code>div</code>) и бандлере (Metro вместо Vite). Для Meta/FAANG-портфолио это даёт важный сигнал: автор умеет <strong>проектировать cross-platform monorepo</strong>, а не просто писать SPA.</p>
+                <p>Этот модуль проходится после модулей 10 (React), 12 (Relay) и 13 (Jotai) — это база. Здесь вы закрываете 21 задачу backlog'а (<code>#98</code>–<code>#118</code>, все фазы M8 кроме distribution).</p>
+            </div>
+            <div class="lang-en">
+                <h2>Introduction: Why React Native for LGD</h2>
+                <p><strong>Milestone 8</strong> introduces <code>apps/mobile</code> — a React Native client. It shares the GraphQL schema, Jotai atoms, hooks, and types with the web client through <code>packages/shared</code>. Everything DOM-bound (<code>document</code>, <code>window</code>, <code>localStorage</code>, CSS Modules) stays web-only. Everything platform-bound (<code>AsyncStorage</code>, <code>Keychain</code>, <code>FCM</code>, <code>StyleSheet</code>) lives under <code>apps/mobile</code>.</p>
+                <p>RN uses the same React 19.2, the same hooks, the same Relay fragments — the only differences are the primitives (<code>View</code> instead of <code>div</code>) and the bundler (Metro instead of Vite). For a Meta/FAANG portfolio this is a strong signal that the author can <strong>design a cross-platform monorepo</strong>, not just a SPA.</p>
+                <p>Take this module after Module 10 (React), Module 12 (Relay), and Module 13 (Jotai). It closes 21 backlog tasks (<code>#98</code>–<code>#118</code> — every M8 phase except distribution).</p>
+            </div>
+        </section>
+
+        <section id="workspace">
+            <div class="lang-ru">
+                <h2>apps/mobile в npm-workspace</h2>
+                <p>Корневой <code>package.json</code> уже содержит workspaces <code>apps/web</code> и <code>packages/shared</code>. Добавляем <code>apps/mobile</code> одной строкой — и получаем изоляцию зависимостей + shared-пакет «из коробки».</p>
+            </div>
+            <div class="lang-en">
+                <h2>apps/mobile in the npm workspace</h2>
+                <p>The root <code>package.json</code> already lists <code>apps/web</code> and <code>packages/shared</code>. Adding <code>apps/mobile</code> is a one-line change that gives you dependency isolation and the shared package out of the box.</p>
+            </div>
+<pre><code class="language-bash"># #98 — Init mobile project
+npx react-native@latest init apps/mobile --skip-install
+# append to root package.json workspaces: ["apps/mobile"]
+npm install
+# #99 — Wire Relay to the shared schema
+cat &gt; apps/mobile/relay.config.json &lt;&lt; 'JSON'
+{ "src": "./src", "language": "typescript",
+  "schema": "../../packages/shared/schema.graphql",
+  "artifactDirectory": "./src/__generated__" }
+JSON
+npm run -w apps/mobile relay</code></pre>
+
+            <div class="tip lang-ru"><strong>Совет:</strong> держите версию <code>react-relay</code> в <code>apps/mobile</code> равной версии в <code>apps/web</code>. Разные версии компилятора дают несовместимые <code>__generated__</code>.</div>
+            <div class="tip lang-en"><strong>Tip:</strong> keep <code>react-relay</code> in <code>apps/mobile</code> pinned to the exact version used in <code>apps/web</code>. Different compiler versions produce incompatible <code>__generated__</code> output.</div>
+        </section>
+
+        <section id="primitives">
+            <div class="lang-ru">
+                <h2>View, Text, StyleSheet vs DOM</h2>
+                <p>Таблица соответствия для быстрой миграции компонентов с веба на мобильник:</p>
+            </div>
+            <div class="lang-en">
+                <h2>View, Text, StyleSheet vs DOM</h2>
+                <p>Mapping table for quickly porting components from web to mobile:</p>
+            </div>
+
+            <table>
+                <thead><tr>
+                    <th><span class="lang-ru">Веб (apps/web)</span><span class="lang-en">Web (apps/web)</span></th>
+                    <th><span class="lang-ru">Мобильный (apps/mobile)</span><span class="lang-en">Mobile (apps/mobile)</span></th>
+                    <th><span class="lang-ru">Примечание</span><span class="lang-en">Notes</span></th>
+                </tr></thead>
+                <tbody>
+                    <tr><td><code>&lt;div&gt;</code></td><td><code>&lt;View&gt;</code></td><td><span class="lang-ru">Flexbox по умолчанию, column direction.</span><span class="lang-en">Flexbox by default, column direction.</span></td></tr>
+                    <tr><td><code>&lt;span&gt;, &lt;p&gt;</code></td><td><code>&lt;Text&gt;</code></td><td><span class="lang-ru">Текст ВСЕГДА внутри <code>Text</code>, иначе crash.</span><span class="lang-en">Text must ALWAYS live inside <code>Text</code>, or the app crashes.</span></td></tr>
+                    <tr><td><code>&lt;img&gt;</code></td><td><code>&lt;Image source=&#123;{uri}&#125;/&gt;</code></td><td>—</td></tr>
+                    <tr><td><code>&lt;button&gt;</code></td><td><code>&lt;Pressable&gt;</code></td><td><span class="lang-ru">Никогда не используйте <code>TouchableOpacity</code> для новых экранов (deprecated path).</span><span class="lang-en">Avoid <code>TouchableOpacity</code> for new screens (deprecated path).</span></td></tr>
+                    <tr><td><code>&lt;input&gt;</code></td><td><code>&lt;TextInput&gt;</code></td><td>—</td></tr>
+                    <tr><td><code>.module.css</code></td><td><code>StyleSheet.create</code></td><td><span class="lang-ru">Объект JS; <code>camelCase</code>; px вместо rem.</span><span class="lang-en">JS object; <code>camelCase</code>; px instead of rem.</span></td></tr>
+                    <tr><td><code>useNavigate</code></td><td><code>useNavigation()</code></td><td><span class="lang-ru">React Navigation, см. ниже.</span><span class="lang-en">React Navigation, see below.</span></td></tr>
+                    <tr><td><code>localStorage</code></td><td><code>AsyncStorage</code></td><td><span class="lang-ru">Асинхронный (Promise) API.</span><span class="lang-en">Async (Promise) API.</span></td></tr>
+                    <tr><td><code>window.fetch</code></td><td><code>global.fetch</code></td><td><span class="lang-ru">Есть из коробки (реализуется через native networking).</span><span class="lang-en">Built in (backed by native networking).</span></td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="navigation">
+            <div class="lang-ru">
+                <h2>React Navigation (#101)</h2>
+                <p>Замена <code>react-router-dom</code>. Три слоя: <strong>NavigationContainer</strong> (корень), <strong>Stack Navigator</strong> (push/pop), <strong>Bottom Tab Navigator</strong> (основные табы Dashboard / Notifications / Settings).</p>
+            </div>
+            <div class="lang-en">
+                <h2>React Navigation (#101)</h2>
+                <p>The replacement for <code>react-router-dom</code>. Three layers: <strong>NavigationContainer</strong> (root), <strong>Stack Navigator</strong> (push/pop), <strong>Bottom Tab Navigator</strong> (the primary Dashboard / Notifications / Settings tabs).</p>
+            </div>
+
+<pre><code class="language-typescript">// apps/mobile/src/navigation/RootNavigator.tsx
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+const Tabs = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+function DashboardStack() {
+  return (
+    &lt;Stack.Navigator&gt;
+      &lt;Stack.Screen name="Dashboard" component={DashboardScreen} /&gt;
+      &lt;Stack.Screen name="WidgetDetail" component={WidgetDetailScreen} /&gt;
+      &lt;Stack.Screen name="AddWidget" component={AddWidgetScreen} /&gt;
+    &lt;/Stack.Navigator&gt;
+  );
+}
+
+export function RootNavigator() {
+  return (
+    &lt;NavigationContainer linking={linkingConfig /* #118 */}&gt;
+      &lt;Tabs.Navigator&gt;
+        &lt;Tabs.Screen name="DashboardTab" component={DashboardStack} /&gt;
+        &lt;Tabs.Screen name="Notifications" component={NotificationsScreen} /&gt;
+        &lt;Tabs.Screen name="Settings" component={SettingsScreen} /&gt;
+      &lt;/Tabs.Navigator&gt;
+    &lt;/NavigationContainer&gt;
+  );
+}</code></pre>
+        </section>
+
+        <section id="relay">
+            <div class="lang-ru">
+                <h2>Relay + WebSocket (#100)</h2>
+                <p>Мобильный <code>RelayEnvironment</code> использует <code>createNetwork(transport)</code> из <code>packages/shared/src/relay/</code> (задача <code>#107</code>). Транспорт для мутаций/запросов — <code>global.fetch</code>, для подписок — <code>graphql-ws</code> через нативный WebSocket.</p>
+            </div>
+            <div class="lang-en">
+                <h2>Relay + WebSocket (#100)</h2>
+                <p>The mobile <code>RelayEnvironment</code> consumes <code>createNetwork(transport)</code> from <code>packages/shared/src/relay/</code> (task <code>#107</code>). The transport is <code>global.fetch</code> for queries/mutations and <code>graphql-ws</code> over a native WebSocket for subscriptions.</p>
+            </div>
+
+<pre><code class="language-typescript">// apps/mobile/src/relay/RelayEnvironment.ts
+import { Environment, RecordSource, Store } from 'relay-runtime';
+import { createClient } from 'graphql-ws';
+import { createNetwork } from '@life-goals/shared/relay';
+import { getAuthToken } from '../auth/tokenStore'; // Keychain-backed
+
+const wsClient = createClient({
+  url: process.env.GRAPHQL_WS_ENDPOINT!,
+  connectionParams: async () =&gt; ({ authorization: `Bearer ${await getAuthToken()}` }),
+});
+
+const network = createNetwork({
+  fetchFn: global.fetch,
+  subscribeFn: wsClient,
+  getAuthHeader: async () =&gt; `Bearer ${await getAuthToken()}`,
+});
+
+export const environment = new Environment({ network, store: new Store(new RecordSource()) });</code></pre>
+
+            <div class="warning lang-ru"><strong>Внимание:</strong> <code>global.fetch</code> в RN не поддерживает streaming (<code>@defer</code>). Если используете <code>@defer</code> на вебе, то для мобильника нужно собирать полноценный ответ через <code>react-native-fetch-api</code> + <code>react-native-url-polyfill</code> или дождаться <code>fetch</code>-streams в Hermes.</div>
+            <div class="warning lang-en"><strong>Caveat:</strong> RN's <code>global.fetch</code> does not support streaming (<code>@defer</code>). If you rely on <code>@defer</code> on the web, you need <code>react-native-fetch-api</code> + <code>react-native-url-polyfill</code> on mobile, or wait for streaming <code>fetch</code> in Hermes.</div>
+        </section>
+
+        <section id="shared">
+            <div class="lang-ru">
+                <h2>packages/shared: atoms, hooks, types, tokens (#104–#108)</h2>
+                <p>Экстракция разделяемого кода — phase 1 M8. Цель: <strong>поведение на вебе не меняется</strong>, но код физически перенесён.</p>
+                <ul style="margin: 1rem 0 1rem 2rem;">
+                    <li><strong>#104 Jotai atoms</strong> — <code>themeAtom</code>, <code>currentUserAtom</code>, <code>notificationsAtom</code>. <code>themeAtom</code> принимает storage adapter (web → <code>localStorage</code>, mobile → <code>AsyncStorage</code>).</li>
+                    <li><strong>#105 Hooks</strong> — <code>useDebounce</code>, <code>usePersistedCallback</code>, всё без DOM.</li>
+                    <li><strong>#106 Типы</strong> — <code>widget.ts</code>, <code>interviewprep.ts</code>, <code>fitness.ts</code>, <code>budget.ts</code>.</li>
+                    <li><strong>#107 Relay network base</strong> — <code>createNetwork(transport)</code> + auth + нормализация ошибок.</li>
+                    <li><strong>#108 Design tokens</strong> — <code>packages/shared/src/types/theme.ts</code> с light/dark presets (из <code>docs/mockups/_theme.css</code>).</li>
+                </ul>
+            </div>
+            <div class="lang-en">
+                <h2>packages/shared: atoms, hooks, types, tokens (#104–#108)</h2>
+                <p>The shared-code extraction is M8 phase 1. Goal: <strong>web behavior stays unchanged</strong>, the code is just moved.</p>
+                <ul style="margin: 1rem 0 1rem 2rem;">
+                    <li><strong>#104 Jotai atoms</strong> — <code>themeAtom</code>, <code>currentUserAtom</code>, <code>notificationsAtom</code>. <code>themeAtom</code> accepts a storage adapter (web → <code>localStorage</code>, mobile → <code>AsyncStorage</code>).</li>
+                    <li><strong>#105 Hooks</strong> — <code>useDebounce</code>, <code>usePersistedCallback</code>, anything DOM-free.</li>
+                    <li><strong>#106 Types</strong> — <code>widget.ts</code>, <code>interviewprep.ts</code>, <code>fitness.ts</code>, <code>budget.ts</code>.</li>
+                    <li><strong>#107 Relay network base</strong> — <code>createNetwork(transport)</code> + auth + error normalization.</li>
+                    <li><strong>#108 Design tokens</strong> — <code>packages/shared/src/types/theme.ts</code> with light/dark presets (ported from <code>docs/mockups/_theme.css</code>).</li>
+                </ul>
+            </div>
+
+<pre><code class="language-typescript">// packages/shared/src/store/themeAtom.ts
+import { atomWithStorage, createJSONStorage } from 'jotai/utils';
+
+export type StorageAdapter = {
+  getItem: (key: string) =&gt; Promise&lt;string | null&gt; | string | null;
+  setItem: (key: string, value: string) =&gt; Promise&lt;void&gt; | void;
+  removeItem: (key: string) =&gt; Promise&lt;void&gt; | void;
+};
+
+export function createThemeAtom(storage: StorageAdapter) {
+  return atomWithStorage&lt;'light' | 'dark'&gt;('theme', 'dark', createJSONStorage(() =&gt; storage));
+}
+
+// apps/web: createThemeAtom(window.localStorage)
+// apps/mobile: createThemeAtom(AsyncStorage)</code></pre>
+        </section>
+
+        <section id="auth">
+            <div class="lang-ru">
+                <h2>OAuth + Keychain (#102)</h2>
+                <p><code>react-native-app-auth</code> делает PKCE-флоу с Google/GitHub без кастомного backend'а, <code>react-native-keychain</code> хранит JWT в <strong>iOS Keychain</strong> и <strong>Android EncryptedSharedPreferences</strong> (аппаратно защищённое хранилище). Это замена <code>localStorage</code> для токенов.</p>
+            </div>
+            <div class="lang-en">
+                <h2>OAuth + Keychain (#102)</h2>
+                <p><code>react-native-app-auth</code> runs the PKCE flow with Google/GitHub without a custom backend. <code>react-native-keychain</code> stores the JWT in the <strong>iOS Keychain</strong> and <strong>Android EncryptedSharedPreferences</strong> (hardware-backed). It replaces <code>localStorage</code> for tokens.</p>
+            </div>
+
+<pre><code class="language-typescript">// apps/mobile/src/auth/tokenStore.ts
+import * as Keychain from 'react-native-keychain';
+
+const SERVICE = 'life-goals-jwt';
+
+export async function setAuthToken(token: string) {
+  await Keychain.setGenericPassword('jwt', token, {
+    service: SERVICE,
+    accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+  });
+}
+
+export async function getAuthToken(): Promise&lt;string | null&gt; {
+  const result = await Keychain.getGenericPassword({ service: SERVICE });
+  return result ? result.password : null;
+}
+
+export async function clearAuthToken() {
+  await Keychain.resetGenericPassword({ service: SERVICE });
+}</code></pre>
+
+            <div class="warning lang-ru"><strong>CRITICAL:</strong> никогда не держите JWT в <code>AsyncStorage</code>. Это plain file в sandbox приложения и извлекается с rooted/jailbroken устройства за секунды.</div>
+            <div class="warning lang-en"><strong>CRITICAL:</strong> never put a JWT in <code>AsyncStorage</code>. It's a plain file inside the app sandbox and can be extracted from a rooted/jailbroken device in seconds.</div>
+        </section>
+
+        <section id="push">
+            <div class="lang-ru">
+                <h2>Push-уведомления: FCM + APNS (#115)</h2>
+                <p><code>@react-native-firebase/messaging</code> унифицирует FCM (Android) и APNS (iOS): один API, две прошивки. Сервер отправляет <code>deviceToken</code>, бэкенд связывает его с <code>user_id</code> и шлёт через Firebase Cloud Messaging.</p>
+                <p>Интеграция с уведомлениями <strong>Notification</strong> (M5): когда <code>AchievementChecker</code> создаёт in-app нотификацию, тот же сервис параллельно отправляет FCM push. Это даёт <strong>resilient delivery</strong> — даже если WebSocket-подписка упала, push разбудит пользователя.</p>
+            </div>
+            <div class="lang-en">
+                <h2>Push notifications: FCM + APNS (#115)</h2>
+                <p><code>@react-native-firebase/messaging</code> unifies FCM (Android) and APNS (iOS): one API, two firmwares. The client registers its <code>deviceToken</code>, the backend links it to a <code>user_id</code>, and dispatches via Firebase Cloud Messaging.</p>
+                <p>This integrates with the <strong>Notification</strong> service (M5): whenever <code>AchievementChecker</code> creates an in-app notification, the same service also fires an FCM push. This yields <strong>resilient delivery</strong> — even if the WebSocket subscription drops, the push still wakes up the user.</p>
+            </div>
+
+<pre><code class="language-typescript">// apps/mobile/src/push/registerDevice.ts
+import messaging from '@react-native-firebase/messaging';
+import { commitMutation, graphql } from 'react-relay';
+import { environment } from '../relay/RelayEnvironment';
+
+export async function registerDeviceForPush() {
+  const authStatus = await messaging().requestPermission();
+  const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED;
+  if (!enabled) return;
+
+  const deviceToken = await messaging().getToken();
+  commitMutation(environment, {
+    mutation: graphql`
+      mutation registerDeviceForPushMutation($input: RegisterDeviceInput!) {
+        registerDevice(input: $input) { device { id } errors { message code } }
+      }`,
+    variables: { input: { token: deviceToken, platform: Platform.OS.toUpperCase() } },
+  });
+}</code></pre>
+        </section>
+
+        <section id="biometrics">
+            <div class="lang-ru">
+                <h2>Биометрия (#116)</h2>
+                <p>Face ID / Touch ID / Fingerprint защищают доступ к приложению после блокировки на 5 минут (<code>AppState</code> listener). Fallback — PIN или полный re-login. Проверка биометрии <strong>не</strong> заменяет JWT, она лишь разблокирует уже сохранённый в Keychain токен.</p>
+            </div>
+            <div class="lang-en">
+                <h2>Biometrics (#116)</h2>
+                <p>Face ID / Touch ID / Fingerprint gate access to the app after a 5-minute idle lock (<code>AppState</code> listener). Fallback: PIN or full re-login. Biometric validation <strong>does not</strong> replace the JWT — it only unlocks the Keychain-stored token.</p>
+            </div>
+        </section>
+
+        <section id="offline">
+            <div class="lang-ru">
+                <h2>Offline-first + mutation queue (#117)</h2>
+                <p>Relay Store хранится в <code>AsyncStorage</code> через <code>relay-runtime</code>-совместимую обёртку. На reconnect — FIFO-очередь мутаций дренируется в фоне. Для UX конфликтов (stale optimistic update vs server winner) используйте <code>updater</code> в mutation config с явной стратегией (server-wins / last-write-wins / manual resolution).</p>
+                <p><code>@react-native-community/netinfo</code> даёт сигнал online/offline для интеграции: UI badge «Offline», disabled на некритичных экранах, автосинк при восстановлении сети.</p>
+            </div>
+            <div class="lang-en">
+                <h2>Offline-first + mutation queue (#117)</h2>
+                <p>The Relay store is persisted to <code>AsyncStorage</code> through a <code>relay-runtime</code>-compatible wrapper. On reconnect, a FIFO mutation queue drains in the background. For conflict UX (stale optimistic update vs server winner), use the <code>updater</code> in the mutation config with an explicit strategy (server-wins / last-write-wins / manual resolution).</p>
+                <p><code>@react-native-community/netinfo</code> emits the online/offline signal for UI: an "Offline" badge, disabling non-critical screens, and auto-sync when the network returns.</p>
+            </div>
+        </section>
+
+        <section id="deep-links">
+            <div class="lang-ru">
+                <h2>Deep linking (#118)</h2>
+                <p>Universal Links (iOS, <code>apple-app-site-association</code>) и App Links (Android, <code>assetlinks.json</code>) позволяют открыть нужный виджет из push-уведомления одним тапом. Конфигурация <code>linking</code> в React Navigation:</p>
+            </div>
+            <div class="lang-en">
+                <h2>Deep linking (#118)</h2>
+                <p>Universal Links (iOS, <code>apple-app-site-association</code>) and App Links (Android, <code>assetlinks.json</code>) let a push notification open the right widget in one tap. React Navigation's <code>linking</code> config:</p>
+            </div>
+
+<pre><code class="language-typescript">// apps/mobile/src/navigation/linking.ts
+export const linkingConfig = {
+  prefixes: ['https://lifegoals.app', 'lifegoals://'],
+  config: {
+    screens: {
+      DashboardTab: {
+        screens: {
+          WidgetDetail: 'widget/:widgetId',
+          AddWidget: 'widget/add/:widgetType',
+        },
+      },
+      Notifications: 'notifications',
+    },
+  },
+};
+
+// Notification payload contract (backend --&gt; mobile):
+// { data: { deepLink: "lifegoals://widget/abc-123-xyz" } }</code></pre>
+        </section>
+
+        <section id="assignments" class="assignments">
+            <div class="lang-ru">
+                <h2>TDD-задания из Backlog (M8: #98–#118)</h2>
+            </div>
+            <div class="lang-en">
+                <h2>TDD Assignments from the Backlog (M8: #98–#118)</h2>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#98 Init React Native + workspaces</span><span class="lang-en">#98 Init React Native + workspaces</span> <span class="tdd-badge">5 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>npm run -w apps/mobile ios</code> и <code>android</code> запускают пустое приложение в симуляторе/эмуляторе. <code>npm install</code> из корня подтягивает RN-deps в <code>apps/mobile/node_modules</code>.</p>
+                <p class="lang-en"><strong>Test:</strong> <code>npm run -w apps/mobile ios</code> and <code>android</code> launch a blank app in the simulator/emulator. <code>npm install</code> from the root hoists RN deps into <code>apps/mobile/node_modules</code>.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#99 + #100 Wire Relay + RelayEnvironment</span><span class="lang-en">#99 + #100 Wire Relay + RelayEnvironment</span> <span class="tdd-badge">3 + 3 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>npm run -w apps/mobile relay</code> успешно компилирует. Unit-тест на <code>createNetwork</code>: мок <code>fetchFn</code> возвращает <code>{ data: { viewer: { id: 'u1' } } }</code> → <code>environment.execute</code> резолвится с тем же payload.</p>
+                <p class="lang-en"><strong>Test:</strong> <code>npm run -w apps/mobile relay</code> succeeds. Unit test on <code>createNetwork</code>: mock <code>fetchFn</code> returns <code>{ data: { viewer: { id: 'u1' } } }</code> → <code>environment.execute</code> resolves with the same payload.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#101 React Navigation skeleton</span><span class="lang-en">#101 React Navigation skeleton</span> <span class="tdd-badge">3 SP</span></h4>
+                <p class="lang-ru"><strong>Тест (RTL + <code>@testing-library/react-native</code>):</strong> таб-бар рендерит 3 таба, <code>getByText('Dashboard')</code> существует, клик по «Notifications» меняет активный скрин.</p>
+                <p class="lang-en"><strong>Test (RTL + <code>@testing-library/react-native</code>):</strong> the tab bar renders 3 tabs, <code>getByText('Dashboard')</code> exists, tapping "Notifications" switches the active screen.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#102 OAuth + Keychain</span><span class="lang-en">#102 OAuth + Keychain</span> <span class="tdd-badge">5 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>setAuthToken('jwt')</code> → <code>getAuthToken()</code> возвращает <code>'jwt'</code>. <code>clearAuthToken()</code> → <code>getAuthToken()</code> возвращает <code>null</code>. Security-тест: после успешного <code>authorize()</code>, JWT ни при каких условиях не оказывается в <code>AsyncStorage</code>.</p>
+                <p class="lang-en"><strong>Test:</strong> <code>setAuthToken('jwt')</code> → <code>getAuthToken()</code> returns <code>'jwt'</code>. <code>clearAuthToken()</code> → <code>getAuthToken()</code> returns <code>null</code>. Security test: after a successful <code>authorize()</code>, the JWT never appears in <code>AsyncStorage</code>.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#103 App shell (bottom tabs + header)</span><span class="lang-en">#103 App shell (bottom tabs + header)</span> <span class="tdd-badge">3 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> safe-area отступы &gt; 0 на устройствах с notch; badge уведомлений показывает число непрочитанных (source — <code>useAtomValue(notificationsAtom)</code>).</p>
+                <p class="lang-en"><strong>Test:</strong> safe-area insets &gt; 0 on notched devices; the notification badge shows the unread count (source: <code>useAtomValue(notificationsAtom)</code>).</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#104 Jotai atoms → packages/shared</span><span class="lang-en">#104 Jotai atoms → packages/shared</span> <span class="tdd-badge">3 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>createThemeAtom(fakeAsyncStorage)</code> → изменение атома триггерит <code>setItem('theme', '"light"')</code>. Веб-клиент продолжает работать без регрессий (snapshot Playwright для Settings page).</p>
+                <p class="lang-en"><strong>Test:</strong> <code>createThemeAtom(fakeAsyncStorage)</code> → mutating the atom triggers <code>setItem('theme', '"light"')</code>. The web client keeps working without regressions (Playwright snapshot of Settings page).</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#105 + #106 Shared hooks + типы</span><span class="lang-en">#105 + #106 Shared hooks + types</span> <span class="tdd-badge">3 + 2 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>useDebounce(v, 300)</code> — классические jest fake-timers assertions. <code>import type { WidgetType } from '@life-goals/shared'</code> компилируется и в <code>apps/web</code>, и в <code>apps/mobile</code>.</p>
+                <p class="lang-en"><strong>Test:</strong> <code>useDebounce(v, 300)</code> — classic jest fake-timers assertions. <code>import type { WidgetType } from '@life-goals/shared'</code> compiles in both <code>apps/web</code> and <code>apps/mobile</code>.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#107 Shared Relay network base</span><span class="lang-en">#107 Shared Relay network base</span> <span class="tdd-badge">3 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>createNetwork</code> добавляет <code>Authorization: Bearer &lt;token&gt;</code> в каждый запрос, нормализует GraphQL errors в единый <code>UserError</code>-формат.</p>
+                <p class="lang-en"><strong>Test:</strong> <code>createNetwork</code> attaches <code>Authorization: Bearer &lt;token&gt;</code> to every request and normalizes GraphQL errors into a unified <code>UserError</code> shape.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#108 Design tokens</span><span class="lang-en">#108 Design tokens</span> <span class="tdd-badge">3 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> для <code>theme.dark.bg</code> = <code>#1e1e2e</code> веб-рендер <code>getComputedStyle(root).getPropertyValue('--bg')</code> совпадает с мобильным <code>StyleSheet</code>-значением.</p>
+                <p class="lang-en"><strong>Test:</strong> for <code>theme.dark.bg</code> = <code>#1e1e2e</code>, the web render <code>getComputedStyle(root).getPropertyValue('--bg')</code> matches the mobile <code>StyleSheet</code> value.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#109 Mobile Dashboard + pull-to-refresh</span><span class="lang-en">#109 Mobile Dashboard + pull-to-refresh</span> <span class="tdd-badge">5 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>FlatList</code> с <code>refreshControl</code> вызывает <code>refetch()</code> Relay-фрагмента. Empty state с кнопкой «Add your first widget» рендерится при пустом массиве виджетов.</p>
+                <p class="lang-en"><strong>Test:</strong> <code>FlatList</code> with <code>refreshControl</code> triggers the Relay fragment's <code>refetch()</code>. Empty state with an "Add your first widget" CTA renders when the widget array is empty.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#110 Mobile Interview Prep widget</span><span class="lang-en">#110 Mobile Interview Prep widget</span> <span class="tdd-badge">8 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>FlatList</code> с <code>usePaginationFragment</code> дозагружает следующую страницу при <code>onEndReached</code>. Heat map через <code>react-native-svg</code> отображает 365 ячеек по данным <code>InterviewPrepWidgetData.dailyActivity</code>.</p>
+                <p class="lang-en"><strong>Test:</strong> <code>FlatList</code> + <code>usePaginationFragment</code> loads the next page on <code>onEndReached</code>. The heat map (via <code>react-native-svg</code>) renders 365 cells from <code>InterviewPrepWidgetData.dailyActivity</code>.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#111 Add Widget flow (type picker + config form)</span><span class="lang-en">#111 Add Widget flow (type picker + config form)</span> <span class="tdd-badge">5 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> query <code>availableWidgets</code> → форма генерируется из <code>configSchema</code>. Мутация <code>addWidgetToDashboard</code> вызывается с валидным payload; при backend-ошибке <code>errors[0].message</code> показывается пользователю.</p>
+                <p class="lang-en"><strong>Test:</strong> the <code>availableWidgets</code> query drives a form generated from <code>configSchema</code>. The <code>addWidgetToDashboard</code> mutation fires with a valid payload; when the backend returns errors, <code>errors[0].message</code> is shown to the user.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#112 Mobile Fitness (workout log, body, food)</span><span class="lang-en">#112 Mobile Fitness (workout log, body, food)</span> <span class="tdd-badge">13 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>victory-native</code> рендерит BodyProgress chart с 10 точками. FoodSearch — debounce 300мс, debounced-query фиксируется в Relay <code>useQueryLoader</code>. MealDiary суммирует калории/макро за выбранный день.</p>
+                <p class="lang-en"><strong>Test:</strong> <code>victory-native</code> renders the BodyProgress chart with 10 points. FoodSearch debounces 300ms and pushes the debounced query into Relay <code>useQueryLoader</code>. MealDiary sums calories/macros for the selected day.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#113 Mobile Budget (transactions + forecast)</span><span class="lang-en">#113 Mobile Budget (transactions + forecast)</span> <span class="tdd-badge">10 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> TransactionList пагинируется через Relay connection. Exchange rate отображается в <code>baseCurrency</code> / <code>targetCurrency</code> из widget config. Forecast chart рисует 3 сценария (current / +10% / +20%).</p>
+                <p class="lang-en"><strong>Test:</strong> TransactionList paginates via a Relay connection. The exchange rate renders in <code>baseCurrency</code> / <code>targetCurrency</code> from the widget config. The forecast chart plots 3 scenarios (current / +10% / +20%).</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#114 Camera integration</span><span class="lang-en">#114 Camera integration</span> <span class="tdd-badge">5 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>react-native-image-picker</code> — permission denied path показывает fallback UI, не падает. Thumbnail grid загружает URL из MealEntry/BodyMeasurement.</p>
+                <p class="lang-en"><strong>Test:</strong> <code>react-native-image-picker</code> — the permission-denied path shows a fallback UI and doesn't crash. The thumbnail grid loads URLs from MealEntry/BodyMeasurement.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#115 Push: FCM + APNS</span><span class="lang-en">#115 Push: FCM + APNS</span> <span class="tdd-badge">8 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> интеграционный — FCM mock доставляет push → <code>onMessage</code> handler вызывает Relay <code>commitMutation</code> для markRead/apply. Per-category toggle в Settings отключает push конкретного типа.</p>
+                <p class="lang-en"><strong>Test:</strong> integration — an FCM mock delivers a push → the <code>onMessage</code> handler invokes a Relay <code>commitMutation</code> for markRead/apply. The per-category toggle in Settings disables push for the selected type.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#116 Biometric auth</span><span class="lang-en">#116 Biometric auth</span> <span class="tdd-badge">5 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>AppState</code> переход в background → через 5 мин inactivity следующий <code>foreground</code> event требует <code>rnBiometrics.simplePrompt</code>. Fallback — PIN-экран. Никаких токенов не логируется.</p>
+                <p class="lang-en"><strong>Test:</strong> an <code>AppState</code> transition to background → after 5 minutes of inactivity, the next <code>foreground</code> event requires <code>rnBiometrics.simplePrompt</code>. Fallback: PIN screen. No tokens are logged.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#117 Offline-first + mutation queue</span><span class="lang-en">#117 Offline-first + mutation queue</span> <span class="tdd-badge">8 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> <code>netinfo</code> мок возвращает offline → <code>commitMutation</code> попадает в persisted FIFO. После online-флипа queue дренируется в том же порядке; server-wins conflict показывает <code>UserError</code> в UI.</p>
+                <p class="lang-en"><strong>Test:</strong> the <code>netinfo</code> mock returns offline → <code>commitMutation</code> lands in a persisted FIFO. After flipping to online, the queue drains in order; a server-wins conflict surfaces a <code>UserError</code> in the UI.</p>
+            </div>
+
+            <div class="assignment">
+                <h4><span class="lang-ru">#118 Deep linking из push</span><span class="lang-en">#118 Deep linking from push</span> <span class="tdd-badge">5 SP</span></h4>
+                <p class="lang-ru"><strong>Тест:</strong> симулируем cold-launch с payload <code>{ data: { deepLink: 'lifegoals://widget/u-1' } }</code> → навигация открывает <code>WidgetDetail</code> со <code>params.widgetId === 'u-1'</code>.</p>
+                <p class="lang-en"><strong>Test:</strong> simulate a cold launch with payload <code>{ data: { deepLink: 'lifegoals://widget/u-1' } }</code> → navigation opens <code>WidgetDetail</code> with <code>params.widgetId === 'u-1'</code>.</p>
+            </div>
+        </section>
+
+        <section class="resources">
+            <div class="lang-ru"><h2>Дополнительные ресурсы</h2></div>
+            <div class="lang-en"><h2>Additional Resources</h2></div>
+
+            <a href="https://reactnative.dev/docs/getting-started" class="resource-link lang-ru">Официальная документация React Native</a>
+            <a href="https://reactnative.dev/docs/getting-started" class="resource-link lang-en">React Native Official Docs</a>
+            <a href="https://reactnavigation.org/docs/getting-started" class="resource-link lang-ru">React Navigation Getting Started</a>
+            <a href="https://reactnavigation.org/docs/getting-started" class="resource-link lang-en">React Navigation Getting Started</a>
+            <a href="https://relay.dev/docs/guides/relay-on-react-native/" class="resource-link lang-ru">Relay на React Native</a>
+            <a href="https://relay.dev/docs/guides/relay-on-react-native/" class="resource-link lang-en">Relay on React Native</a>
+            <a href="https://github.com/oblador/react-native-keychain" class="resource-link lang-ru">react-native-keychain: безопасное хранение</a>
+            <a href="https://github.com/oblador/react-native-keychain" class="resource-link lang-en">react-native-keychain: secure storage</a>
+            <a href="https://rnfirebase.io/messaging/usage" class="resource-link lang-ru">React Native Firebase: Messaging</a>
+            <a href="https://rnfirebase.io/messaging/usage" class="resource-link lang-en">React Native Firebase: Messaging</a>
+            <a href="https://reactnavigation.org/docs/deep-linking/" class="resource-link lang-ru">Deep linking в React Navigation</a>
+            <a href="https://reactnavigation.org/docs/deep-linking/" class="resource-link lang-en">Deep linking in React Navigation</a>
+            <a href="https://github.com/react-native-async-storage/async-storage" class="resource-link lang-ru">AsyncStorage: async KV</a>
+            <a href="https://github.com/react-native-async-storage/async-storage" class="resource-link lang-en">AsyncStorage: async KV store</a>
+            <a href="../superpowers/specs/2026-04-14-mobile-backlog-and-m8-design.md" class="resource-link lang-ru">M8 design spec (источник задач #98–#122)</a>
+            <a href="../superpowers/specs/2026-04-14-mobile-backlog-and-m8-design.md" class="resource-link lang-en">M8 design spec (source of tasks #98–#122)</a>
+        </section>
+
+        <footer class="nav-footer">
+            <a href="17-integration.html" class="nav-link prev lang-ru">← Модуль 17: Интеграция</a>
+            <a href="17-integration.html" class="nav-link prev lang-en">← Module 17: Integration</a>
+            <a href="19-mobile-distribution.html" class="nav-link next lang-ru">Модуль 19: Mobile Distribution →</a>
+            <a href="19-mobile-distribution.html" class="nav-link next lang-en">Module 19: Mobile Distribution →</a>
+        </footer>
+    </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script>
+    function setLang(lang) {
+        document.body.classList.toggle('show-en', lang === 'en');
+        document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+        document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+        try { localStorage.setItem('study-lang', lang); } catch(e) {}
+    }
+    try { const s = localStorage.getItem('study-lang'); if (s) setLang(s); } catch(e) {}
+</script>
+
+    <script>
+    /* hide-on-scroll */
+    (function () {
+        var header  = document.querySelector('header');
+        var sidebar = document.querySelector('.sidebar');
+        if (!header) return;
+
+        // Inject CSS transitions once
+        var s = document.createElement('style');
+        s.textContent = 'header { transition: top 0.3s ease; } .sidebar { transition: top 0.3s ease; }';
+        document.head.appendChild(s);
+
+        var lastY = 0;
+
+        window.addEventListener('scroll', function () {
+            var y = window.scrollY;
+            var h = header.offsetHeight;
+
+            if (y > lastY && y > 80) {
+                // scrolling down — hide
+                header.style.top = '-' + (h + 2) + 'px';
+                if (sidebar) sidebar.style.top = '0';
+            } else {
+                // scrolling up — show
+                header.style.top = '0';
+                if (sidebar) sidebar.style.top = h + 'px';
+            }
+            lastY = y;
+        }, { passive: true });
+    })();
+    </script>
+</body>
+</html>

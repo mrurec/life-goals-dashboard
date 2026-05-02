@@ -402,7 +402,23 @@
                 font-size: 1.8rem;
             }
         }
-    </style>
+    
+        /* Home link */
+        .home-link {
+            display: block;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.75rem;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        .home-link:hover {
+            background: rgba(243, 139, 168, 0.1);
+        }
+</style>
 </head>
 <body>
 
@@ -435,6 +451,9 @@
 
     <div class="layout">
         <aside class="sidebar">
+            <a href="index.html" class="home-link">&#8592; <span class="lang-ru">Все модули</span><span class="lang-en">All Modules</span>
+            </a>
+
             <h3>
                 <span class="lang-ru">Содержание</span>
                 <span class="lang-en">Contents</span>
@@ -1678,7 +1697,7 @@ fun invalidateWidgetData(userId: UUID) {
 ├── <span class="file">reading.graphqls</span>
 └── ...
 
-<span class="dir">life-goals-web/src/features/reading/</span>
+<span class="dir">apps/web/src/features/reading/</span>
 ├── <span class="dir">components/</span>
 │   ├── <span class="file">BookCard.tsx</span>
 │   ├── <span class="file">BookList.tsx</span>
